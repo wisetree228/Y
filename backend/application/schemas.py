@@ -13,3 +13,7 @@ class RegisterFormData(BaseModel):
 class LoginFormData(BaseModel):
     email: EmailStr
     password: str
+
+class CreatePostData(BaseModel):
+    text: str
+    mediakeys: str

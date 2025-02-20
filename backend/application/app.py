@@ -67,7 +67,6 @@ async def login(data: LoginFormData, response: Response, db: Session = Depends(g
         raise HTTPException(status_code=401, detail="Неверный пароль!")
     token = security.create_access_token(uid=str(db_user_by_email.id))
     response.set_cookie(config.JWT_ACCESS_COOKIE_NAME, token)
-    print(token)
     return {"auth_token":token}
 
 @app.get('/protected', dependencies = [Depends(security.access_token_required)]) # неавторизованному пользователю вернёт статус код 500
