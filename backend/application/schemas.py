@@ -17,3 +17,7 @@ class LoginFormData(BaseModel):
 class CreatePostData(BaseModel):
     text: str
     mediakeys: str
+
+class MessagesData(BaseModel):
+    text: str = Field(max_length = 500)
+    recipientId : int
