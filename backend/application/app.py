@@ -2,11 +2,11 @@ from fastapi import FastAPI, Form, APIRouter, Depends, HTTPException, Response
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from fastapi import Depends
-from application.schemas import *
-from db.models import *
+from .schemas import *
+from backend.db.models import *
 from authx import AuthX, AuthXConfig
 import os
-from application.utils import hash_password, verify_password
+from .utils import hash_password, verify_password
 import asyncio
 from sqlalchemy.future import select
 
