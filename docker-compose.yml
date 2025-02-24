@@ -33,6 +33,20 @@ services:
     entrypoint: ["alembic", "-c", "alembic.ini", "upgrade", "head"]
     depends_on:
       - db  # Ждет, пока PostgreSQL станет доступен
+  
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+    depends_on:
+      - app
+
+
   db:
     image: postgres:14
     environment:
@@ -43,6 +57,7 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+  
 
 volumes:
   postgres_data:

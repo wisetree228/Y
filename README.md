@@ -151,7 +151,6 @@
 [//]: # (If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.)
 ### Для запуска проекта:
 
-#### Для запуска бэкенда (данные инструкции выполнять в папке backend)
 
 1) создать виртуальное окружение:
 ```commandline
@@ -174,32 +173,17 @@ source venv/bin/activate
 ```
 -для линукса
 
-3) Установить всю пакеты:
-```
-python3 -m pip install -r requirements.txt
-```
 
-4) Создать файл .env и там установить ссылку для подключения к бд по следующему паттерну:
+3) Создать файл .env и там установить настройки подключения к бд, а также секретный ключ для шифрования JWT токенов при авторизации, пример:
 ```
-DATABASE_URL=postgresql+asyncpg://<your_user_name>:<your_password>@localhost:<your_port>/<your_db_name>
-```
-например
-```
-DATABASE_URL=postgresql+asyncpg://postgres:123456789@localhost:5432/mydb
-```
-туда же прописать
-```
-SECRET_KEY=<your_secret_key>
-```
-это нужно для шифрования JWT токенов при авторизации.
-
-5) Для создания таблиц в бд запустить create_all.py:
-```commandline
-python3 python db/create_all.py
+POSTGRES_USER=wisetree
+POSTGRES_PASSWORD=123456789
+POSTGRES_DB=mydb
+SECRET_KEY=96683abd8bb109bc25fe27675433a9b6
+DATABASE_URL=postgresql+asyncpg://wisetree:123456789@db:5432/mydb
 ```
 
 
-Вот и готово, для запуска проекта 
-```commandline
-python3 main.py
-```
+4) Поднять докер (на виндовс просто запустите docker desktop, на линуксе выполните команду ```sudo systemctl start docker```)
+5) Выполните команду ```docker-compose up --build```
+6) Готово! Проект доступен на локальном сервере по адресу http://localhost:3000
