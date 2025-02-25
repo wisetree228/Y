@@ -25,7 +25,7 @@ async def get_current_user_id(request: Request):
         payload = jwt.decode(
             token,
             config.JWT_SECRET_KEY,  # Ваш секретный ключ
-            algorithms=[config.ALGORITHM]  # Алгоритм, используемый для подписи токена
+            algorithms=[config.JWT_ALGORITHM]  # Алгоритм, используемый для подписи токена
         )
         user_id: str = payload.get("sub")
         if user_id is None:
