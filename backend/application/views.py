@@ -1,22 +1,10 @@
 from fastapi import FastAPI, Form, APIRouter, Depends, HTTPException, Response
-from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from .schemas import *
 from backend.db.models import *
-from authx import AuthX, AuthXConfig
-import os
-from .utils import hash_password, verify_password
-import asyncio
+from backend.application.utils import hash_password, verify_password
 from sqlalchemy.future import select
-
-
-config = AuthXConfig()
-config.JWT_ALGORITHM = "HS256"
-config.JWT_SECRET_KEY = os.getenv('SECRET_KEY')
-config.JWT_ACCESS_COOKIE_NAME = "auth_token"
-config.JWT_TOKEN_LOCATION = ["cookies"]
-
-security = AuthX(config=config)
+from .config import config, security
 
 
 

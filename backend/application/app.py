@@ -1,15 +1,15 @@
-from fastapi import FastAPI, Form, APIRouter, Depends, HTTPException, Response
+# from fastapi import FastAPI, Form, APIRouter, Depends, HTTPException, Response
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy.orm import Session
-from fastapi import Depends
-from .schemas import *
-from backend.db.models import *
-from authx import AuthX, AuthXConfig
-import os
-from .utils import hash_password, verify_password
+# from sqlalchemy.orm import Session
+# from fastapi import Depends
+# from .schemas import *
+# from backend.db.models import *
+# from authx import AuthX, AuthXConfig
+# import os
+from .utils import get_current_user_id
 from .views import *
-import asyncio
-from sqlalchemy.future import select
+# import asyncio
+# from sqlalchemy.future import select
 
 app = FastAPI()
 
@@ -37,8 +37,8 @@ async def login(data: LoginFormData, response: Response, db: Session = Depends(g
     return await login_view(data, response, db)
 
 @app.get('/protected', dependencies = [Depends(security.access_token_required)]) # неавторизованному пользователю вернёт статус код 500
-async def secret():
-    return {'data':'secret data'}
+async def secret(user_id: str = Depends(get_current_user_id)):
+    return {'data':user_id}
 
 @app.post('/logout')
 async def logout(response: Response):
