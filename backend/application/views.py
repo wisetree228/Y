@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Form, APIRouter, Depends, HTTPException, Response
+from fastapi import FastAPI, Form, APIRouter, Depends, HTTPException, Response, UploadFile, File
 from sqlalchemy.orm import Session
 from .schemas import *
 from backend.db.models import *
@@ -44,3 +44,11 @@ async def login_view(data: LoginFormData, response: Response, db: Session):
     token = security.create_access_token(uid=str(db_user_by_email.id))
     response.set_cookie(config.JWT_ACCESS_COOKIE_NAME, token)
     return {"auth_token": token}
+
+async def create_post_view(
+    text: str,
+    images: list[UploadFile],
+    user_id: int,
+):
+    print(user_id)
+    return {'a':'a'}
