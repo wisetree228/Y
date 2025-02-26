@@ -29,8 +29,8 @@ async def example():
     return {'ok':'ok'}
 
 @app.post('/register')
-async def submit_form(data: RegisterFormData, db: Session = Depends(get_db)): # при некорректном формате данных статус код 422
-    return await register_view(data, db)
+async def submit_form(data: RegisterFormData, response: Response, db: Session = Depends(get_db)): # при некорректном формате данных статус код 422
+    return await register_view(data, response, db)
 
 @app.post('/login')
 async def login(data: LoginFormData, response: Response, db: Session = Depends(get_db)):
