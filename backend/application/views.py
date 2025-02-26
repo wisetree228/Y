@@ -10,7 +10,7 @@ from .config import config, security
 
 
 
-async def register_view(data: RegisterFormData, db: Session):
+async def register_view(data: RegisterFormData, response: Response, db: Session):
     result_username = await db.execute(select(User).filter(User.username == data.username))
     db_user_by_username = result_username.scalars().first()
     result_email = await db.execute(select(User).filter(User.email == data.email))
@@ -29,6 +29,8 @@ async def register_view(data: RegisterFormData, db: Session):
     db.add(new_user)
     await db.commit()
     await db.refresh(new_user)
+    token = security.create_access_token(uid=str(new_user.id))
+    response.set_cookie(config.JWT_ACCESS_COOKIE_NAME, token)
     return {'status': 'ok'}
 
 async def login_view(data: LoginFormData, response: Response, db: Session):
