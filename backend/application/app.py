@@ -1,4 +1,4 @@
-# from fastapi import FastAPI, Form, APIRouter, Depends, HTTPException, Response
+from fastapi import FastAPI,UploadFile, File, Request
 from fastapi.middleware.cors import CORSMiddleware
 # from sqlalchemy.orm import Session
 # from fastapi import Depends
@@ -8,16 +8,15 @@ from fastapi.middleware.cors import CORSMiddleware
 # import os
 from .utils import get_current_user_id
 from .views import *
-# import asyncio
-# from sqlalchemy.future import select
+from typing import List, Optional
 
 app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # Разрешить все домены (для разработки)
-    allow_methods=["*"],  # Разрешить все методы
-    allow_headers=["*"],  # Разрешить все заголовки
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 async def get_db() -> AsyncSession:
@@ -46,5 +45,5 @@ async def logout(response: Response):
     return {"message": "Вы успешно вышли из аккаунта."}
 
 @app.post('/createpost', dependencies = [Depends(security.access_token_required)])
-async def create_post():
-    pass
+async def create_post(data: CreatePostData, user_id: str = Depends(get_current_user_id),):
+    return await create_post_view(data, int(user_id))
