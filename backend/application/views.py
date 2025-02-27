@@ -45,5 +45,20 @@ async def login_view(data: LoginFormData, response: Response, db: Session):
     response.set_cookie(config.JWT_ACCESS_COOKIE_NAME, token)
     return {"auth_token": token}
 
-async def create_post_view(data: CreatePostData, user_id: int):
-    pass
+async def create_post_view(data: CreatePostData, user_id: int, db: Session):
+    post = Post(
+        text=data.text,
+        author_id = user_id
+    )
+    db.add(post)
+    await db.commit()
+    await db.refresh(post)
+    if data.options:
+        for option in data.options:
+            var = VotingVariant(
+                post_id = post.id,
+                text=option,
+            )
+            db.add(var)
+            await db.commit()
+    return {'ok':'ok'}
