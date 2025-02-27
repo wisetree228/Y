@@ -9,8 +9,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from .utils import get_current_user_id
 from .views import *
 from typing import List, Optional
-# import asyncio
-# from sqlalchemy.future import select
 
 app = FastAPI()
 
@@ -47,10 +45,5 @@ async def logout(response: Response):
     return {"message": "Вы успешно вышли из аккаунта."}
 
 @app.post('/createpost', dependencies = [Depends(security.access_token_required)])
-async def create_post(
-    request: Request,
-    text: Optional[str] = Form(None),
-    images: Optional[List[UploadFile]] = File(None),
-    user_id: str = Depends(get_current_user_id),
-):
-    return await create_post_view(text, images, int(user_id))
+async def create_post(data: CreatePostData, user_id: str = Depends(get_current_user_id),):
+    return await create_post_view(data, int(user_id))

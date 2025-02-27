@@ -45,10 +45,5 @@ async def login_view(data: LoginFormData, response: Response, db: Session):
     response.set_cookie(config.JWT_ACCESS_COOKIE_NAME, token)
     return {"auth_token": token}
 
-async def create_post_view(
-    text: str,
-    images: list[UploadFile],
-    user_id: int,
-):
-    print(user_id)
-    return {'a':'a'}
+async def create_post_view(data: CreatePostData, user_id: int):
+    pass
