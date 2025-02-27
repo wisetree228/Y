@@ -186,4 +186,5 @@ DATABASE_URL=postgresql+asyncpg://wisetree:123456789@db:5432/mydb
 
 4) Поднять докер (на виндовс просто запустите docker desktop, на линуксе выполните команду ```sudo systemctl start docker```)
 5) Выполните команду ```docker-compose up --build```
-6) Готово! Проект доступен на локальном сервере по адресу http://localhost:3000
+6) Когда докер поднимется, откройте второй терминал и выполните ```docker-compose run --rm app alembic revision --autogenerate -m "New migration"``` а потом ```docker-compose run --rm app alembic upgrade head``` (создание таблиц в бд)
+7) Готово! Проект доступен на локальном сервере по адресу http://localhost:3000 (пользовательский фронтенд), к API бэкенда обращатся по http://localhost:8000
