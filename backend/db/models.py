@@ -32,8 +32,8 @@ class User(Base):
     # complaints_about_comments = relationship("ComplaintAboutComment", back_populates="author", cascade="all, delete-orphan")
     # complaints_about_posts = relationship("ComplaintAboutPost", back_populates="author", cascade="all, delete-orphan")
     # votes = relationship("Vote", back_populates="user", cascade="all, delete-orphan")
-    # friendship_requests_sent = relationship("FriendshipRequest", foreign_keys="FriendshipRequest.author_id", back_populates="author", cascade="all, delete-orphan")
-    # friendship_requests_received = relationship("FriendshipRequest", foreign_keys="FriendshipRequest.getter_id", back_populates="getter", cascade="all, delete-orphan")
+    friendship_requests_sent = relationship("FriendshipRequest", foreign_keys="FriendshipRequest.author_id", back_populates="author", cascade="all, delete-orphan")
+    friendship_requests_received = relationship("FriendshipRequest", foreign_keys="FriendshipRequest.getter_id", back_populates="getter", cascade="all, delete-orphan")
     # messages_sent = relationship("Message", foreign_keys="Message.author_id", back_populates="author", cascade="all, delete-orphan")
     # messages_received = relationship("Message", foreign_keys="Message.getter_id", back_populates="getter", cascade="all, delete-orphan")
     # subscriptions = relationship("Subscribe", foreign_keys="Subscribe.subscriber_id", back_populates="subscriber", cascade="all, delete-orphan")
@@ -107,26 +107,26 @@ class VotingVariant(Base):
 #     user = relationship("User", back_populates="votes")
 #     variant = relationship("VotingVariant", back_populates="votes")
 #
-# class Friendship(Base):
-#     __tablename__ = 'friendship'
-#     id = Column(Integer, primary_key=True)
-#     first_friend_id = Column(Integer, ForeignKey('users.id'), nullable=False)
-#     second_friend_id = Column(Integer, ForeignKey('users.id'), nullable=False)
-#     created_at = Column(DateTime, default=datetime.now)
-#
-#     first_friend = relationship("User", foreign_keys=[first_friend_id])
-#     second_friend = relationship("User", foreign_keys=[second_friend_id])
-#
-# class FriendshipRequest(Base):
-#     __tablename__ = 'friendship_requests'
-#     id = Column(Integer, primary_key=True)
-#     author_id = Column(Integer, ForeignKey('users.id'), nullable=False)
-#     getter_id = Column(Integer, ForeignKey('users.id'), nullable=False)
-#     created_at = Column(DateTime, default=datetime.now)
-#
-#     author = relationship("User", foreign_keys=[author_id], back_populates="friendship_requests_sent")
-#     getter = relationship("User", foreign_keys=[getter_id], back_populates="friendship_requests_received")
-#
+class Friendship(Base):
+    __tablename__ = 'friendship'
+    id = Column(Integer, primary_key=True)
+    first_friend_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    second_friend_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    created_at = Column(DateTime, default=datetime.now)
+
+    first_friend = relationship("User", foreign_keys=[first_friend_id])
+    second_friend = relationship("User", foreign_keys=[second_friend_id])
+
+class FriendshipRequest(Base):
+    __tablename__ = 'friendship_requests'
+    id = Column(Integer, primary_key=True)
+    author_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    getter_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    created_at = Column(DateTime, default=datetime.now)
+
+    author = relationship("User", foreign_keys=[author_id], back_populates="friendship_requests_sent")
+    getter = relationship("User", foreign_keys=[getter_id], back_populates="friendship_requests_received")
+
 # class Subscribe(Base):
 #     __tablename__ = 'subscribe'
 #     id = Column(Integer, primary_key=True)

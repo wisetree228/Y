@@ -15,5 +15,5 @@ class LoginFormData(BaseModel):
     password: str
 
 class CreatePostData(BaseModel):
-    text: str
-    options: Optional[List[str]] = None
+    text: constr(min_length=3, max_length=10000)
+    options: Optional[List[constr(min_length=3, max_length=100)]] = None

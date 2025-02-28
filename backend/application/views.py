@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Form, APIRouter, Depends, HTTPException, Response, UploadFile, File
+from sqlalchemy import or_, and_
 from sqlalchemy.orm import Session
 from .schemas import *
 from backend.db.models import *
@@ -62,3 +63,53 @@ async def create_post_view(data: CreatePostData, user_id: int, db: Session):
             db.add(var)
             await db.commit()
     return {'ok':'ok'}
+
+async def create_friendship_request_view(author_id: int, getter_id: int, db: Session):
+    data_db = await db.execute(select(FriendshipRequest).filter(
+        and_(
+            FriendshipRequest.author_id == author_id,
+            FriendshipRequest.getter_id == getter_id
+        )
+    ))
+    result = data_db.scalars().first()
+    if result:
+        raise HTTPException(status_code=400, detail="Вы уже отправили этому пользователю запрос дружбы!")
+
+    #Если пользователь отправлял вам запрос дружбы вам до этого, по взаимным запросам создаём дружбу
+    data_db = await db.execute(select(FriendshipRequest).filter(
+        and_(
+            FriendshipRequest.author_id == getter_id,
+            FriendshipRequest.getter_id == author_id
+        )
+    ))
+    result1 = data_db.scalars().first()
+
+    data_db = await db.execute(select(Friendship).filter(
+        or_(
+            and_(Friendship.first_friend_id == author_id, Friendship.second_friend_id == getter_id),
+            and_(Friendship.first_friend_id == getter_id, Friendship.second_friend_id == author_id)
+        )
+    ))
+    result = data_db.scalars().first()
+    if result:
+        raise HTTPException(status_code=400, detail="Вы уже дружите с этим пользователем!")
+
+    if result1:
+        new_friendship = Friendship(
+            first_friend_id=author_id,
+            second_friend_id=getter_id
+        )
+        db.add(new_friendship)
+        # удаляем запрос дружбы
+        await db.delete(result1)
+        await db.commit()
+        return {'status':'you got a new friend!'}
+
+    #Если ничего из вышеперечисленного, создаём новый запрос
+    new_request = FriendshipRequest(
+        author_id=author_id,
+        getter_id = getter_id
+    )
+    db.add(new_request)
+    await db.commit()
+    return {'status':'запрос отправлен, ожидайте ответа от пользователя'}
