@@ -29,11 +29,11 @@ async def example():
 
 @app.post('/register')
 async def submit_form(data: RegisterFormData, response: Response, db: Session = Depends(get_db)): # при некорректном формате данных статус код 422
-    return await register_view(data, response, db)
+    return await register_view(data=data, response=response, db=db)
 
 @app.post('/login')
 async def login(data: LoginFormData, response: Response, db: Session = Depends(get_db)):
-    return await login_view(data, response, db)
+    return await login_view(data=data, response=response, db=db)
 
 @app.get('/protected', dependencies = [Depends(security.access_token_required)]) # неавторизованному пользователю вернёт статус код 500
 async def secret(user_id: str = Depends(get_current_user_id)):
@@ -46,4 +46,8 @@ async def logout(response: Response):
 
 @app.post('/createpost', dependencies = [Depends(security.access_token_required)])
 async def create_post(data: CreatePostData, user_id: str = Depends(get_current_user_id), db: Session = Depends(get_db)):
-    return await create_post_view(data, int(user_id), db)
+    return await create_post_view(data=data, user_id=int(user_id), db=db)
+
+@app.post('/create_friendship_request/{getter_id}', dependencies = [Depends(security.access_token_required)])
+async def create_friendship_request(getter_id: int, user_id: str = Depends(get_current_user_id), db: Session = Depends(get_db)):
+    return await create_friendship_request_view(author_id=int(user_id), getter_id=getter_id, db=db)
