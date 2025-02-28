@@ -65,6 +65,15 @@ async def create_post_view(data: CreatePostData, user_id: int, db: Session):
     return {'ok':'ok'}
 
 async def create_friendship_request_view(author_id: int, getter_id: int, db: Session):
+    # Проверка существования получателя
+    data = await db.execute(select(User).filter(
+        User.id==getter_id
+    ))
+    person = data.scalars().first()
+    if not person:
+        raise HTTPException(status_code=400, detail="Такого пользователя не существует")
+
+
     data_db = await db.execute(select(FriendshipRequest).filter(
         and_(
             FriendshipRequest.author_id == author_id,
