@@ -1,32 +1,35 @@
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { Link } from 'react-router-dom';
+
+
+
 const Login = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const navigate = useNavigate();
+
+
   
     const handleSubmit = async (e) => {
       e.preventDefault();
+      console.log('Отправка данных:', { username, password });
       try {
-        // Отправляем данные на сервер
-        const response = await fetch('https://example.com/api/login', {
-            //указать ссылку куда отправлять
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ username, password }), 
+        const response = await axios.post('https://jsonplaceholder.typicode.com/posts', {
+          title: "Login",
+          body: JSON.stringify({ username, password }),
         });
-  
-        if (!response.ok) {
-          throw new Error('Ошибка при авторизации');
+        if (response.status !== 201) {
+          throw new Error('Ошибка при регистрации');
         }
-  
-        const data = await response.json();
-  
-        if (data.success) {
-          navigate('/dashboard'); //поменяит ссылку на нужную страницу
+        console.log('Ответ от сервера:', response.data);
+      if (response.status === 201) {
+        console.log('Авторизация успешна (тестовый ответ):', response.data);
+        navigate('/posts');
         } else {
-          setError('Неверный логин или пароль');
+          setError(response.message || 'Ошибка при регистрации'); 
         }
       } catch (err) {
         console.error('Ошибка при авторизации:', err);
@@ -35,24 +38,48 @@ const Login = () => {
     };
   
     return (
-      <div>
-        <h1>Страница авторизации</h1>
-        <form onSubmit={handleSubmit}>
-          <input
-            type="text"
-            placeholder="Логин"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-          />
-          <input
-            type="password"
-            placeholder="Пароль"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-          <button type="submit">Войти</button>
-        </form>
-      </div>
+          <div className="container">
+              <div className="background-shapes">
+                  <div className="shape shape-1"></div>
+                  <div className="shape shape-2"></div>
+                  <div className="shape shape-3"></div>
+              </div>
+      
+              <main>
+                  <div className="auth-container">
+                      <h1 className="logo">Y</h1>
+                      <div className="auth-card">
+                          <h2 className="auth-title">Вход</h2>
+                            <form onSubmit={handleSubmit}>
+                              <input
+                                type="text"
+                                placeholder="Логин"
+                                value={username}
+                                onChange={(e) => setUsername(e.target.value)}
+                              />
+                              <input
+                                type="password"
+                                placeholder="Пароль"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                              />
+                              <button type="submit">Войти</button>
+                            </form>
+                          <p className="auth-switch">
+                              Нет аккаунта? <Link to="/register">
+                        Зарегистрироваться
+                          </Link>
+                          </p>
+                      </div>
+                  </div>
+              </main>
+      
+              <footer>
+                  <div className="footer-content">
+                      <p>© 2025 Y. Все права защищены</p>
+                  </div>
+              </footer>
+          </div>
     );
   };
   
