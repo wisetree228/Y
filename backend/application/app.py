@@ -1,31 +1,23 @@
-from fastapi import FastAPI, Form, APIRouter, Depends, HTTPException, Response
+from fastapi import FastAPI,UploadFile, File, Request
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy.orm import Session
-from fastapi import Depends
-from application.schemas import *
-from db.models import *
-from authx import AuthX, AuthXConfig
-import os
-from application.utils import hash_password, verify_password
-import asyncio
-from sqlalchemy.future import select
+# from sqlalchemy.orm import Session
+# from fastapi import Depends
+# from .schemas import *
+# from backend.db.models import *
+# from authx import AuthX, AuthXConfig
+# import os
+from .utils import get_current_user_id
+from .views import *
+from typing import List, Optional
 
 app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # Разрешить все домены (для разработки)
-    allow_methods=["*"],  # Разрешить все методы
-    allow_headers=["*"],  # Разрешить все заголовки
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
-
-config = AuthXConfig()
-config.JWT_ALGORITHM = "HS256"
-config.JWT_SECRET_KEY = os.getenv('SECRET_KEY')
-config.JWT_ACCESS_COOKIE_NAME = "auth_token"
-config.JWT_TOKEN_LOCATION = ["cookies"]
-
-security = AuthX(config=config)
 
 async def get_db() -> AsyncSession:
     async with SessionLocal() as db:
@@ -36,42 +28,16 @@ async def example():
     return {'ok':'ok'}
 
 @app.post('/register')
-async def submit_form(data: RegisterFormData, db: Session = Depends(get_db)): # при некорректном формате данных статус код 422
-    result_username = await db.execute(select(User).filter(User.username == data.username))
-    db_user_by_username = result_username.scalars().first()
-    result_email = await db.execute(select(User).filter(User.email == data.email))
-    db_user_by_email = result_email.scalars().first()
-    if db_user_by_username:
-        raise HTTPException(status_code=400, detail="Пользователь с таким юзернеймом уже существует.")
-    if db_user_by_email:
-        raise HTTPException(status_code=400, detail="Пользователь с таким email уже существует.")
-    new_user = User(
-        username = data.username,
-        email = data.email,
-        name = data.name,
-        surname = data.surname,
-        password = hash_password(data.password)
-    )
-    db.add(new_user)
-    await db.commit()
-    await db.refresh(new_user)
-    return {'status':'ok'}
+async def submit_form(data: RegisterFormData, response: Response, db: Session = Depends(get_db)): # при некорректном формате данных статус код 422
+    return await register_view(data=data, response=response, db=db)
 
 @app.post('/login')
 async def login(data: LoginFormData, response: Response, db: Session = Depends(get_db)):
-    result_email = await db.execute(select(User).filter(User.email == data.email))
-    db_user_by_email = result_email.scalars().first()
-    if not db_user_by_email:
-        raise HTTPException(status_code=401, detail="Пользователя с таким email не существует! Зарегистрируйтесь, пожалуйста")
-    if not verify_password(db_user_by_email.password, data.password):
-        raise HTTPException(status_code=401, detail="Неверный пароль!")
-    token = security.create_access_token(uid=str(db_user_by_email.id))
-    response.set_cookie(config.JWT_ACCESS_COOKIE_NAME, token)
-    return {"auth_token":token}
+    return await login_view(data=data, response=response, db=db)
 
 @app.get('/protected', dependencies = [Depends(security.access_token_required)]) # неавторизованному пользователю вернёт статус код 500
-async def secret():
-    return {'data':'secret data'}
+async def secret(user_id: str = Depends(get_current_user_id)):
+    return {'data':user_id}
 
 @app.post('/logout')
 async def logout(response: Response):
@@ -79,5 +45,13 @@ async def logout(response: Response):
     return {"message": "Вы успешно вышли из аккаунта."}
 
 @app.post('/createpost', dependencies = [Depends(security.access_token_required)])
-async def create_post():
-    pass
+async def create_post(data: CreatePostData, user_id: str = Depends(get_current_user_id), db: Session = Depends(get_db)):
+    return await create_post_view(data=data, user_id=int(user_id), db=db)
+
+@app.post('/create_friendship_request/{getter_id}', dependencies = [Depends(security.access_token_required)])
+async def create_friendship_request(getter_id: int, user_id: str = Depends(get_current_user_id), db: Session = Depends(get_db)):
+    return await create_friendship_request_view(author_id=int(user_id), getter_id=getter_id, db=db)
+
+@app.put('/edit_profile', dependencies = [Depends(security.access_token_required)])
+async def edit_profile(data: EditProfileForm, user_id: str = Depends(get_current_user_id), db: Session = Depends(get_db)):
+    return await edit_profile_view(data=data, author_id=int(user_id), db=db)
