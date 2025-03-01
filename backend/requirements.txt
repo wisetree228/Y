@@ -8,4 +8,4 @@ python-multipart
 authx
 pydantic[email]
 passlib
-bcrypt
+bcryptgit
