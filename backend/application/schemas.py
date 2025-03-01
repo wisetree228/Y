@@ -1,6 +1,6 @@
 from pydantic import BaseModel, EmailStr, ValidationError, constr
 from datetime import datetime
-from typing import List
+from typing import List, Optional
 
 
 class RegisterFormData(BaseModel):
@@ -15,9 +15,5 @@ class LoginFormData(BaseModel):
     password: str
 
 class CreatePostData(BaseModel):
-    text: str
-    mediakeys: str
-
-class MessagesData(BaseModel):
-    text: str = Field(max_length = 500)
-    recipientId : int
+    text: constr(min_length=3, max_length=10000)
+    options: Optional[List[constr(min_length=3, max_length=100)]] = None
