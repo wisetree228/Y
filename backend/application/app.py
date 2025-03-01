@@ -51,3 +51,7 @@ async def create_post(data: CreatePostData, user_id: str = Depends(get_current_u
 @app.post('/create_friendship_request/{getter_id}', dependencies = [Depends(security.access_token_required)])
 async def create_friendship_request(getter_id: int, user_id: str = Depends(get_current_user_id), db: Session = Depends(get_db)):
     return await create_friendship_request_view(author_id=int(user_id), getter_id=getter_id, db=db)
+
+@app.put('/edit_profile', dependencies = [Depends(security.access_token_required)])
+async def edit_profile(data: EditProfileForm, user_id: str = Depends(get_current_user_id), db: Session = Depends(get_db)):
+    return await edit_profile_view(data=data, author_id=int(user_id), db=db)

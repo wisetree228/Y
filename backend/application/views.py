@@ -122,3 +122,28 @@ async def create_friendship_request_view(author_id: int, getter_id: int, db: Ses
     db.add(new_request)
     await db.commit()
     return {'status':'запрос отправлен, ожидайте ответа от пользователя'}
+
+async def edit_profile_view(data: EditProfileForm, author_id: int, db: Session):
+    result_username = await db.execute(select(User).filter(User.username == data.username))
+    db_user_by_username = result_username.scalars().first()
+    result_email = await db.execute(select(User).filter(User.email == data.email))
+    db_user_by_email = result_email.scalars().first()
+    if db_user_by_username:
+        raise HTTPException(status_code=400, detail="Пользователь с таким юзернеймом уже существует.")
+    if db_user_by_email:
+        raise HTTPException(status_code=400, detail="Пользователь с таким email уже существует.")
+    data_db  = await db.execute(select(User).filter(User.id == author_id))
+    user = data_db.scalars().first()
+    if data.username:
+        user.username = data.username
+    if data.email:
+        user.email = data.email
+    if data.name:
+        user.name = data.name
+    if data.surname:
+        user.surname = data.surname
+    if data.password:
+        user.password = hash_password(data.password)
+    await db.commit()
+    await db.refresh(user)
+    return user
