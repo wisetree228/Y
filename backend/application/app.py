@@ -51,3 +51,7 @@ async def create_post(data: CreatePostData, user_id: str = Depends(get_current_u
 @app.post('/create_friendship_request/{getter_id}', dependencies = [Depends(security.access_token_required)])
 async def create_friendship_request(getter_id: int, user_id: str = Depends(get_current_user_id), db: Session = Depends(get_db)):
     return await create_friendship_request_view(author_id=int(user_id), getter_id=getter_id, db=db)
+
+@app.post('/add_media/{post_id}')
+async def add_media():
+    return await add_media_view()

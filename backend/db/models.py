@@ -83,7 +83,7 @@ class Post(Base):
     # comments = relationship("Comment", back_populates="post", cascade="all, delete-orphan")
     # complaints = relationship("ComplaintAboutPost", back_populates="post", cascade="all, delete-orphan")
     voting_variants = relationship("VotingVariant", back_populates="post", cascade="all, delete-orphan")
-    # media = relationship("MediaInPost", back_populates="post", cascade="all, delete-orphan")
+    media = relationship("MediaInPost", back_populates="post", cascade="all, delete-orphan")
     # likes = relationship("Like", back_populates="post", cascade="all, delete-orphan")
 
 
@@ -137,13 +137,13 @@ class FriendshipRequest(Base):
 #     subscriber = relationship("User", foreign_keys=[subscriber_id], back_populates="subscriptions")
 #     contentmaker = relationship("User", foreign_keys=[contentmaker_id], back_populates="subscribers")
 #
-# class MediaInPost(Base):
-#     __tablename__ = 'media_in_post'
-#     id = Column(Integer, primary_key=True)
-#     image = Column(LargeBinary)
-#     post_id = Column(Integer, ForeignKey('posts.id'), nullable=False)
-#     post = relationship("Post", back_populates="media")
-#
+class MediaInPost(Base):
+     __tablename__ = 'media_in_post'
+     id = Column(Integer, primary_key=True)
+     image = Column(LargeBinary)
+     post_id = Column(Integer, ForeignKey('posts.id'), nullable=False)
+     post = relationship("Post", back_populates="media")
+
 # class Message(Base):
 #     __tablename__ = 'messages'
 #     id = Column(Integer, primary_key=True)
