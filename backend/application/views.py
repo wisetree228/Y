@@ -3,6 +3,7 @@ from sqlalchemy import or_, and_
 from sqlalchemy.orm import Session
 from .schemas import *
 from backend.db.models import *
+from backend.db.utils import add_and_refresh_object
 from backend.application.utils import hash_password, verify_password
 from sqlalchemy.future import select
 from .config import config, security
@@ -27,9 +28,7 @@ async def register_view(data: RegisterFormData, response: Response, db: Session)
         surname=data.surname,
         password=hash_password(data.password)
     )
-    db.add(new_user)
-    await db.commit()
-    await db.refresh(new_user)
+    await add_and_refresh_object(object=new_user, db=db)
     token = security.create_access_token(uid=str(new_user.id))
     response.set_cookie(config.JWT_ACCESS_COOKIE_NAME, token)
     return {'status': 'ok'}
@@ -51,18 +50,15 @@ async def create_post_view(data: CreatePostData, user_id: int, db: Session):
         text=data.text,
         author_id = user_id
     )
-    db.add(post)
-    await db.commit()
-    await db.refresh(post)
+    await add_and_refresh_object(object=post, db=db)
     if data.options:
         for option in data.options:
             var = VotingVariant(
                 post_id = post.id,
                 text=option,
             )
-            db.add(var)
-            await db.commit()
-    return {'ok':'ok'}
+            await add_and_refresh_object(object=var, db=db)
+    return {'status':'ok'}
 
 async def create_friendship_request_view(author_id: int, getter_id: int, db: Session):
     # Проверка существования получателя
@@ -108,10 +104,7 @@ async def create_friendship_request_view(author_id: int, getter_id: int, db: Ses
             first_friend_id=author_id,
             second_friend_id=getter_id
         )
-        db.add(new_friendship)
-        # удаляем запрос дружбы
-        await db.delete(result1)
-        await db.commit()
+        await add_and_refresh_object(object=new_friendship, db=db)
         return {'status':'you got a new friend!'}
 
     #Если ничего из вышеперечисленного, создаём новый запрос
@@ -134,16 +127,11 @@ async def edit_profile_view(data: EditProfileForm, author_id: int, db: Session):
         raise HTTPException(status_code=400, detail="Пользователь с таким email уже существует.")
     data_db  = await db.execute(select(User).filter(User.id == author_id))
     user = data_db.scalars().first()
-    if data.username:
-        user.username = data.username
-    if data.email:
-        user.email = data.email
-    if data.name:
-        user.name = data.name
-    if data.surname:
-        user.surname = data.surname
-    if data.password:
-        user.password = hash_password(data.password)
+    if data.username: user.username = data.username
+    if data.email: user.email = data.email
+    if data.name: user.name = data.name
+    if data.surname: user.surname = data.surname
+    if data.password: user.password = hash_password(data.password)
     await db.commit()
     await db.refresh(user)
-    return user
+    return {'status':'ok'}
