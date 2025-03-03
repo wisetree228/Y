@@ -1,7 +1,7 @@
 from fastapi import FastAPI,UploadFile, File, Request
 from fastapi.middleware.cors import CORSMiddleware
 # from sqlalchemy.orm import Session
-# from fastapi import Depends
+#from fastapi import Depends
 # from .schemas import *
 # from backend.db.models import *
 # from authx import AuthX, AuthXConfig
@@ -25,7 +25,7 @@ async def get_db() -> AsyncSession:
 
 @app.get('/')
 async def example():
-    return {'ok':'ok'}
+    return {'status':'ok'}
 
 @app.post('/register')
 async def submit_form(data: RegisterFormData, response: Response, db: Session = Depends(get_db)): # при некорректном формате данных статус код 422
@@ -42,7 +42,7 @@ async def secret(user_id: str = Depends(get_current_user_id)):
 @app.post('/logout')
 async def logout(response: Response):
     response.delete_cookie(config.JWT_ACCESS_COOKIE_NAME)
-    return {"message": "Вы успешно вышли из аккаунта."}
+    return {"status": "Вы успешно вышли из аккаунта."}
 
 @app.post('/createpost', dependencies = [Depends(security.access_token_required)])
 async def create_post(data: CreatePostData, user_id: str = Depends(get_current_user_id), db: Session = Depends(get_db)):
