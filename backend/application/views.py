@@ -3,7 +3,7 @@ from sqlalchemy import or_, and_
 from sqlalchemy.orm import Session
 from .schemas import *
 from backend.db.models import *
-from backend.db.utils import add_and_refresh_object
+from backend.db.utils import add_and_refresh_object, get_user_by_email, get_user_by_id, delete_object
 from backend.application.utils import hash_password, verify_password
 from sqlalchemy.future import select
 from .config import config, security
@@ -34,14 +34,13 @@ async def register_view(data: RegisterFormData, response: Response, db: Session)
     return {'status': 'ok'}
 
 async def login_view(data: LoginFormData, response: Response, db: Session):
-    result_email = await db.execute(select(User).filter(User.email == data.email))
-    db_user_by_email = result_email.scalars().first()
-    if not db_user_by_email:
+    user = await get_user_by_email(email=data.email, db=db)
+    if not user:
         raise HTTPException(status_code=401,
                             detail="Пользователя с таким email не существует! Зарегистрируйтесь, пожалуйста")
-    if not verify_password(db_user_by_email.password, data.password):
+    if not verify_password(user.password, data.password):
         raise HTTPException(status_code=401, detail="Неверный пароль!")
-    token = security.create_access_token(uid=str(db_user_by_email.id))
+    token = security.create_access_token(uid=str(user.id))
     response.set_cookie(config.JWT_ACCESS_COOKIE_NAME, token)
     return {"auth_token": token}
 
@@ -62,10 +61,7 @@ async def create_post_view(data: CreatePostData, user_id: int, db: Session):
 
 async def create_friendship_request_view(author_id: int, getter_id: int, db: Session):
     # Проверка существования получателя
-    data = await db.execute(select(User).filter(
-        User.id==getter_id
-    ))
-    person = data.scalars().first()
+    person = await get_user_by_id(id=getter_id, db=db)
     if not person:
         raise HTTPException(status_code=400, detail="Такого пользователя не существует")
 
@@ -104,6 +100,7 @@ async def create_friendship_request_view(author_id: int, getter_id: int, db: Ses
             first_friend_id=author_id,
             second_friend_id=getter_id
         )
+        await delete_object(object=result1, db=db)
         await add_and_refresh_object(object=new_friendship, db=db)
         return {'status':'you got a new friend!'}
 
