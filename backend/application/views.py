@@ -3,7 +3,7 @@ from sqlalchemy import or_, and_
 from sqlalchemy.orm import Session
 from .schemas import *
 from backend.db.models import *
-from backend.db.utils import add_and_refresh_object, get_user_by_email, get_user_by_id, delete_object
+from backend.db.utils import *
 from backend.application.utils import hash_password, verify_password
 from sqlalchemy.future import select
 from .config import config, security
@@ -100,7 +100,7 @@ async def create_friendship_request_view(author_id: int, getter_id: int, db: Ses
             first_friend_id=author_id,
             second_friend_id=getter_id
         )
-        await delete_object(object=result1, db=db)
+        await delete_object(obgitject=result1, db=db)
         await add_and_refresh_object(object=new_friendship, db=db)
         return {'status':'you got a new friend!'}
 
@@ -113,7 +113,7 @@ async def create_friendship_request_view(author_id: int, getter_id: int, db: Ses
     await db.commit()
     return {'status':'запрос отправлен, ожидайте ответа от пользователя'}
 
-async def edit_profile_view(data: EditProfileForm, author_id: int, db: Session):
+async def edit_profile_view(data: EditProfileFormData, author_id: int, db: Session):
     result_username = await db.execute(select(User).filter(User.username == data.username))
     db_user_by_username = result_username.scalars().first()
     result_email = await db.execute(select(User).filter(User.email == data.email))
@@ -132,3 +132,17 @@ async def edit_profile_view(data: EditProfileForm, author_id: int, db: Session):
     await db.commit()
     await db.refresh(user)
     return {'status':'ok'}
+
+async def create_comment_view(data: CreateCommentData, post_id: int, user_id: int, db: Session):
+    post = await get_post_by_id(id=post_id, db=db)
+    if not post:
+        raise HTTPException(status_code=400, detail="Поста с таким id не существует!")
+    comment = Comment(
+        text=data.text,
+        post_id=post_id,
+        author_id=user_id
+    )
+    await add_and_refresh_object(object=comment, db=db)
+    return {'status':'ok'}
+
+
