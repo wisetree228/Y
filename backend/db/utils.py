@@ -22,5 +22,9 @@ async def delete_object(object: Union[User, Post, Friendship, FriendshipRequest,
     await db.delete(object)
     await db.commit()
 
+async def get_post_by_id(id: int, db: Session):
+    result_db = await db.execute(select(Post).filter(Post.id == id))
+    return result_db.scalars().first()
+
 
 

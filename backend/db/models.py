@@ -27,7 +27,7 @@ class User(Base):
     created_at = Column(DateTime, default=datetime.now)
     updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
 
-    # comments = relationship("Comment", back_populates="author", cascade="all, delete-orphan")
+    comments = relationship("Comment", back_populates="author", cascade="all, delete-orphan")
     posts = relationship("Post", back_populates="author", cascade="all, delete-orphan")
     # complaints_about_comments = relationship("ComplaintAboutComment", back_populates="author", cascade="all, delete-orphan")
     # complaints_about_posts = relationship("ComplaintAboutPost", back_populates="author", cascade="all, delete-orphan")
@@ -40,17 +40,17 @@ class User(Base):
     # subscribers = relationship("Subscribe", foreign_keys="Subscribe.contentmaker_id", back_populates="contentmaker", cascade="all, delete-orphan")
     # likes = relationship("Like", back_populates="author", cascade="all, delete-orphan")
 
-# class Comment(Base):
-#     __tablename__ = 'comments'
-#     id = Column(Integer, primary_key=True)
-#     text = Column(Text, nullable=False)
-#     author_id = Column(Integer, ForeignKey('users.id'), nullable=False)
-#     post_id = Column(Integer, ForeignKey('posts.id'), nullable=False)
-#     created_at = Column(DateTime, default=datetime.now)
-#
-#     author = relationship("User", back_populates="comments")
-#     post = relationship("Post", back_populates="comments")
-#     complaints = relationship("ComplaintAboutComment", back_populates="comment", cascade="all, delete-orphan")
+class Comment(Base):
+    __tablename__ = 'comments'
+    id = Column(Integer, primary_key=True)
+    text = Column(Text, nullable=False)
+    author_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    post_id = Column(Integer, ForeignKey('posts.id'), nullable=False)
+    created_at = Column(DateTime, default=datetime.now)
+
+    author = relationship("User", back_populates="comments")
+    post = relationship("Post", back_populates="comments")
+    # complaints = relationship("ComplaintAboutComment", back_populates="comment", cascade="all, delete-orphan")
 #
 # class ComplaintAboutComment(Base):
 #     __tablename__ = 'complaints_about_comment'
@@ -80,7 +80,7 @@ class Post(Base):
     created_at = Column(DateTime, default=datetime.now)
 
     author = relationship("User", back_populates="posts")
-    # comments = relationship("Comment", back_populates="post", cascade="all, delete-orphan")
+    comments = relationship("Comment", back_populates="post", cascade="all, delete-orphan")
     # complaints = relationship("ComplaintAboutPost", back_populates="post", cascade="all, delete-orphan")
     voting_variants = relationship("VotingVariant", back_populates="post", cascade="all, delete-orphan")
     # media = relationship("MediaInPost", back_populates="post", cascade="all, delete-orphan")

@@ -26,11 +26,14 @@ class CreateCommentData(BaseModel):
     text: str
     post_id: int
 
-class EditProfileForm(BaseModel):
+class EditProfileFormData(BaseModel):
     email : Optional[EmailStr] = None
     username: Optional[str] = None
     name: Optional[str] = None
     surname: Optional[str] = None
     password: Optional[str] = None
+
+class CreateCommentData(BaseModel):
+    text: constr(min_length=3, max_length=10000)
 
 
