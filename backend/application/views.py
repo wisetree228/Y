@@ -145,4 +145,19 @@ async def create_comment_view(data: CreateCommentData, post_id: int, user_id: in
     await add_and_refresh_object(object=comment, db=db)
     return {'status':'ok'}
 
+async def create_or_delete_like_view(post_id: int, user_id: int, db: Session):
+    post =await get_post_by_id(id=post_id, db=db)
+    if not post:
+        raise HTTPException(status_code=400, detail="Такого поста не существует!")
+    like = await get_like_on_post_from_user(post_id=post_id, user_id=user_id, db=db)
+    if not like:
+        new_like = Like(
+            post_id=post_id,
+            author_id=user_id
+        )
+        await add_and_refresh_object(object=new_like, db=db)
+        return {'status':'liked'}
+    await delete_object(object=like, db=db)
+    return {'status':'unliked'}
+
 

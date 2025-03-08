@@ -59,3 +59,7 @@ async def edit_profile(data: EditProfileFormData, user_id: str = Depends(get_cur
 @app.post('/create_comment/{post_id}', dependencies = [Depends(security.access_token_required)])
 async def create_comment(data: CreateCommentData, post_id: int, user_id: str = Depends(get_current_user_id), db: Session = Depends(get_db)):
     return await create_comment_view(data=data, post_id=post_id, user_id=int(user_id), db=db)
+
+@app.post('/create_like/{post_id}', dependencies = [Depends(security.access_token_required)])
+async def create_or_delete_like(post_id: int, user_id: str = Depends(get_current_user_id), db: Session = Depends(get_db)):
+    return await create_or_delete_like_view(post_id=post_id, user_id=int(user_id), db=db)
