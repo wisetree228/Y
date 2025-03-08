@@ -38,7 +38,7 @@ class User(Base):
     # messages_received = relationship("Message", foreign_keys="Message.getter_id", back_populates="getter", cascade="all, delete-orphan")
     # subscriptions = relationship("Subscribe", foreign_keys="Subscribe.subscriber_id", back_populates="subscriber", cascade="all, delete-orphan")
     # subscribers = relationship("Subscribe", foreign_keys="Subscribe.contentmaker_id", back_populates="contentmaker", cascade="all, delete-orphan")
-    # likes = relationship("Like", back_populates="author", cascade="all, delete-orphan")
+    likes = relationship("Like", back_populates="author", cascade="all, delete-orphan")
 
 class Comment(Base):
     __tablename__ = 'comments'
@@ -84,7 +84,7 @@ class Post(Base):
     # complaints = relationship("ComplaintAboutPost", back_populates="post", cascade="all, delete-orphan")
     voting_variants = relationship("VotingVariant", back_populates="post", cascade="all, delete-orphan")
     # media = relationship("MediaInPost", back_populates="post", cascade="all, delete-orphan")
-    # likes = relationship("Like", back_populates="post", cascade="all, delete-orphan")
+    likes = relationship("Like", back_populates="post", cascade="all, delete-orphan")
 
 
 class VotingVariant(Base):
@@ -165,14 +165,14 @@ class FriendshipRequest(Base):
 #
 #     message = relationship("Message", back_populates="media")
 #
-# class Like(Base):
-#     __tablename__ = 'likes'
-#     id = Column(Integer, primary_key=True)
-#     author_id = Column(Integer, ForeignKey('users.id'), nullable=False)
-#     post_id = Column(Integer, ForeignKey('posts.id'), nullable=False)  # Исправлено на 'posts.id'
-#
-#     author = relationship("User", back_populates="likes")  # Исправлено
-#     post = relationship("Post", back_populates="likes")  # Исправлено
+class Like(Base):
+    __tablename__ = 'likes'
+    id = Column(Integer, primary_key=True)
+    author_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    post_id = Column(Integer, ForeignKey('posts.id'), nullable=False)
+
+    author = relationship("User", back_populates="likes")
+    post = relationship("Post", back_populates="likes")
 
 
 async def create_database():
