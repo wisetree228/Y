@@ -1,12 +1,13 @@
-from fastapi import FastAPI, Form, APIRouter, Depends, HTTPException, Response, UploadFile, File
+from fastapi import FastAPI, Form, APIRouter, Depends, HTTPException, Response, UploadFile, File, WebSocket, WebSocketDisconnect
 from sqlalchemy import or_, and_
 from sqlalchemy.orm import Session
 from .schemas import *
 from backend.db.models import *
 from backend.db.utils import *
-from backend.application.utils import hash_password, verify_password
+from backend.application.utils import hash_password, verify_password, WebSocketConnectionManager
 from sqlalchemy.future import select
 from .config import config, security
+import json
 
 
 
@@ -160,4 +161,18 @@ async def create_or_delete_like_view(post_id: int, user_id: int, db: Session):
     await delete_object(object=like, db=db)
     return {'status':'unliked'}
 
-
+async def handle_websocket(websocket: WebSocket, user_id: str, manager: WebSocketConnectionManager):
+    await manager.connect(user_id, websocket)
+    try:
+        while True:
+            data = await websocket.receive_text()
+            message_data = json.loads(data)
+            recipient_id = message_data.get("recipient_id")
+            message = message_data.get("message")
+            if recipient_id and message:
+                await manager.send_personal_message(f"User {user_id}: {message}", recipient_id)
+            else:
+                await websocket.send_text("Invalid message format")
+    except WebSocketDisconnect:
+        manager.disconnect(user_id)
+        await manager.send_personal_message(f"User {user_id} left the chat", recipient_id)

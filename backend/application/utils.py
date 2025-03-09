@@ -3,6 +3,8 @@ import bcrypt
 from .config import config, security
 from fastapi import Request, HTTPException, status
 from jose import JWTError, jwt
+from fastapi import WebSocket
+from typing import Dict
 
 # Настройка контекста для хэширования
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -39,3 +41,25 @@ async def get_current_user_id(request: Request):
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Не удалось декодировать токен",
         )
+
+
+class WebSocketConnectionManager:
+    def __init__(self):
+        self.active_connections: Dict[str, WebSocket] = {}
+
+    async def connect(self, user_id: str, websocket: WebSocket):
+        await websocket.accept()
+        self.active_connections[user_id] = websocket
+
+    def disconnect(self, user_id: str):
+        if user_id in self.active_connections:
+            del self.active_connections[user_id]
+
+    async def send_personal_message(self, message: str, user_id: str):
+        if user_id in self.active_connections:
+            await self.active_connections[user_id].send_text(message)
+
+    async def broadcast(self, message: str):
+        for connection in self.active_connections.values():
+            await connection.send_text(message)
+

@@ -1,4 +1,4 @@
-from fastapi import FastAPI,UploadFile, File, Request
+from fastapi import FastAPI,UploadFile, File, Request,WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 # from sqlalchemy.orm import Session
 #from fastapi import Depends
@@ -6,11 +6,13 @@ from fastapi.middleware.cors import CORSMiddleware
 # from backend.db.models import *
 # from authx import AuthX, AuthXConfig
 # import os
-from .utils import get_current_user_id
+from .utils import get_current_user_id, WebSocketConnectionManager
 from .views import *
 from typing import List, Optional
 
 app = FastAPI()
+
+manager = WebSocketConnectionManager()
 
 app.add_middleware(
     CORSMiddleware,
@@ -35,9 +37,9 @@ async def submit_form(data: RegisterFormData, response: Response, db: Session = 
 async def login(data: LoginFormData, response: Response, db: Session = Depends(get_db)):
     return await login_view(data=data, response=response, db=db)
 
-@app.get('/protected', dependencies = [Depends(security.access_token_required)]) # неавторизованному пользователю вернёт статус код 500
+@app.get('/get_my_id', dependencies = [Depends(security.access_token_required)]) # неавторизованному пользователю вернёт статус код 500
 async def secret(user_id: str = Depends(get_current_user_id)):
-    return {'data':user_id}
+    return {'data':int(user_id)}
 
 @app.post('/logout')
 async def logout(response: Response):
@@ -63,3 +65,7 @@ async def create_comment(data: CreateCommentData, post_id: int, user_id: str = D
 @app.post('/create_like/{post_id}', dependencies = [Depends(security.access_token_required)])
 async def create_or_delete_like(post_id: int, user_id: str = Depends(get_current_user_id), db: Session = Depends(get_db)):
     return await create_or_delete_like_view(post_id=post_id, user_id=int(user_id), db=db)
+
+@app.websocket("/ws/{user_id}")
+async def websocket_endpoint(websocket: WebSocket, user_id: str):
+    await handle_websocket(websocket, user_id, manager)

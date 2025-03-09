@@ -13,3 +13,4 @@ authx
 pydantic[email]
 passlib
 bcrypt
+uvicorn[standart]
