@@ -34,8 +34,8 @@ class User(Base):
     # votes = relationship("Vote", back_populates="user", cascade="all, delete-orphan")
     friendship_requests_sent = relationship("FriendshipRequest", foreign_keys="FriendshipRequest.author_id", back_populates="author", cascade="all, delete-orphan")
     friendship_requests_received = relationship("FriendshipRequest", foreign_keys="FriendshipRequest.getter_id", back_populates="getter", cascade="all, delete-orphan")
-    # messages_sent = relationship("Message", foreign_keys="Message.author_id", back_populates="author", cascade="all, delete-orphan")
-    # messages_received = relationship("Message", foreign_keys="Message.getter_id", back_populates="getter", cascade="all, delete-orphan")
+    messages_sent = relationship("Message", foreign_keys="Message.author_id", back_populates="author", cascade="all, delete-orphan")
+    messages_received = relationship("Message", foreign_keys="Message.getter_id", back_populates="getter", cascade="all, delete-orphan")
     # subscriptions = relationship("Subscribe", foreign_keys="Subscribe.subscriber_id", back_populates="subscriber", cascade="all, delete-orphan")
     # subscribers = relationship("Subscribe", foreign_keys="Subscribe.contentmaker_id", back_populates="contentmaker", cascade="all, delete-orphan")
     likes = relationship("Like", back_populates="author", cascade="all, delete-orphan")
@@ -144,17 +144,17 @@ class FriendshipRequest(Base):
 #     post_id = Column(Integer, ForeignKey('posts.id'), nullable=False)
 #     post = relationship("Post", back_populates="media")
 #
-# class Message(Base):
-#     __tablename__ = 'messages'
-#     id = Column(Integer, primary_key=True)
-#     text = Column(Text, nullable=False)
-#     author_id = Column(Integer, ForeignKey('users.id'), nullable=False)
-#     getter_id = Column(Integer, ForeignKey('users.id'), nullable=False)
-#     created_at = Column(DateTime, default=datetime.now)
-#
-#     author = relationship("User", foreign_keys=[author_id], back_populates="messages_sent")
-#     getter = relationship("User", foreign_keys=[getter_id], back_populates="messages_received")
-#     media = relationship("MediaInMessage", back_populates="message", cascade="all, delete-orphan")
+class Message(Base):
+    __tablename__ = 'messages'
+    id = Column(Integer, primary_key=True)
+    text = Column(Text, nullable=False)
+    author_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    getter_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    created_at = Column(DateTime, default=datetime.now)
+
+    author = relationship("User", foreign_keys=[author_id], back_populates="messages_sent")
+    getter = relationship("User", foreign_keys=[getter_id], back_populates="messages_received")
+    #media = relationship("MediaInMessage", back_populates="message", cascade="all, delete-orphan")
 #
 # class MediaInMessage(Base):
 #     __tablename__ = 'media_in_message'

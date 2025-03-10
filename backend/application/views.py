@@ -161,7 +161,7 @@ async def create_or_delete_like_view(post_id: int, user_id: int, db: Session):
     await delete_object(object=like, db=db)
     return {'status':'unliked'}
 
-async def handle_websocket(websocket: WebSocket, user_id: str, manager: WebSocketConnectionManager):
+async def handle_websocket(websocket: WebSocket, user_id: str, manager: WebSocketConnectionManager, db: Session):
     await manager.connect(user_id, websocket)
     try:
         while True:
@@ -171,6 +171,12 @@ async def handle_websocket(websocket: WebSocket, user_id: str, manager: WebSocke
             message = message_data.get("message")
             if recipient_id and message:
                 await manager.send_personal_message(f"User {user_id}: {message}", recipient_id)
+                new_message = Message(
+                    text=message,
+                    author_id=int(user_id),
+                    getter_id=int(recipient_id)
+                )
+                await add_and_refresh_object(object=new_message, db=db)
             else:
                 await websocket.send_text("Invalid message format")
     except WebSocketDisconnect:
