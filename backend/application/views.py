@@ -157,9 +157,9 @@ async def create_or_delete_like_view(post_id: int, user_id: int, db: Session):
             author_id=user_id
         )
         await add_and_refresh_object(object=new_like, db=db)
-        return {'status':'liked'}
+        return {'status':'liked', 'likes_count':await get_likes_count(post_id=post_id, db=db)}
     await delete_object(object=like, db=db)
-    return {'status':'unliked'}
+    return {'status':'unliked', 'likes_count':await get_likes_count(post_id=post_id, db=db)}
 
 async def handle_websocket(websocket: WebSocket, user_id: str, manager: WebSocketConnectionManager, db: Session):
     await manager.connect(user_id, websocket)
