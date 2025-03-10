@@ -67,5 +67,5 @@ async def create_or_delete_like(post_id: int, user_id: str = Depends(get_current
     return await create_or_delete_like_view(post_id=post_id, user_id=int(user_id), db=db)
 
 @app.websocket("/ws/{user_id}")
-async def websocket_endpoint(websocket: WebSocket, user_id: str):
-    await handle_websocket(websocket, user_id, manager)
+async def websocket_endpoint(websocket: WebSocket, user_id: str, db: Session = Depends(get_db)):
+    await handle_websocket(websocket, user_id, manager, db)
