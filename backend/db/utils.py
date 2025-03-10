@@ -1,6 +1,6 @@
 from sqlalchemy.future import select
 from sqlalchemy.orm import Session
-from sqlalchemy import or_, and_
+from sqlalchemy import or_, and_, func
 from .models import *
 from typing import Union
 
@@ -34,5 +34,9 @@ async def get_like_on_post_from_user(post_id: int, user_id: int, db: Session):
     ) ))
     return result_db.scalars().first()
 
+async def get_likes_count(post_id: int, db: Session):
+    count_query = await db.execute(select(func.count()).select_from(Like).filter(Like.post_id==post_id))
+    count = count_query.scalar()
+    return count
 
 
