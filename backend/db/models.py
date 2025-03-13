@@ -31,7 +31,7 @@ class User(Base):
     posts = relationship("Post", back_populates="author", cascade="all, delete-orphan")
     # complaints_about_comments = relationship("ComplaintAboutComment", back_populates="author", cascade="all, delete-orphan")
     # complaints_about_posts = relationship("ComplaintAboutPost", back_populates="author", cascade="all, delete-orphan")
-    # votes = relationship("Vote", back_populates="user", cascade="all, delete-orphan")
+    votes = relationship("Vote", back_populates="user", cascade="all, delete-orphan")
     friendship_requests_sent = relationship("FriendshipRequest", foreign_keys="FriendshipRequest.author_id", back_populates="author", cascade="all, delete-orphan")
     friendship_requests_received = relationship("FriendshipRequest", foreign_keys="FriendshipRequest.getter_id", back_populates="getter", cascade="all, delete-orphan")
     messages_sent = relationship("Message", foreign_keys="Message.author_id", back_populates="author", cascade="all, delete-orphan")
@@ -95,18 +95,18 @@ class VotingVariant(Base):
     created_at = Column(DateTime, default=datetime.now)
 
     post = relationship("Post", back_populates="voting_variants")
-    #votes = relationship("Vote", back_populates="variant", cascade="all, delete-orphan")
-#
-# class Vote(Base):
-#     __tablename__ = 'votes'
-#     id = Column(Integer, primary_key=True)
-#     user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
-#     variant_id = Column(Integer, ForeignKey('voting_variants.id'), nullable=False)
-#     created_at = Column(DateTime, default=datetime.now)
-#
-#     user = relationship("User", back_populates="votes")
-#     variant = relationship("VotingVariant", back_populates="votes")
-#
+    votes = relationship("Vote", back_populates="variant", cascade="all, delete-orphan")
+
+class Vote(Base):
+    __tablename__ = 'votes'
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    variant_id = Column(Integer, ForeignKey('voting_variants.id'), nullable=False)
+    created_at = Column(DateTime, default=datetime.now)
+
+    user = relationship("User", back_populates="votes")
+    variant = relationship("VotingVariant", back_populates="votes")
+
 class Friendship(Base):
     __tablename__ = 'friendship'
     id = Column(Integer, primary_key=True)

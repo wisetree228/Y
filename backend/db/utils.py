@@ -6,7 +6,7 @@ from typing import Union
 
 
 
-async def add_and_refresh_object(object: Union[User, Post, Friendship, FriendshipRequest, VotingVariant, Like, Message], db: Session):
+async def add_and_refresh_object(object: Union[User, Post, Friendship, FriendshipRequest, VotingVariant, Like, Message, Vote], db: Session):
     db.add(object)
     await db.commit()
     await db.refresh(object)
@@ -19,7 +19,7 @@ async def get_user_by_id(id: int, db: Session):
     result_db = await db.execute(select(User).filter(User.id == id))
     return result_db.scalars().first()
 
-async def delete_object(object: Union[User, Post, Friendship, FriendshipRequest, VotingVariant, Like], db: Session):
+async def delete_object(object: Union[User, Post, Friendship, FriendshipRequest, VotingVariant, Like, Message, Vote], db: Session):
     await db.delete(object)
     await db.commit()
 
@@ -38,5 +38,16 @@ async def get_likes_count(post_id: int, db: Session):
     count_query = await db.execute(select(func.count()).select_from(Like).filter(Like.post_id==post_id))
     count = count_query.scalar()
     return count
+
+async def get_variant_by_id(var_id: int, db: Session):
+    result_db = await db.execute(select(VotingVariant).filter(VotingVariant.id == var_id))
+    return result_db.scalars().first()
+
+async def get_user_vote(var_id: int, user_id: int, db: Session):
+    result_db = await db.execute(select(Vote).filter(and_(
+        Vote.user_id == user_id,
+        Vote.variant_id == var_id
+    )))
+    return result_db.scalars().first()
 
 

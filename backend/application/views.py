@@ -6,6 +6,7 @@ from backend.db.models import *
 from backend.db.utils import *
 from backend.application.utils import hash_password, verify_password, WebSocketConnectionManager
 from sqlalchemy.future import select
+from sqlalchemy.orm import selectinload
 from .config import config, security
 import json
 
@@ -182,3 +183,23 @@ async def handle_websocket(websocket: WebSocket, user_id: str, manager: WebSocke
     except WebSocketDisconnect:
         manager.disconnect(user_id)
         await manager.send_personal_message(f"User {user_id} left the chat", recipient_id)
+
+async def vote_view(variant_id: int, user_id: int, db: Session):
+    var = await db.execute(
+        select(VotingVariant)
+        .where(VotingVariant.id == variant_id)
+        .options(selectinload(VotingVariant.post).selectinload(Post.voting_variants))
+    )
+    var = var.scalars().first()
+    if not var:
+        raise HTTPException(status_code=400, detail="Такого варианта голосования не существует!")
+    for variant in var.post.voting_variants:
+        vote = await get_user_vote(var_id=variant.id, user_id=user_id, db=db)
+        if vote:
+            await delete_object(object=vote, db=db)
+    new_vote = Vote(
+        user_id=user_id,
+        variant_id=variant_id
+    )
+    await add_and_refresh_object(object=new_vote, db=db)
+    return {'status': 'ok'}
