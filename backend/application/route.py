@@ -60,3 +60,7 @@ async def create_or_delete_like(variant_id: int, user_id: str = Depends(get_curr
 @router.websocket("/ws/{user_id}")
 async def websocket_endpoint(websocket: WebSocket, user_id: str, db: Session = Depends(get_db)):
     await handle_websocket(websocket, user_id, manager, db)
+
+@router.post('/add_media_to_post/{post_id}', dependencies = [Depends(security.access_token_required)])
+async def add_media_to_post(uploaded_file: UploadFile, post_id: int, user_id: str = Depends(get_current_user_id), db: Session = Depends(get_db)):
+    return await add_media_to_post_view(uploaded_file=uploaded_file, post_id=post_id, user_id=int(user_id), db=db)
