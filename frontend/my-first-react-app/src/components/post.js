@@ -38,6 +38,16 @@ const Posts = () => {
             <p>{post.content}</p>
             <p><strong>Автор:</strong> {post.author}</p>
             <small>{new Date(post.created_at).toLocaleDateString()}</small>
+            <div>
+            <Link
+              to={{
+              pathname: `/posts/${post.id}/comments`,
+              state: { post }, // Передаем данные поста
+              }}
+            >
+              <button style={{ marginTop: '10px' }}>Комментарии</button>
+            </Link>
+          </div>
           </div>
         ))}
       </div>
