@@ -83,7 +83,7 @@ class Post(Base):
     comments = relationship("Comment", back_populates="post", cascade="all, delete-orphan")
     # complaints = relationship("ComplaintAboutPost", back_populates="post", cascade="all, delete-orphan")
     voting_variants = relationship("VotingVariant", back_populates="post", cascade="all, delete-orphan")
-    # media = relationship("MediaInPost", back_populates="post", cascade="all, delete-orphan")
+    media = relationship("MediaInPost", back_populates="post", cascade="all, delete-orphan")
     likes = relationship("Like", back_populates="post", cascade="all, delete-orphan")
 
 
