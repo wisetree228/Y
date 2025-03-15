@@ -212,8 +212,10 @@ async def add_media_to_post_view(uploaded_file: UploadFile, post_id: int, user_i
 
     if post.author_id != user_id:
         raise HTTPException(status_code=403, detail="Вы не являетесь автором поста")
+    
+    file_bytes = await uploaded_file.read()
 
-    new_media = MediaInPost(post_id=post_id, image=uploaded_file.file)
+    new_media = MediaInPost(post_id=post_id, image=file_bytes)
 
     await add_and_refresh_object(object=new_media, db=db)
     return {'status': 'file successfully added'}
