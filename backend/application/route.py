@@ -78,3 +78,8 @@ async def websocket_endpoint(websocket: WebSocket, user_id: str, db: Session = D
 @router.post('/media_in_post/{post_id}', dependencies = [Depends(security.access_token_required)])
 async def add_media_to_post(uploaded_file: UploadFile, post_id: int, user_id: str = Depends(get_current_user_id), db: Session = Depends(get_db)):
     return await add_media_to_post_view(uploaded_file=uploaded_file, post_id=post_id, user_id=int(user_id), db=db)
+
+
+@router.post('/media_in_message/{message_id}', dependencies = [Depends(security.access_token_required)])
+async def add_media_to_post(uploaded_file: UploadFile, message_id: int, user_id: str = Depends(get_current_user_id), db: Session = Depends(get_db)):
+    return await add_media_to_message_view(uploaded_file=uploaded_file, message_id=message_id, user_id=int(user_id), db=db)

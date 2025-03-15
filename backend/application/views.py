@@ -2,17 +2,19 @@
 Импортирую необходимые для разработки утилиты и т. д.
 """
 import json
-from fastapi import HTTPException, Response, WebSocket, WebSocketDisconnect
+from fastapi import HTTPException, Response, WebSocket, WebSocketDisconnect, UploadFile
 from sqlalchemy.orm import Session
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
 from backend.db.models import (
-    User, Post, Comment, Vote, VotingVariant, Message, Friendship, FriendshipRequest, Like
+    User, Post, Comment, Vote, VotingVariant, Message, Friendship, FriendshipRequest, Like,
+    MediaInPost
 )
 from backend.db.utils import (
     delete_object, add_and_refresh_object, get_user_by_email, get_user_by_id,
     get_post_by_id, get_like_on_post_from_user, get_likes_count, get_user_vote,
-    get_user_by_username, get_existing_friendship, get_existing_friendship_request
+    get_user_by_username, get_existing_friendship, get_existing_friendship_request,
+    get_message_by_id
 )
 from backend.application.utils import (
     hash_password, verify_password, WebSocketConnectionManager
@@ -314,6 +316,7 @@ async def vote_view(variant_id: int, user_id: int, db: Session) -> dict:
     await add_and_refresh_object(new_vote, db)
     return {'status': 'ok'}
 
+
 async def add_media_to_post_view(uploaded_file: UploadFile, post_id: int, user_id: int, db: Session):
     post = get_post_by_id(id=post_id)
     
@@ -326,6 +329,23 @@ async def add_media_to_post_view(uploaded_file: UploadFile, post_id: int, user_i
     file_bytes = await uploaded_file.read()
 
     new_media = MediaInPost(post_id=post_id, image=file_bytes)
+
+    await add_and_refresh_object(object=new_media, db=db)
+    return {'status': 'file successfully added'}
+
+
+async def add_media_to_message_view(uploaded_file: UploadFile, message_id: int, user_id: int, db: Session):
+    message = get_message_by_id(id=message_id)
+
+    if not message:
+        raise HTTPException(status_code=404, detail="Пост не найден")
+
+    if message.author_id != user_id:
+        raise HTTPException(status_code=403, detail="Вы не являетесь автором поста")
+
+    file_bytes = await uploaded_file.read()
+
+    new_media = MediaInPost(post_id=message_id, image=file_bytes)
 
     await add_and_refresh_object(object=new_media, db=db)
     return {'status': 'file successfully added'}

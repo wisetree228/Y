@@ -46,6 +46,11 @@ async def get_post_by_id(id: int, db: Session):
     return result_db.scalars().first()
 
 
+async def get_message_by_id(id: int, db: Session):
+    result_db = await db.execute(select(Message).filter(Message.id == id))
+    return result_db.scalars().first()
+
+
 async def get_like_on_post_from_user(post_id: int, user_id: int, db: Session):
     result_db = await db.execute(select(Like).filter( and_(
         Like.post_id==post_id,
