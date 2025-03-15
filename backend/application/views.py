@@ -9,7 +9,6 @@ from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
 from .config import config, security
 import json
-import shutil
 
 
 
@@ -204,7 +203,6 @@ async def vote_view(variant_id: int, user_id: int, db: Session):
     await add_and_refresh_object(object=new_vote, db=db)
     return {'status': 'ok'}
 
-UPLOAD_DIR = 'media'
 async def add_media_to_post_view(uploaded_file: UploadFile, post_id: int, user_id: int, db: Session):
     result = await db.execute(select(Post).where(Post.id == post_id))
     post = result.scalars().first()
@@ -215,16 +213,7 @@ async def add_media_to_post_view(uploaded_file: UploadFile, post_id: int, user_i
     if post.author_id != user_id:
         raise HTTPException(status_code=403, detail="Вы не являетесь автором поста")
 
-    if not os.path.exists(UPLOAD_DIR):
-        os.makedirs(UPLOAD_DIR)
+    new_media = MediaInPost(post_id=post_id, image=uploaded_file.file)
 
-    file_path = os.path.join(UPLOAD_DIR, uploaded_file.filename)
-
-    with open(file_path, "wb") as buffer:
-        shutil.copyfileobj(uploaded_file.file, buffer)
-
-    new_media = MediaInPost(post_id=post_id, file_path=file_path)
-    db.add(new_media)
-    await db.commit()
-    await db.refresh(new_media)
-    return {'status': 'ok'}
+    await add_and_refresh_object(object=new_media, db=db)
+    return {'status': 'file successfully added'}
