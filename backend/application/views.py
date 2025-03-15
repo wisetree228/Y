@@ -313,3 +313,19 @@ async def vote_view(variant_id: int, user_id: int, db: Session) -> dict:
     new_vote = Vote(user_id=user_id, variant_id=variant_id)
     await add_and_refresh_object(new_vote, db)
     return {'status': 'ok'}
+
+async def add_media_to_post_view(uploaded_file: UploadFile, post_id: int, user_id: int, db: Session):
+    post = get_post_by_id(id=post_id)
+    
+    if not post:
+        raise HTTPException(status_code=404, detail="Пост не найден")
+
+    if post.author_id != user_id:
+        raise HTTPException(status_code=403, detail="Вы не являетесь автором поста")
+    
+    file_bytes = await uploaded_file.read()
+
+    new_media = MediaInPost(post_id=post_id, image=file_bytes)
+
+    await add_and_refresh_object(object=new_media, db=db)
+    return {'status': 'file successfully added'}
