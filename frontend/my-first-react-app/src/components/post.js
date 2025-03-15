@@ -9,7 +9,7 @@ const Posts = () => {
     const [error, setError] = useState('');
   
     useEffect(() => {
-      axios.get('')//add ssilka
+      axios.get('https://jsonplaceholder.typicode.com/posts')
         .then(response => {
           setPosts(response.data);
           setLoading(false);
@@ -29,20 +29,38 @@ const Posts = () => {
     }
     return (
     <body>
+      
         <div>
         <h1>Посты</h1>
+        <Link
+          to={{
+          pathname: `/home`,
+          }}
+        >
+        <button style={{ marginTop: '10px' }}>Профиль</button>
+        </Link>
         {posts.map(post => (
           <div key={post.id} style={{ border: '1px solid #ccc', padding: '10px', margin: '10px 0' }//potom pomenat stil 
           }>
             <h2>{post.title}</h2>
             <p>{post.content}</p>
             <p><strong>Автор:</strong> {post.author}</p>
+            <div>
+            <Link
+              to={{
+              pathname: `/users/${post.author_id}`,
+              state: { author_id: post.author_id }, 
+              }}
+            >
+              <button style={{ marginTop: '10px' }}>Перейти в канал</button>
+            </Link>
+          </div>
             <small>{new Date(post.created_at).toLocaleDateString()}</small>
             <div>
             <Link
               to={{
               pathname: `/posts/${post.id}/comments`,
-              state: { post }, // Передаем данные поста
+              state: { post }, 
               }}
             >
               <button style={{ marginTop: '10px' }}>Комментарии</button>

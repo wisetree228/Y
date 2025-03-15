@@ -1,18 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { useParams } from 'react-router-dom';
+import { useParams, useLocation, useNavigate } from 'react-router-dom';
 
 const PostComments = () => {
     const { postId } = useParams(); 
     const location = useLocation(); 
     const post = location.state?.post; 
-  
+    const navigate = useNavigate();
     const [comments, setComments] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
     useEffect(() => {
-        axios.get('')//add ssilka
+        axios.get('https://jsonplaceholder.typicode.com/posts')
           .then(response => {
             setComments(response.data);
             setLoading(false);
@@ -32,6 +32,21 @@ const PostComments = () => {
 
 return (
     <div>
+      <button
+        onClick={() => navigate(-1)} 
+        style={{
+          padding: '10px 20px',
+          backgroundColor: '#007bff',
+          color: '#fff',
+          border: 'none',
+          borderRadius: '5px',
+          cursor: 'pointer',
+          marginBottom: '20px',
+        }}
+      >
+        Назад
+      </button>
+
         {post && (
         <div style={{ border: '1px solid #ccc', padding: '10px', margin: '10px 0' }}>
             <h2>{post.title}</h2>
@@ -41,7 +56,6 @@ return (
         </div>
         )}
     
-        {/* Отображаем комментарии */}
         <h1>Комментарии к посту #{postId}</h1>
         {comments.map(comment => (
         <div key={comment.id} style={{ border: '1px solid #ccc', padding: '10px', margin: '10px 0' }}>
@@ -53,4 +67,4 @@ return (
     );
 };
     
-    export default PostComments;
+export default PostComments;
