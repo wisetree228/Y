@@ -2,12 +2,13 @@
 Импортирую необходимые для разработки утилиты и т. д.
 """
 import json
-from fastapi import HTTPException, Response, WebSocket, WebSocketDisconnect
+from fastapi import HTTPException, Response, WebSocket, WebSocketDisconnect, UploadFile
 from sqlalchemy.orm import Session
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
 from backend.db.models import (
-    User, Post, Comment, Vote, VotingVariant, Message, Friendship, FriendshipRequest, Like
+    User, Post, Comment, Vote, VotingVariant, Message, Friendship, FriendshipRequest, Like,
+    MediaInPost
 )
 from backend.db.utils import (
     delete_object, add_and_refresh_object, get_user_by_email, get_user_by_id,
