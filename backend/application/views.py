@@ -315,7 +315,7 @@ async def vote_view(variant_id: int, user_id: int, db: Session) -> dict:
     return {'status': 'ok'}
 
 async def add_media_to_post_view(uploaded_file: UploadFile, post_id: int, user_id: int, db: Session):
-    result = await db.execute(select(Post).where(Post.id == post_id))
+    result = get_post_by_id(id=post_id)
     post = result.scalars().first()
     
     if not post:
