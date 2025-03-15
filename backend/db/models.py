@@ -40,6 +40,7 @@ class User(Base):
     # subscribers = relationship("Subscribe", foreign_keys="Subscribe.contentmaker_id", back_populates="contentmaker", cascade="all, delete-orphan")
     likes = relationship("Like", back_populates="author", cascade="all, delete-orphan")
 
+
 class Comment(Base):
     __tablename__ = 'comments'
     id = Column(Integer, primary_key=True)
@@ -51,7 +52,8 @@ class Comment(Base):
     author = relationship("User", back_populates="comments")
     post = relationship("Post", back_populates="comments")
     # complaints = relationship("ComplaintAboutComment", back_populates="comment", cascade="all, delete-orphan")
-#
+
+
 # class ComplaintAboutComment(Base):
 #     __tablename__ = 'complaints_about_comment'
 #     id = Column(Integer, primary_key=True)
@@ -71,7 +73,8 @@ class Comment(Base):
 #
 #     author = relationship("User", back_populates="complaints_about_posts")
 #     post = relationship("Post", back_populates="complaints")
-#
+
+
 class Post(Base):
     __tablename__ = 'posts'
     id = Column(Integer, primary_key=True)
@@ -97,6 +100,7 @@ class VotingVariant(Base):
     post = relationship("Post", back_populates="voting_variants")
     votes = relationship("Vote", back_populates="variant", cascade="all, delete-orphan")
 
+
 class Vote(Base):
     __tablename__ = 'votes'
     id = Column(Integer, primary_key=True)
@@ -106,6 +110,7 @@ class Vote(Base):
 
     user = relationship("User", back_populates="votes")
     variant = relationship("VotingVariant", back_populates="votes")
+
 
 class Friendship(Base):
     __tablename__ = 'friendship'
@@ -117,6 +122,7 @@ class Friendship(Base):
     first_friend = relationship("User", foreign_keys=[first_friend_id])
     second_friend = relationship("User", foreign_keys=[second_friend_id])
 
+
 class FriendshipRequest(Base):
     __tablename__ = 'friendship_requests'
     id = Column(Integer, primary_key=True)
@@ -127,6 +133,7 @@ class FriendshipRequest(Base):
     author = relationship("User", foreign_keys=[author_id], back_populates="friendship_requests_sent")
     getter = relationship("User", foreign_keys=[getter_id], back_populates="friendship_requests_received")
 
+
 # class Subscribe(Base):
 #     __tablename__ = 'subscribe'
 #     id = Column(Integer, primary_key=True)
@@ -136,13 +143,15 @@ class FriendshipRequest(Base):
 #
 #     subscriber = relationship("User", foreign_keys=[subscriber_id], back_populates="subscriptions")
 #     contentmaker = relationship("User", foreign_keys=[contentmaker_id], back_populates="subscribers")
-#
+
+
 class MediaInPost(Base):
-     __tablename__ = 'media_in_post'
-     id = Column(Integer, primary_key=True)
-     image = Column(LargeBinary)
-     post_id = Column(Integer, ForeignKey('posts.id'), nullable=False)
-     post = relationship("Post", back_populates="media")
+    __tablename__ = 'media_in_post'
+    id = Column(Integer, primary_key=True)
+    image = Column(LargeBinary)
+    post_id = Column(Integer, ForeignKey('posts.id'), nullable=False)
+    post = relationship("Post", back_populates="media")
+
 
 class Message(Base):
     __tablename__ = 'messages'
@@ -155,7 +164,8 @@ class Message(Base):
     author = relationship("User", foreign_keys=[author_id], back_populates="messages_sent")
     getter = relationship("User", foreign_keys=[getter_id], back_populates="messages_received")
     #media = relationship("MediaInMessage", back_populates="message", cascade="all, delete-orphan")
-#
+
+
 # class MediaInMessage(Base):
 #     __tablename__ = 'media_in_message'
 #     id = Column(Integer, primary_key=True)
@@ -164,7 +174,8 @@ class Message(Base):
 #     created_at = Column(DateTime, default=datetime.now)
 #
 #     message = relationship("Message", back_populates="media")
-#
+
+
 class Like(Base):
     __tablename__ = 'likes'
     id = Column(Integer, primary_key=True)
@@ -175,8 +186,8 @@ class Like(Base):
     post = relationship("Post", back_populates="likes")
 
 
-async def create_database():
-    async with engine.begin() as conn:
-        # Используем run_sync для создания таблиц
-        await conn.run_sync(Base.metadata.create_all)
+# async def create_database():
+#     async with engine.begin() as conn:
+#         # Используем run_sync для создания таблиц
+#         await conn.run_sync(Base.metadata.create_all)
 
