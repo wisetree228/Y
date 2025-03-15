@@ -315,8 +315,7 @@ async def vote_view(variant_id: int, user_id: int, db: Session) -> dict:
     return {'status': 'ok'}
 
 async def add_media_to_post_view(uploaded_file: UploadFile, post_id: int, user_id: int, db: Session):
-    result = get_post_by_id(id=post_id)
-    post = result.scalars().first()
+    post = get_post_by_id(id=post_id)
     
     if not post:
         raise HTTPException(status_code=404, detail="Пост не найден")
