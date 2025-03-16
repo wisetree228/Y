@@ -13,7 +13,9 @@ from backend.db.models import (
 from backend.db.utils import (
     delete_object, add_and_refresh_object, get_user_by_email, get_user_by_id,
     get_post_by_id, get_like_on_post_from_user, get_likes_count, get_user_vote,
-    get_user_by_username, get_existing_friendship, get_existing_friendship_request
+    get_user_by_username, get_existing_friendship, get_existing_friendship_request,
+    get_all_from_table, get_comments_count, get_post_voting_variants, get_like_status,
+    get_images_id_for_post
 )
 from backend.application.utils import (
     hash_password, verify_password, WebSocketConnectionManager
@@ -316,7 +318,7 @@ async def vote_view(variant_id: int, user_id: int, db: Session) -> dict:
     return {'status': 'ok'}
 
 async def add_media_to_post_view(uploaded_file: UploadFile, post_id: int, user_id: int, db: Session):
-    post = get_post_by_id(id=post_id)
+    post = await get_post_by_id(id=post_id, db=db)
     
     if not post:
         raise HTTPException(status_code=404, detail="Пост не найден")
@@ -330,3 +332,38 @@ async def add_media_to_post_view(uploaded_file: UploadFile, post_id: int, user_i
 
     await add_and_refresh_object(object=new_media, db=db)
     return {'status': 'file successfully added'}
+
+
+async def get_posts_view(user_id: int, db: Session):
+    posts_db = await get_all_from_table(object_type=Post, db=db)
+    posts=[]
+    for post in posts_db:
+        author = await get_user_by_id(id=post.id, db=db)
+        like_status = await get_like_status(user_id=user_id, post_id=post.id, db=db)
+        if like_status:
+            status_str='liked'
+        else:
+            status_str='unliked'
+        variants_db = await get_post_voting_variants(post_id=post.id, db=db)
+        variants=[]
+        for var in variants_db:
+            variants.append({
+                'id':var.id,
+                'text':var.text
+            })
+        posts.append({
+            'id':post.id,
+            'author_id':post.author_id,
+            'author_username':author.username,
+            'created_at':post.created_at,
+            'text':post.text,
+            'likes_count':await get_likes_count(post_id=post.id, db=db),
+            'like_status':status_str,
+            'comments_count':await get_comments_count(post_id=post.id, db=db),
+            'images_id':await get_images_id_for_post(post_id=post.id, db=db),
+            'voting_variants':variants
+        })
+    return {'posts':posts}
+
+
+
