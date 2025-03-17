@@ -10,7 +10,8 @@ from .config import security, config
 from .views import (
     register_view, login_view, create_post_view, create_comment_view,
     create_friendship_request_view, edit_profile_view, create_or_delete_like_view,
-    vote_view, handle_websocket, add_media_to_post_view, get_posts_view
+    vote_view, handle_websocket, add_media_to_post_view, get_posts_view,
+    get_post_img_view
 )
 from .schemas import (
     RegisterFormData, LoginFormData, CreatePostData, CreateCommentData, EditProfileFormData
@@ -239,3 +240,8 @@ async def add_media_to_post(uploaded_file: UploadFile, post_id: int, user_id: st
 @router.get('/posts', dependencies=[Depends(security.access_token_required)])
 async def get_posts(user_id: str = Depends(get_current_user_id), db: Session = Depends(get_db)):
     return await get_posts_view(user_id=int(user_id), db=db)
+
+
+@router.get('/post_image/{image_id}', dependencies=[Depends(security.access_token_required)])
+async def get_post_img(image_id: int, db: Session = Depends(get_db)):
+    return await get_post_img_view(image_id = image_id, db=db)

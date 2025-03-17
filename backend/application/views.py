@@ -2,7 +2,11 @@
 Импортирую необходимые для разработки утилиты и т. д.
 """
 import json
-from fastapi import HTTPException, Response, WebSocket, WebSocketDisconnect, UploadFile
+from io import BytesIO
+from fastapi import (HTTPException, Response, WebSocket, WebSocketDisconnect,
+    UploadFile
+)
+from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
@@ -11,11 +15,11 @@ from backend.db.models import (
     MediaInPost
 )
 from backend.db.utils import (
-    delete_object, add_and_refresh_object, get_user_by_email, get_user_by_id,
-    get_post_by_id, get_like_on_post_from_user, get_likes_count, get_user_vote,
+    delete_object, add_and_refresh_object, get_user_by_email,
+    get_like_on_post_from_user, get_likes_count, get_user_vote,
     get_user_by_username, get_existing_friendship, get_existing_friendship_request,
     get_all_from_table, get_comments_count, get_post_voting_variants, get_like_status,
-    get_images_id_for_post
+    get_images_id_for_post, get_object_by_id
 )
 from backend.application.utils import (
     hash_password, verify_password, WebSocketConnectionManager
@@ -128,7 +132,7 @@ async def create_friendship_request_view(
     Returns:
         dict: Статус операции.
     """
-    person = await get_user_by_id(getter_id, db)
+    person = await get_object_by_id(object_type=User, id=getter_id, db=db)
     if not person:
         raise HTTPException(status_code=400, detail="Такого пользователя не существует.")
 
@@ -186,7 +190,7 @@ async def edit_profile_view(
             detail="Пользователь с таким email уже существует."
         )
 
-    user = await get_user_by_id(author_id, db)
+    user = await get_object_by_id(object_type=User, id=author_id, db=db)
     if data.username:
         user.username = data.username
     if data.email:
@@ -217,7 +221,7 @@ async def create_comment_view(
     Returns:
         dict: Статус операции.
     """
-    post = await get_post_by_id(post_id, db)
+    post = await get_object_by_id(object_type=Post, id=post_id, db=db)
     if not post:
         raise HTTPException(status_code=400, detail="Поста с таким id не существует!")
 
@@ -238,7 +242,7 @@ async def create_or_delete_like_view(post_id: int, user_id: int, db: Session) ->
     Returns:
         dict: Статус операции и количество лайков.
     """
-    post = await get_post_by_id(post_id, db)
+    post = await get_object_by_id(object_type=Post, id=post_id, db=db)
     if not post:
         raise HTTPException(status_code=400, detail="Такого поста не существует!")
 
@@ -318,7 +322,7 @@ async def vote_view(variant_id: int, user_id: int, db: Session) -> dict:
     return {'status': 'ok'}
 
 async def add_media_to_post_view(uploaded_file: UploadFile, post_id: int, user_id: int, db: Session):
-    post = await get_post_by_id(id=post_id, db=db)
+    post = await get_object_by_id(object_type=Post, id=post_id, db=db)
     
     if not post:
         raise HTTPException(status_code=404, detail="Пост не найден")
@@ -338,7 +342,7 @@ async def get_posts_view(user_id: int, db: Session):
     posts_db = await get_all_from_table(object_type=Post, db=db)
     posts=[]
     for post in posts_db:
-        author = await get_user_by_id(id=post.id, db=db)
+        author = await get_object_by_id(object_type=User, id=post.author_id, db=db)
         like_status = await get_like_status(user_id=user_id, post_id=post.id, db=db)
         if like_status:
             status_str='liked'
@@ -364,6 +368,14 @@ async def get_posts_view(user_id: int, db: Session):
             'voting_variants':variants
         })
     return {'posts':posts}
+
+
+async def get_post_img_view(image_id: int, db: Session):
+    img_db = await get_object_by_id(object_type=MediaInPost, id=image_id, db=db)
+    if not img_db:
+        raise HTTPException(status_code=400, detail="Такой картинки не существует!")
+    return StreamingResponse(BytesIO(img_db.image), media_type='image/png')
+
 
 
 
