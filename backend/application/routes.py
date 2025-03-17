@@ -234,14 +234,41 @@ async def websocket_endpoint(
 
 @router.post('/media_in_post/{post_id}', dependencies = [Depends(security.access_token_required)])
 async def add_media_to_post(uploaded_file: UploadFile, post_id: int, user_id: str = Depends(get_current_user_id), db: Session = Depends(get_db)):
+    """
+    Добавляет в бд картинку, связанную с постом
+    Args:
+        uploaded_file (UploadFile): картинка от пользователя
+        post_id (int): id поста
+        user_id (str): ID пользователя.
+        db (Session): Сессия базы данных.
+    Returns:
+        dict: Статус операции
+    """
     return await add_media_to_post_view(uploaded_file=uploaded_file, post_id=post_id, user_id=int(user_id), db=db)
 
 
 @router.get('/posts', dependencies=[Depends(security.access_token_required)])
 async def get_posts(user_id: str = Depends(get_current_user_id), db: Session = Depends(get_db)):
+    """
+    Отдаёт данные для отрисовки ленты постов.
+
+    Args:
+        user_id (str): ID пользователя.
+        db (Session): Сессия базы данных.
+    Returns:
+        dict: Данные в виде json
+    """
     return await get_posts_view(user_id=int(user_id), db=db)
 
 
 @router.get('/post_image/{image_id}', dependencies=[Depends(security.access_token_required)])
 async def get_post_img(image_id: int, db: Session = Depends(get_db)):
+    """
+    Отдаёт файл картинки, прикреплённой к посту
+    Args:
+        image_id (int): id картинки в бд
+        db (Session): Сессия базы данных.
+    Returns:
+        StreamingResponse: файл картинки
+    """
     return await get_post_img_view(image_id = image_id, db=db)
