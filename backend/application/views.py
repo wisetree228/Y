@@ -322,6 +322,16 @@ async def vote_view(variant_id: int, user_id: int, db: Session) -> dict:
     return {'status': 'ok'}
 
 async def add_media_to_post_view(uploaded_file: UploadFile, post_id: int, user_id: int, db: Session):
+    """
+    Добавляет в бд картинку, связанную с постом
+    Args:
+        uploaded_file (UploadFile): картинка от пользователя
+        post_id (int): id поста
+        user_id (str): ID пользователя.
+        db (Session): Сессия базы данных.
+    Returns:
+        dict: Статус операции
+    """
     post = await get_object_by_id(object_type=Post, id=post_id, db=db)
     
     if not post:
@@ -339,6 +349,15 @@ async def add_media_to_post_view(uploaded_file: UploadFile, post_id: int, user_i
 
 
 async def get_posts_view(user_id: int, db: Session):
+    """
+    Отдаёт данные для отрисовки ленты постов.
+
+    Args:
+        user_id (str): ID пользователя.
+        db (Session): Сессия базы данных.
+    Returns:
+        dict: Данные в виде json
+    """
     posts_db = await get_all_from_table(object_type=Post, db=db)
     posts=[]
     for post in posts_db:
@@ -371,6 +390,14 @@ async def get_posts_view(user_id: int, db: Session):
 
 
 async def get_post_img_view(image_id: int, db: Session):
+    """
+    Отдаёт файл картинки, прикреплённой к посту
+    Args:
+        image_id (int): id картинки в бд
+        db (Session): Сессия базы данных.
+    Returns:
+        StreamingResponse: файл картинки
+    """
     img_db = await get_object_by_id(object_type=MediaInPost, id=image_id, db=db)
     if not img_db:
         raise HTTPException(status_code=400, detail="Такой картинки не существует!")
