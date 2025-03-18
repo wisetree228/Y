@@ -19,7 +19,7 @@ from backend.db.utils import (
     get_like_on_post_from_user, get_likes_count, get_user_vote,
     get_user_by_username, get_existing_friendship, get_existing_friendship_request,
     get_all_from_table, get_comments_count, get_post_voting_variants, get_like_status,
-    get_images_id_for_post, get_object_by_id
+    get_images_id_for_post, get_object_by_id, get_post_comments
 )
 from backend.application.utils import (
     hash_password, verify_password, WebSocketConnectionManager
@@ -404,5 +404,43 @@ async def get_post_img_view(image_id: int, db: Session):
     return StreamingResponse(BytesIO(img_db.image), media_type='image/png')
 
 
+async def get_post_view(post_id: int, user_id: int, db: Session):
+    """
+    Возвращает данные в json для просмотра отдельного поста
+    Args:
+        post_id (int): id поста
+        db (Session): сессия бд
+    Returns:
+        json - данные поста
+    """
+    post = {}
+    post_db = await get_object_by_id(object_type=Post, id=post_id, db=db)
+    author = await get_object_by_id(object_type=User, id=post_db.author_id, db=db)
+
+    post['author_id'] = post_db.author_id
+    post['author_username'] = author.username
+    post['text'] = post_db.text
+    post['voting_variants'] = [ {'id':var.id, 'text':var.text} for var in await get_post_voting_variants(post_id=post_id, db=db) ]
+    post['images_id'] = await get_images_id_for_post(post_id=post_id, db=db)
+    post['created_at'] = post_db.created_at
+    post['likes_count'] = await get_likes_count(post_id=post_id, db=db)
+    if await get_like_status(post_id=post_id, user_id=user_id, db=db):
+        post['liked_status'] = 'liked'
+    else:
+        post['liked_status'] = 'unliked'
+    comments=[]
+
+    for comm in await get_post_comments(post_id=post_id, db=db):
+        author_of_comm = await get_object_by_id(object_type=User, id=comm.author_id, db=db)
+        comments.append({
+            'id':comm.id,
+            'text':comm.text,
+            'author_id':author_of_comm.id,
+            'author_username':author_of_comm.username,
+            'created_at':comm.created_at
+        })
+    post['comments'] = comments
+
+    return {'post':post}
 
 
