@@ -11,7 +11,7 @@ from .views import (
     register_view, login_view, create_post_view, create_comment_view,
     create_friendship_request_view, edit_profile_view, create_or_delete_like_view,
     vote_view, handle_websocket, add_media_to_post_view, get_posts_view,
-    get_post_img_view, get_post_view
+    get_post_img_view, get_post_view, add_media_to_message_view
 )
 from .schemas import (
     RegisterFormData, LoginFormData, CreatePostData, CreateCommentData, EditProfileFormData
@@ -245,6 +245,20 @@ async def add_media_to_post(uploaded_file: UploadFile, post_id: int, user_id: st
         dict: Статус операции
     """
     return await add_media_to_post_view(uploaded_file=uploaded_file, post_id=post_id, user_id=int(user_id), db=db)
+
+@router.post('/media_in_message/{message_id}', dependencies = [Depends(security.access_token_required)])
+async def add_media_to_message(uploaded_file: UploadFile, message_id: int, user_id: str = Depends(get_current_user_id), db: Session = Depends(get_db)):
+    """
+    Добавляет в бд картинку, связанную с сообщением
+    Args:
+        uploaded_file (UploadFile): картинка от пользователя
+        message_id (int): id сообщения
+        user_id (str): ID пользователя.
+        db (Session): Сессия базы данных.
+    Returns:
+        dict: Статус операции
+    """
+    return await add_media_to_message_view(uploaded_file=uploaded_file, message_id=message_id, user_id=int(user_id), db=db)
 
 
 @router.get('/posts', dependencies=[Depends(security.access_token_required)])
