@@ -1,14 +1,18 @@
+"""
+Импорты всякой необходимой шняги
+"""
+from typing import Union, Type, List
 from sqlalchemy.future import select
 from sqlalchemy.orm import Session
 from sqlalchemy import or_, and_, func, desc
 from .models import ( User, Post, Friendship, FriendshipRequest,
     VotingVariant, Like, Message, Vote, MediaInPost, Comment
 )
-from typing import Union, Type, List
 
 
 async def add_and_refresh_object(
-        object: Union[User, Post, Friendship, FriendshipRequest, VotingVariant, Like, Message, Vote, MediaInPost, Comment],
+        object: Union[User, Post, Friendship, FriendshipRequest,
+        VotingVariant, Like, Message, Vote, MediaInPost, Comment],
         db: Session
 ) -> None:
     """
@@ -25,7 +29,7 @@ async def add_and_refresh_object(
     await db.refresh(object)
 
 
-async def get_user_by_email(email: str, db: Session):
+async def get_user_by_email(email: str, db: Session) -> User:
     """
     Получает пользователя по email из бд
     Args:
@@ -38,7 +42,7 @@ async def get_user_by_email(email: str, db: Session):
     return result_email.scalars().first()
 
 
-async def get_user_by_username(username: str, db: Session):
+async def get_user_by_username(username: str, db: Session) -> User:
     """
     Получает пользователя по username пользователя.
 
@@ -53,9 +57,10 @@ async def get_user_by_username(username: str, db: Session):
 
 
 async def delete_object(
-    object: Union[User, Post, Friendship, FriendshipRequest, VotingVariant, Like, Message, Vote, Comment],
+    object: Union[User, Post, Friendship, FriendshipRequest,
+    VotingVariant, Like, Message, Vote, Comment],
     db: Session
-):
+) -> None:
     """
     Удаляет обьект из бд
     Args:
@@ -68,7 +73,7 @@ async def delete_object(
     await db.commit()
 
 
-async def get_like_on_post_from_user(post_id: int, user_id: int, db: Session):
+async def get_like_on_post_from_user(post_id: int, user_id: int, db: Session) -> Like:
     """
     Возвращает лайк пользователя на посте
     Args:
@@ -84,7 +89,7 @@ async def get_like_on_post_from_user(post_id: int, user_id: int, db: Session):
     return result_db.scalars().first()
 
 
-async def get_likes_count(post_id: int, db: Session):
+async def get_likes_count(post_id: int, db: Session) -> int:
     """
     Возвращает количество лайков на посте
     Args:
@@ -92,12 +97,16 @@ async def get_likes_count(post_id: int, db: Session):
     Returns:
         int количество лайков
     """
-    count_query = await db.execute(select(func.count()).select_from(Like).filter(Like.post_id==post_id))
+    count_query = await db.execute(select(
+        func.count()
+    ).select_from(Like).filter(
+        Like.post_id==post_id)
+    )
     count = count_query.scalar()
     return count
 
 
-async def get_user_vote(var_id: int, user_id: int, db: Session):
+async def get_user_vote(var_id: int, user_id: int, db: Session) -> Vote:
     """
     Возвращает голос юзера на варианте голосования
     Args:
@@ -107,14 +116,17 @@ async def get_user_vote(var_id: int, user_id: int, db: Session):
     Returns:
         обьект Vote или None
     """
-    result_db = await db.execute(select(Vote).filter(and_(
+    result_db = await db.execute(
+        select(Vote).filter(and_(
         Vote.user_id == user_id,
         Vote.variant_id == var_id
     )))
     return result_db.scalars().first()
 
 
-async def get_existing_friendship_request(author_id: int, getter_id: int, db: Session) -> FriendshipRequest:
+async def get_existing_friendship_request(
+        author_id: int, getter_id: int, db: Session
+) -> FriendshipRequest:
     """
     Получает существующий запрос на дружбу.
 
@@ -131,7 +143,9 @@ async def get_existing_friendship_request(author_id: int, getter_id: int, db: Se
     return result.scalars().first()
 
 
-async def get_existing_friendship(first_friend_id: int, second_friend_id: int, db: Session) -> Friendship:
+async def get_existing_friendship(
+        first_friend_id: int, second_friend_id: int, db: Session
+) -> Friendship:
     """
     Получает существующую дружбу.
 
@@ -144,14 +158,20 @@ async def get_existing_friendship(first_friend_id: int, second_friend_id: int, d
     """
     result = await db.execute(select(Friendship).filter(
         or_(
-            and_(Friendship.first_friend_id == first_friend_id, Friendship.second_friend_id == second_friend_id),
-            and_(Friendship.first_friend_id == second_friend_id, Friendship.second_friend_id == first_friend_id)
+            and_(
+                Friendship.first_friend_id == first_friend_id,
+                Friendship.second_friend_id == second_friend_id
+            ),
+            and_(
+                Friendship.first_friend_id == second_friend_id,
+                Friendship.second_friend_id == first_friend_id
+            )
         )
     ))
     return result.scalars().first()
 
 
-async def get_comments_count(post_id: int, db: Session):
+async def get_comments_count(post_id: int, db: Session) -> int:
     """
     Получает количество комментариев на посте
     Args:
@@ -160,7 +180,11 @@ async def get_comments_count(post_id: int, db: Session):
     Returns:
         int количество комментариев
     """
-    count_query = await db.execute(select(func.count()).select_from(Comment).filter(Comment.post_id==post_id))
+    count_query = await db.execute(select(
+        func.count()
+    ).select_from(Comment).filter(
+        Comment.post_id==post_id
+    ))
     count = count_query.scalar()
     return count
 
@@ -169,7 +193,7 @@ async def get_all_from_table(
         object_type: Union[Type[User], Type[Post], Type[Friendship], Type[FriendshipRequest],
         Type[VotingVariant], Type[Like], Type[Message], Type[Vote], Type[MediaInPost]],
         db: Session, limit=None
-):
+) -> list:
     """
     Получает все обьекты из таблицы бд
     Args:
@@ -186,7 +210,7 @@ async def get_all_from_table(
     return result.scalars().all()
 
 
-async def get_post_voting_variants(post_id: int, db: Session):
+async def get_post_voting_variants(post_id: int, db: Session) -> list:
     """
     Получает варианты голосования поста
     Args:
@@ -199,7 +223,7 @@ async def get_post_voting_variants(post_id: int, db: Session):
     return result_db.scalars().all()
 
 
-async def get_like_status(user_id: int, post_id: int, db: Session):
+async def get_like_status(user_id: int, post_id: int, db: Session) -> bool:
     """
     Определяет, лайкнул ли пользователь пост
     Args:
@@ -249,3 +273,16 @@ async def get_object_by_id(
     """
     result = await db.execute(select(object_type).filter(object_type.id==id))
     return result.scalars().first()
+
+
+async def get_post_comments(post_id: int, db: Session) -> list:
+    """
+    Возвращает список комментариев к посту
+    Args:
+        post_id (int): id поста
+        db (Session): сессия бд
+    Returns:
+        list - список обьектов Comment
+    """
+    result_db = await db.execute(select(Comment).filter(Comment.post_id==post_id))
+    return result_db.scalars().all()
