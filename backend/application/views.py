@@ -12,7 +12,7 @@ from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
 from backend.db.models import (
     User, Post, Comment, Vote, VotingVariant, Message, Friendship, FriendshipRequest, Like,
-    MediaInPost
+    MediaInPost, MediaInMessage
 )
 from backend.db.utils import (
     delete_object, add_and_refresh_object, get_user_by_email,
@@ -321,6 +321,7 @@ async def vote_view(variant_id: int, user_id: int, db: Session) -> dict:
     await add_and_refresh_object(new_vote, db)
     return {'status': 'ok'}
 
+
 async def add_media_to_post_view(uploaded_file: UploadFile, post_id: int, user_id: int, db: Session):
     """
     Добавляет в бд картинку, связанную с постом
@@ -343,6 +344,33 @@ async def add_media_to_post_view(uploaded_file: UploadFile, post_id: int, user_i
     file_bytes = await uploaded_file.read()
 
     new_media = MediaInPost(post_id=post_id, image=file_bytes)
+
+    await add_and_refresh_object(object=new_media, db=db)
+    return {'status': 'file successfully added'}
+
+
+async def add_media_to_message_view(uploaded_file: UploadFile, message_id: int, user_id: int, db: Session):
+    """
+    Добавляет в бд картинку, связанную с сообщением
+    Args:
+        uploaded_file (UploadFile): картинка от пользователя
+        message_id (int): id сообщения
+        user_id (str): ID пользователя.
+        db (Session): Сессия базы данных.
+    Returns:
+        dict: Статус операции
+    """
+    message = await get_object_by_id(object_type=Message, id=message_id, db=db)
+    
+    if not message:
+        raise HTTPException(status_code=404, detail="Сообщение не найдено")
+
+    if message.author_id != user_id:
+        raise HTTPException(status_code=403, detail="Вы не являетесь автором сообщения")
+    
+    file_bytes = await uploaded_file.read()
+
+    new_media = MediaInMessage(message_id=message_id, image=file_bytes)
 
     await add_and_refresh_object(object=new_media, db=db)
     return {'status': 'file successfully added'}
