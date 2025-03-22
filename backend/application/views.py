@@ -472,3 +472,16 @@ async def get_post_view(post_id: int, user_id: int, db: Session):
     return {'post':post}
 
 
+async def get_message_img_view(image_id: int, db: Session):
+    """
+    Отдаёт файл картинки, прикреплённой к посту
+    Args:
+        image_id (int): id картинки в бд
+        db (Session): Сессия базы данных.
+    Returns:
+        StreamingResponse: файл картинки
+    """
+    img_db = await get_object_by_id(object_type=MediaInMessage, id=image_id, db=db)
+    if not img_db:
+        raise HTTPException(status_code=400, detail="Такой картинки не существует!")
+    return StreamingResponse(BytesIO(img_db.image), media_type='image/png')

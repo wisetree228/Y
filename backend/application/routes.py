@@ -11,7 +11,8 @@ from .views import (
     register_view, login_view, create_post_view, create_comment_view,
     create_friendship_request_view, edit_profile_view, create_or_delete_like_view,
     vote_view, handle_websocket, add_media_to_post_view, get_posts_view,
-    get_post_img_view, get_post_view, add_media_to_message_view
+    get_post_img_view, get_post_view, add_media_to_message_view,
+    get_message_img_view
 )
 from .schemas import (
     RegisterFormData, LoginFormData, CreatePostData, CreateCommentData, EditProfileFormData
@@ -291,3 +292,16 @@ async def get_post_img(image_id: int, db: Session = Depends(get_db)):
 @router.get('/post/{post_id}', dependencies=[Depends(security.access_token_required)])
 async def get_post(post_id: int, user_id: str = Depends(get_current_user_id), db: Session = Depends(get_db)):
     return await get_post_view(post_id=post_id, user_id=int(user_id), db=db)
+
+
+@router.get('/message_image/{image_id}', dependencies=[Depends(security.access_token_required)])
+async def get_post_img(image_id: int, db: Session = Depends(get_db)):
+    """
+    Отдаёт файл картинки, прикреплённой к посту
+    Args:
+        image_id (int): id картинки в бд
+        db (Session): Сессия базы данных.
+    Returns:
+        StreamingResponse: файл картинки
+    """
+    return await get_message_img_view(image_id = image_id, db=db)
