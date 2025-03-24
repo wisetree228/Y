@@ -32,3 +32,8 @@ class CreateCommentData(BaseModel):
     text: constr(min_length=3, max_length=10000)
 
 
+class EditPostData(BaseModel):
+    text: Optional[constr(min_length=3, max_length=10000)] = None
+    options: Optional[List[constr(min_length=3, max_length=100)]] = None
+
+
