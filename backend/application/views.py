@@ -25,7 +25,8 @@ from backend.application.utils import (
     hash_password, verify_password, WebSocketConnectionManager
 )
 from .schemas import (
-    RegisterFormData, LoginFormData, CreatePostData, CreateCommentData, EditProfileFormData
+    RegisterFormData, LoginFormData, CreatePostData, CreateCommentData, EditProfileFormData,
+    EditPostData
 )
 from .config import config, security
 
@@ -437,12 +438,15 @@ async def get_post_view(post_id: int, user_id: int, db: Session):
     Возвращает данные в json для просмотра отдельного поста
     Args:
         post_id (int): id поста
+        user_id (str): ID пользователя.
         db (Session): сессия бд
     Returns:
         json - данные поста
     """
     post = {}
     post_db = await get_object_by_id(object_type=Post, id=post_id, db=db)
+    if not post_db:
+        raise HTTPException(status_code=400, detail="Такого поста не существует!")
     author = await get_object_by_id(object_type=User, id=post_db.author_id, db=db)
 
     post['author_id'] = post_db.author_id
@@ -485,3 +489,104 @@ async def get_message_img_view(image_id: int, db: Session):
     if not img_db:
         raise HTTPException(status_code=400, detail="Такой картинки не существует!")
     return StreamingResponse(BytesIO(img_db.image), media_type='image/png')
+
+
+async def edit_post_view(data: EditPostData, post_id: int, user_id: int, db: Session):
+    """
+    Редактирует пост
+    Args:
+        post_id (int): id поста
+        user_id (int): ID пользователя.
+        db (Session): сессия бд
+    Returns:
+        json - статус операции
+    """
+    post = await get_object_by_id(object_type = Post, id = post_id, db = db)
+    if not post:
+        raise HTTPException(status_code=400, detail="Такого поста не существует!")
+    if post.author_id != user_id:
+        raise HTTPException(status_code = 400, detail = "Вы не являетесь автором поста!")
+    if data.text:
+        post.text = data.text
+    if data.options:
+        old_options = await get_post_voting_variants(post_id = post_id, db = db)
+        for option in old_options:
+            await delete_object(object = option, db = db)
+        await db.commit()
+        for option in data.options:
+            var = VotingVariant(post_id=post.id, text=option)
+            await add_and_refresh_object(var, db)
+    return {'status':'ok'}
+
+
+async def delete_post_view(post_id: int, user_id: int, db: Session):
+    """
+    Удаляет пост
+    Args:
+        post_id (int): id поста
+        user_id (int): ID пользователя.
+        db (Session): сессия бд
+    Returns:
+        json - статус операции
+    """
+    post = await get_object_by_id(object_type=Post, id=post_id, db=db)
+    if not post:
+        raise HTTPException(status_code=400, detail="Такого поста не существует!")
+    if post.author_id != user_id:
+        raise HTTPException(status_code=400, detail="Вы не являетесь автором поста!")
+    await delete_object(object=post, db=db)
+    return {'status':'ok'}
+
+
+async def delete_comment_view(comment_id: int, user_id: int, db: Session):
+    """
+    Удаляет комментарий
+    Args:
+        comment_id (int): id комментария
+        user_id (int): ID пользователя.
+        db (Session): сессия бд
+    Returns:
+        json - статус операции
+    """
+    comment = await get_object_by_id(object_type=Comment, id=comment_id, db=db)
+    if not Comment:
+        raise HTTPException(status_code=400, detail="Такого комментария не существует!")
+    if comment.author_id != user_id:
+        raise HTTPException(status_code=400, detail="Вы не являетесь автором комментария!")
+    await delete_object(object=comment, db=db)
+    return {'status': 'ok'}
+
+
+async def delete_vote_view(variant_id: int, user_id: int, db: Session):
+    """
+    Удаляет голос пользователя на варианте голосования
+    Args:
+        variant_id (int): id варианта голосования
+        user_id (int): ID пользователя.
+        db (Session): сессия бд
+    Returns:
+        json - статус операции
+    """
+    vote = await get_user_vote(var_id=variant_id, user_id=user_id, db=db)
+    if vote:
+        await delete_object(object=vote, db=db)
+    return {'status':'ok'}
+
+
+async def delete_message_view(message_id: int, user_id: int, db: Session):
+    """
+    Удаляет сообщение
+    Args:
+        message_id (int): id варианта голосования
+        user_id (int): ID пользователя.
+        db (Session): сессия бд
+    Returns:
+        json - статус операции
+    """
+    message = await get_object_by_id(object_type=Message, id=message_id, db=db)
+    if not message:
+        raise HTTPException(status_code=400, detail="Такого сообщения не существует")
+    if message.author_id != user_id:
+        raise HTTPException(status_code=400, detail="Вы не автор сообщения")
+    await delete_object(object = message, db=db)
+    return {'status': 'ok'}

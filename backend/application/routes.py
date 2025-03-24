@@ -12,10 +12,12 @@ from .views import (
     create_friendship_request_view, edit_profile_view, create_or_delete_like_view,
     vote_view, handle_websocket, add_media_to_post_view, get_posts_view,
     get_post_img_view, get_post_view, add_media_to_message_view,
-    get_message_img_view
+    get_message_img_view, edit_post_view, delete_post_view, delete_comment_view,
+    delete_vote_view, delete_message_view
 )
 from .schemas import (
-    RegisterFormData, LoginFormData, CreatePostData, CreateCommentData, EditProfileFormData
+    RegisterFormData, LoginFormData, CreatePostData, CreateCommentData, EditProfileFormData,
+    EditPostData
 )
 
 router = APIRouter()
@@ -291,13 +293,23 @@ async def get_post_img(image_id: int, db: Session = Depends(get_db)):
 
 @router.get('/post/{post_id}', dependencies=[Depends(security.access_token_required)])
 async def get_post(post_id: int, user_id: str = Depends(get_current_user_id), db: Session = Depends(get_db)):
+    """
+    Отдаёт данные для просмотра одного поста.
+
+    Args:
+        post_id (int): ID поста
+        user_id (str): ID пользователя.
+        db (Session): Сессия базы данных.
+    Returns:
+        dict: Данные в виде json
+    """
     return await get_post_view(post_id=post_id, user_id=int(user_id), db=db)
 
 
 @router.get('/message_image/{image_id}', dependencies=[Depends(security.access_token_required)])
-async def get_post_img(image_id: int, db: Session = Depends(get_db)):
+async def get_message_img(image_id: int, db: Session = Depends(get_db)):
     """
-    Отдаёт файл картинки, прикреплённой к посту
+    Отдаёт файл картинки, прикреплённой к сообщению
     Args:
         image_id (int): id картинки в бд
         db (Session): Сессия базы данных.
@@ -305,3 +317,73 @@ async def get_post_img(image_id: int, db: Session = Depends(get_db)):
         StreamingResponse: файл картинки
     """
     return await get_message_img_view(image_id = image_id, db=db)
+
+
+@router.put('/post/{post_id}', dependencies=[Depends(security.access_token_required)])
+async def edit_post(data: EditPostData, post_id: int, user_id: str = Depends(get_current_user_id), db: Session = Depends(get_db)):
+    """
+    Редактирует пост
+    Args:
+        post_id (int): id поста
+        user_id (str): ID пользователя.
+        db (Session): сессия бд
+    Returns:
+        json - статус операции
+    """
+    return await edit_post_view(data = data, post_id = post_id, user_id = int(user_id), db = db)
+
+
+@router.delete('/post/{post_id}', dependencies=[Depends(security.access_token_required)])
+async def delete_post(post_id: int, user_id: str = Depends(get_current_user_id), db: Session = Depends(get_db)):
+    """
+    Удаляет пост
+    Args:
+        post_id (int): id поста
+        user_id (str): ID пользователя.
+        db (Session): сессия бд
+    Returns:
+        json - статус операции
+    """
+    return await delete_post_view(post_id = post_id, user_id = int(user_id), db = db)
+
+
+@router.delete('/comment/{comment_id}', dependencies=[Depends(security.access_token_required)])
+async def delete_comment(comment_id: int, user_id: str = Depends(get_current_user_id), db: Session = Depends(get_db)):
+    """
+    Удаляет комментарий
+    Args:
+        comment_id (int): id комментария
+        user_id (str): ID пользователя.
+        db (Session): сессия бд
+    Returns:
+        json - статус операции
+    """
+    return await delete_comment_view(comment_id = comment_id, user_id = int(user_id), db = db)
+
+
+@router.delete('/vote/{variant_id}', dependencies=[Depends(security.access_token_required)])
+async def delete_vote(variant_id: int, user_id: str = Depends(get_current_user_id), db: Session = Depends(get_db)):
+    """
+    Удаляет голос пользователя на варианте голосования
+    Args:
+        variant_id (int): id варианта голосования
+        user_id (str): ID пользователя.
+        db (Session): сессия бд
+    Returns:
+        json - статус операции
+    """
+    return await delete_vote_view(variant_id = variant_id, user_id = int(user_id), db = db)
+
+
+@router.delete('/message/{message_id}', dependencies=[Depends(security.access_token_required)])
+async def delete_message(message_id: int, user_id: str = Depends(get_current_user_id), db: Session = Depends(get_db)):
+    """
+    Удаляет сообщение
+    Args:
+        message_id (int): id варианта голосования
+        user_id (str): ID пользователя.
+        db (Session): сессия бд
+    Returns:
+        json - статус операции
+    """
+    return await delete_message_view(message_id = message_id, user_id = int(user_id), db = db)

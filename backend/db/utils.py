@@ -6,13 +6,15 @@ from sqlalchemy.future import select
 from sqlalchemy.orm import Session
 from sqlalchemy import or_, and_, func, desc
 from .models import ( User, Post, Friendship, FriendshipRequest,
-    VotingVariant, Like, Message, Vote, MediaInPost, Comment
+    VotingVariant, Like, Message, Vote, MediaInPost, Comment,
+    MediaInMessage
 )
 
 
 async def add_and_refresh_object(
         object: Union[User, Post, Friendship, FriendshipRequest,
-        VotingVariant, Like, Message, Vote, MediaInPost, Comment],
+        VotingVariant, Like, Message, Vote, MediaInPost, Comment,
+        MediaInMessage],
         db: Session
 ) -> None:
     """
@@ -58,7 +60,8 @@ async def get_user_by_username(username: str, db: Session) -> User:
 
 async def delete_object(
     object: Union[User, Post, Friendship, FriendshipRequest,
-    VotingVariant, Like, Message, Vote, Comment],
+    VotingVariant, Like, Message, Vote, Comment, MediaInPost,
+    MediaInMessage],
     db: Session
 ) -> None:
     """
@@ -191,7 +194,8 @@ async def get_comments_count(post_id: int, db: Session) -> int:
 
 async def get_all_from_table(
         object_type: Union[Type[User], Type[Post], Type[Friendship], Type[FriendshipRequest],
-        Type[VotingVariant], Type[Like], Type[Message], Type[Vote], Type[MediaInPost]],
+        Type[VotingVariant], Type[Like], Type[Message], Type[Vote], Type[MediaInPost],
+        Type[MediaInMessage], Type[Comment]],
         db: Session, limit=None
 ) -> list:
     """
@@ -259,7 +263,8 @@ async def get_images_id_for_post(post_id: int, db: Session) -> List[int]:
 
 async def get_object_by_id(
         object_type: Union[Type[User], Type[Post], Type[Friendship], Type[FriendshipRequest],
-        Type[VotingVariant], Type[Like], Type[Message], Type[Vote], Type[MediaInPost]],
+        Type[VotingVariant], Type[Like], Type[Message], Type[Vote], Type[MediaInPost],
+        Type[MediaInMessage], Type[Comment]],
         id: int, db: Session
 ):
     """
