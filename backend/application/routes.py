@@ -13,7 +13,7 @@ from .views import (
     vote_view, handle_websocket, add_media_to_post_view, get_posts_view,
     get_post_img_view, get_post_view, add_media_to_message_view,
     get_message_img_view, edit_post_view, delete_post_view, delete_comment_view,
-    delete_vote_view, delete_message_view
+    delete_vote_view, delete_message_view, change_avatar_view, get_avatar_view
 )
 from .schemas import (
     RegisterFormData, LoginFormData, CreatePostData, CreateCommentData, EditProfileFormData,
@@ -387,3 +387,31 @@ async def delete_message(message_id: int, user_id: str = Depends(get_current_use
         json - статус операции
     """
     return await delete_message_view(message_id = message_id, user_id = int(user_id), db = db)
+
+
+@router.post('/avatar', dependencies=[Depends(security.access_token_required)])
+async def change_avatar(uploaded_file: UploadFile, user_id: str = Depends(get_current_user_id), db: Session = Depends(get_db)):
+    """
+    Меняет аватарку пользователя
+    Args:
+        uploaded_file (UploadFile): загруженное изображение
+        user_id (str): id пользователя
+        db (Session): сессия бд
+    Returns:
+        json - статус операции
+    """
+    return await change_avatar_view(uploaded_file = uploaded_file, user_id = int(user_id), db = db)
+
+
+@router.get('/avatar/{another_user_id}', dependencies=[Depends(security.access_token_required)])
+async def get_avatar(another_user_id: int, user_id: str = Depends(get_current_user_id), db: Session = Depends(get_db)):
+    """
+    Возвращает аватарку пользователя
+    Args:
+        another_user_id (int): id пользователя, аватарку которого мы получаем
+        user_id (str): id пользователя
+        db (Session): сессия бд
+    Returns:
+        StreamingResponse - файл аватарки
+    """
+    return await get_avatar_view(another_user_id = another_user_id, user_id = int(user_id), db=db)
