@@ -508,6 +508,7 @@ async def edit_post_view(data: EditPostData, post_id: int, user_id: int, db: Ses
         raise HTTPException(status_code = 400, detail = "Вы не являетесь автором поста!")
     if data.text:
         post.text = data.text
+        await db.commit()
     if data.options:
         old_options = await get_post_voting_variants(post_id = post_id, db = db)
         for option in old_options:
@@ -590,3 +591,38 @@ async def delete_message_view(message_id: int, user_id: int, db: Session):
         raise HTTPException(status_code=400, detail="Вы не автор сообщения")
     await delete_object(object = message, db=db)
     return {'status': 'ok'}
+
+
+async def change_avatar_view(uploaded_file: UploadFile, user_id: int, db: Session):
+    """
+    Меняет аватарку пользователя
+    Args:
+        uploaded_file (UploadFile): загруженное изображение
+        user_id (int): id пользователя
+        db (Session): сессия бд
+    Returns:
+        json - статус операции
+    """
+    user = await get_object_by_id(object_type=User, id=user_id, db=db)
+    file_bytes = await uploaded_file.read()
+    user.avatar = file_bytes
+    await db.commit()
+    return {'status':'ok'}
+
+
+async def get_avatar_view(another_user_id: int, user_id: int, db: Session):
+    """
+    Возвращает аватарку пользователя
+    Args:
+        another_user_id (int): id пользователя, аватарку которого мы получаем
+        user_id (int): id пользователя
+        db (Session): сессия бд
+    Returns:
+        StreamingResponse - файл аватарки, или None
+    """
+    user = await get_object_by_id(object_type=User, id = another_user_id, db=db)
+    if not user:
+        raise HTTPException(status_code=400, detail="Такого юзера не существует")
+    if not user.avatar:
+        return None
+    return StreamingResponse(BytesIO(user.avatar), media_type='image/png')
