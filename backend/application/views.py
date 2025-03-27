@@ -6,7 +6,7 @@ from io import BytesIO
 from fastapi import (HTTPException, Response, WebSocket, WebSocketDisconnect,
     UploadFile
 )
-from fastapi.responses import StreamingResponse
+from fastapi.responses import StreamingResponse, FileResponse
 from sqlalchemy.orm import Session
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
@@ -19,7 +19,8 @@ from backend.db.utils import (
     get_like_on_post_from_user, get_likes_count, get_user_vote,
     get_user_by_username, get_existing_friendship, get_existing_friendship_request,
     get_all_from_table, get_comments_count, get_post_voting_variants, get_like_status,
-    get_images_id_for_post, get_object_by_id, get_post_comments
+    get_images_id_for_post, get_object_by_id, get_post_comments, get_messages_between_two_users,
+    get_images_id_for_message, get_votes_on_voting_variant
 )
 from backend.application.utils import (
     hash_password, verify_password, WebSocketConnectionManager
@@ -624,5 +625,57 @@ async def get_avatar_view(another_user_id: int, user_id: int, db: Session):
     if not user:
         raise HTTPException(status_code=400, detail="Такого юзера не существует")
     if not user.avatar:
-        return None
+        return FileResponse('backend/static/avatar.png')
     return StreamingResponse(BytesIO(user.avatar), media_type='image/png')
+
+
+async def get_chat_view(recipient_id: int, user_id: int, db: Session):
+    """
+    Возвращает данные для страницы чата (массив сообщений)
+    Args:
+        recipient_id (int): id собеседника
+        user_id (int): id пользователя
+        db (Session): сессия бд
+    Returns:
+        json - массив сообщений
+    """
+    recipient = await get_object_by_id(object_type=User, id=recipient_id, db=db)
+    if not recipient:
+        raise HTTPException(status_code=400, detail="Такого пользователя не существует")
+    messages_db = await get_messages_between_two_users(first_user_id=user_id, second_user_id=recipient_id, db=db)
+    messages = []
+    for message in messages_db:
+        messages.append({
+            'id':message.id,
+            'author_id':message.author_id,
+            'text':message.text,
+            'created_at':message.created_at,
+            'images_id':await get_images_id_for_message(message_id=message.id, db=db)
+        })
+
+    return {
+        'recipient_id':recipient.id,
+        'recipient_username':recipient.username,
+        'messages':messages
+    }
+
+
+async def get_votes_view(voting_variant_id: int, user_id: int, db: Session):
+    """
+    Возвращает список голосовавших за вариант голосования в посте
+    Args:
+        voting_variant_id (int): id варианта голосования
+        user_id (int): id пользователя
+        db (Session): сессия бд
+    Returns:
+        json - список голосовавших
+    """
+    votes_db = await get_votes_on_voting_variant(variant_id=voting_variant_id, db=db)
+    voted_list = []
+    for vote in votes_db:
+        vote_author = await get_object_by_id(object_type=User, id=vote.user_id, db=db)
+        voted_list.append({
+            'id':vote_author.id,
+            'username':vote_author.username,
+        })
+    return {'voted_users':voted_list}

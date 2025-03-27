@@ -13,7 +13,8 @@ from .views import (
     vote_view, handle_websocket, add_media_to_post_view, get_posts_view,
     get_post_img_view, get_post_view, add_media_to_message_view,
     get_message_img_view, edit_post_view, delete_post_view, delete_comment_view,
-    delete_vote_view, delete_message_view, change_avatar_view, get_avatar_view
+    delete_vote_view, delete_message_view, change_avatar_view, get_avatar_view,
+    get_chat_view, get_votes_view
 )
 from .schemas import (
     RegisterFormData, LoginFormData, CreatePostData, CreateCommentData, EditProfileFormData,
@@ -215,7 +216,7 @@ async def create_or_delete_vote(
         db (Session): Сессия базы данных.
 
     Returns:
-        dict: Статус операции.
+        json: Статус операции.
     """
     return await vote_view(variant_id=variant_id, user_id=int(user_id), db=db)
 
@@ -226,7 +227,6 @@ async def websocket_endpoint(
 ) -> None:
     """
     Обрабатывает WebSocket-соединение для чата.
-
     Args:
         websocket (WebSocket): WebSocket-соединение.
         user_id (str): ID пользователя.
@@ -245,7 +245,7 @@ async def add_media_to_post(uploaded_file: UploadFile, post_id: int, user_id: st
         user_id (str): ID пользователя.
         db (Session): Сессия базы данных.
     Returns:
-        dict: Статус операции
+        json: Статус операции
     """
     return await add_media_to_post_view(uploaded_file=uploaded_file, post_id=post_id, user_id=int(user_id), db=db)
 
@@ -259,7 +259,7 @@ async def add_media_to_message(uploaded_file: UploadFile, message_id: int, user_
         user_id (str): ID пользователя.
         db (Session): Сессия базы данных.
     Returns:
-        dict: Статус операции
+        json: Статус операции
     """
     return await add_media_to_message_view(uploaded_file=uploaded_file, message_id=message_id, user_id=int(user_id), db=db)
 
@@ -273,7 +273,7 @@ async def get_posts(user_id: str = Depends(get_current_user_id), db: Session = D
         user_id (str): ID пользователя.
         db (Session): Сессия базы данных.
     Returns:
-        dict: Данные в виде json
+        json: Данные в виде json
     """
     return await get_posts_view(user_id=int(user_id), db=db)
 
@@ -301,7 +301,7 @@ async def get_post(post_id: int, user_id: str = Depends(get_current_user_id), db
         user_id (str): ID пользователя.
         db (Session): Сессия базы данных.
     Returns:
-        dict: Данные в виде json
+        json: Данные в виде json
     """
     return await get_post_view(post_id=post_id, user_id=int(user_id), db=db)
 
@@ -415,3 +415,31 @@ async def get_avatar(another_user_id: int, user_id: str = Depends(get_current_us
         StreamingResponse - файл аватарки
     """
     return await get_avatar_view(another_user_id = another_user_id, user_id = int(user_id), db=db)
+
+
+@router.get('/chat/{recipient_id}', dependencies=[Depends(security.access_token_required)])
+async def get_chat(recipient_id: int, user_id: str = Depends(get_current_user_id), db: Session = Depends(get_db)):
+    """
+    Возвращает данные для страницы чата (массив сообщений)
+    Args:
+        recipient_id (int): id собеседника
+        user_id (str): id пользователя
+        db (Session): сессия бд
+    Returns:
+        json - массив сообщений
+    """
+    return await get_chat_view(recipient_id = recipient_id, user_id = int(user_id), db = db)
+
+
+@router.get('/votes/{voting_variant_id}', dependencies=[Depends(security.access_token_required)])
+async def get_votes(voting_variant_id: int, user_id: str = Depends(get_current_user_id), db: Session = Depends(get_db)):
+    """
+    Возвращает список голосовавших за вариант голосования в посте
+    Args:
+        voting_variant_id (int): id варианта голосования
+        user_id (str): id пользователя
+        db (Session): сессия бд
+    Returns:
+        json - список голосовавших
+    """
+    return await get_votes_view(voting_variant_id = voting_variant_id, user_id = int(user_id), db=db)

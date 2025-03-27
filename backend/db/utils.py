@@ -291,3 +291,49 @@ async def get_post_comments(post_id: int, db: Session) -> list:
     """
     result_db = await db.execute(select(Comment).filter(Comment.post_id==post_id))
     return result_db.scalars().all()
+
+
+async def get_messages_between_two_users(first_user_id: int, second_user_id: int, db: Session) -> list:
+    """
+    Возвращает список сообщений между двумя пользователями
+    Args:
+        first_user_id (int): id первого пользователя
+        second_user_id (int): id второго пользователя
+        db (Session): сессия бд
+    Returns:
+        list - список обьектов Message
+    """
+    result_db = await db.execute(select(Message).filter(
+        or_(
+            and_(
+                Message.author_id == first_user_id,
+                Message.getter_id == second_user_id
+            ),
+            and_(
+                Message.author_id == second_user_id,
+                Message.getter_id == first_user_id
+            )
+        )
+    ))
+    return result_db.scalars().all()
+
+
+async def get_images_id_for_message(message_id: int, db: Session) -> List[int]:
+    """
+    Получает список id картинок в бд, прикреплённых к сообщению
+    Args:
+        message_id (int): id поста
+        db (Session): сессия бд
+    Returns:
+        list[int]
+    """
+    id_list=[]
+    result_db = await db.execute(select(MediaInMessage).filter(MediaInMessage.message_id==message_id))
+    for img in result_db.scalars().all():
+        id_list.append(img.id)
+    return id_list
+
+
+async def get_votes_on_voting_variant(variant_id: int, db: Session):
+    result_db = await db.execute(select(Vote).filter(Vote.variant_id == variant_id))
+    return result_db.scalars().all()
