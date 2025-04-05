@@ -442,16 +442,29 @@ async def get_post_view(post_id: int, user_id: int, db: Session):
     post['author_id'] = post_db.author_id
     post['author_username'] = author.username
     post['text'] = post_db.text
-    post['voting_variants'] = [ {'id':var.id, 'text':var.text} for var in await get_post_voting_variants(post_id=post_id, db=db) ]
+    post['voting_variants'] = []
+    vars_db = await get_post_voting_variants(post_id=post_id, db=db)
+    votes_count=0
+    for var in vars_db:
+        votes_count += len(await get_votes_on_voting_variant(variant_id=var.id, db=db))
+    for var in vars_db:
+        if votes_count:
+            post['voting_variants'].append({
+                'id':var.id,
+                'text':var.text,
+                'percent':round(len(await get_votes_on_voting_variant(variant_id=var.id, db=db))/votes_count)
+            })
+        else:
+            post['voting_variants'].append({
+                'id': var.id,
+                'text': var.text,
+                'percent': 0
+            })
     post['images_id'] = await get_images_id_for_post(post_id=post_id, db=db)
     post['created_at'] = post_db.created_at
     post['likes_count'] = await get_likes_count(post_id=post_id, db=db)
-    if await get_like_status(post_id=post_id, user_id=user_id, db=db):
-        post['liked_status'] = 'liked'
-    else:
-        post['liked_status'] = 'unliked'
-    comments=[]
-
+    post['liked_status'] = await get_like_status(post_id=post_id, user_id=user_id, db=db)
+    comments =[]
     for comm in await get_post_comments(post_id=post_id, db=db):
         author_of_comm = await get_object_by_id(object_type=User, id=comm.author_id, db=db)
         comments.append({
