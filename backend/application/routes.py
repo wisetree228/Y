@@ -158,7 +158,7 @@ async def edit_profile(
     return await edit_profile_view(data=data, author_id=int(user_id), db=db)
 
 
-@router.post('/comment/{post_id}', dependencies=[Depends(security.access_token_required)])
+@router.post('post/{post_id}/comment', dependencies=[Depends(security.access_token_required)])
 async def create_comment(
     data: CreateCommentData, post_id: int, user_id: str = Depends(get_current_user_id), db: Session = Depends(get_db)
 ) -> dict:
@@ -177,7 +177,7 @@ async def create_comment(
     return await create_comment_view(data=data, post_id=post_id, user_id=int(user_id), db=db)
 
 
-@router.post('/like/{post_id}', dependencies=[Depends(security.access_token_required)])
+@router.post('post/{post_id}/like', dependencies=[Depends(security.access_token_required)])
 async def create_or_delete_like(
     post_id: int, user_id: str = Depends(get_current_user_id), db: Session = Depends(get_db)
 ) -> dict:
@@ -227,7 +227,7 @@ async def websocket_endpoint(
     await handle_websocket(websocket=websocket, user_id=user_id, manager=manager, db=db)
 
 
-@router.post('/media_in_post/{post_id}', dependencies = [Depends(security.access_token_required)])
+@router.post('posts/{post_id}/media', dependencies = [Depends(security.access_token_required)])
 async def add_media_to_post(uploaded_file: UploadFile, post_id: int, user_id: str = Depends(get_current_user_id), db: Session = Depends(get_db)):
     """
     Добавляет в бд картинку, связанную с постом
@@ -241,7 +241,7 @@ async def add_media_to_post(uploaded_file: UploadFile, post_id: int, user_id: st
     """
     return await add_media_to_post_view(uploaded_file=uploaded_file, post_id=post_id, user_id=int(user_id), db=db)
 
-@router.post('/media_in_message/{message_id}', dependencies = [Depends(security.access_token_required)])
+@router.post('/message/{message_id}/media', dependencies = [Depends(security.access_token_required)])
 async def add_media_to_message(uploaded_file: UploadFile, message_id: int, user_id: str = Depends(get_current_user_id), db: Session = Depends(get_db)):
     """
     Добавляет в бд картинку, связанную с сообщением
@@ -270,7 +270,7 @@ async def get_posts(user_id: str = Depends(get_current_user_id), db: Session = D
     return await get_posts_view(user_id=int(user_id), db=db)
 
 
-@router.get('/post_image/{image_id}', dependencies=[Depends(security.access_token_required)])
+@router.get('/posts/image/{image_id}', dependencies=[Depends(security.access_token_required)])
 async def get_post_img(image_id: int, db: Session = Depends(get_db)):
     """
     Отдаёт файл картинки, прикреплённой к посту
@@ -283,7 +283,7 @@ async def get_post_img(image_id: int, db: Session = Depends(get_db)):
     return await get_post_img_view(image_id = image_id, db=db)
 
 
-@router.get('/post/{post_id}', dependencies=[Depends(security.access_token_required)])
+@router.get('/posts/{post_id}', dependencies=[Depends(security.access_token_required)])
 async def get_post(post_id: int, user_id: str = Depends(get_current_user_id), db: Session = Depends(get_db)):
     """
     Отдаёт данные для просмотра одного поста.
@@ -298,7 +298,7 @@ async def get_post(post_id: int, user_id: str = Depends(get_current_user_id), db
     return await get_post_view(post_id=post_id, user_id=int(user_id), db=db)
 
 
-@router.get('/message_image/{image_id}', dependencies=[Depends(security.access_token_required)])
+@router.get('/message/image/{image_id}', dependencies=[Depends(security.access_token_required)])
 async def get_message_img(image_id: int, db: Session = Depends(get_db)):
     """
     Отдаёт файл картинки, прикреплённой к сообщению
@@ -395,7 +395,7 @@ async def change_avatar(uploaded_file: UploadFile, user_id: str = Depends(get_cu
     return await change_avatar_view(uploaded_file = uploaded_file, user_id = int(user_id), db = db)
 
 
-@router.get('/avatar/{another_user_id}', dependencies=[Depends(security.access_token_required)])
+@router.get('/user/{another_user_id}/avatar', dependencies=[Depends(security.access_token_required)])
 async def get_avatar(another_user_id: int, user_id: str = Depends(get_current_user_id), db: Session = Depends(get_db)):
     """
     Возвращает аватарку пользователя
