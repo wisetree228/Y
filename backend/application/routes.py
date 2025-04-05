@@ -438,7 +438,7 @@ async def get_votes(voting_variant_id: int, user_id: str = Depends(get_current_u
 
 
 @router.get('/profile/posts', dependencies=[Depends(security.access_token_required)])
-async def get_user_posts(user_id: str = Depends(get_current_user_id), db: Session = Depends(get_db)):
+async def get_users_posts(user_id: str = Depends(get_current_user_id), db: Session = Depends(get_db)):
     """
     Возвращает список постов пользователя
     Args:
@@ -448,3 +448,16 @@ async def get_user_posts(user_id: str = Depends(get_current_user_id), db: Sessio
         json - список постов
     """
     return await get_users_posts_view(user_id = int(user_id), db=db)
+
+
+@router.get('/users/{user_id}/posts', dependencies=[Depends(security.access_token_required)])
+async def get_user_posts(user_id: int, db: Session = Depends(get_db)):
+    """
+    Возвращает список постов пользователя
+    Args:
+        user_id (str): id пользователя
+        db (Session): сессия бд
+    Returns:
+        json - список постов
+    """
+    return await get_users_posts_view(user_id = user_id, db=db)
