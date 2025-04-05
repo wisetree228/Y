@@ -335,6 +335,14 @@ async def get_images_id_for_message(message_id: int, db: Session) -> List[int]:
 
 
 async def get_votes_on_voting_variant(variant_id: int, db: Session):
+    """
+    Возвращает голоса на варианте голосования
+    Args:
+        variant_id (int): id варианта голосования
+        db (Session): сессия бд
+    Returns:
+        list - массив обьектов Vote
+    """
     result_db = await db.execute(select(Vote).filter(Vote.variant_id == variant_id))
     return result_db.scalars().all()
 
