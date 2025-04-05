@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { API_BASE_URL } from './config';
 import { Link } from 'react-router-dom';
 
 const Register = () => {
     const [username, setUsername] = useState('');
+    const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [name, setName] = useState('');
     const [surname, setSurname] = useState('');
@@ -18,9 +20,8 @@ const Register = () => {
           return;
         }
         try {
-          const response = await axios.post('https://jsonplaceholder.typicode.com/posts', {
-            title: "Register",
-            body: JSON.stringify({ username, password, name, surname }),
+          const response = await axios.post(API_BASE_URL+'/register', {
+            body: JSON.stringify({ username, password, name, surname, email }),
           });
           if (response.status != 'ok') {
             throw new Error('Ошибка при регистрации');
@@ -52,6 +53,13 @@ const Register = () => {
                 <div className="auth-card">
                     <h2 className="auth-title">Регистрация</h2>
                     <form onSubmit={handleSubmit}>
+                    <input
+                          type="text"
+                          placeholder="Email"
+                          value={username}
+                          onChange={(e) => setEmail(e.target.value)}
+                          required
+                        />
                         <input
                           type="text"
                           placeholder="Логин"

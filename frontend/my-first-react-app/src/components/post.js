@@ -2,6 +2,8 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
+import { API_BASE_URL } from './config';
+
 
 const Posts = () => {
     const [posts, setPosts] = useState([]);
@@ -9,7 +11,7 @@ const Posts = () => {
     const [error, setError] = useState('');
   
     useEffect(() => {
-      axios.get('https://jsonplaceholder.typicode.com/posts')
+      axios.get(API_BASE_URL+'/posts')
         .then(response => {
           setPosts(response.data.posts);
           setLoading(false);

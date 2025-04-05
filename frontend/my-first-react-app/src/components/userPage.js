@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useLocation } from 'react-router-dom';
+import { API_BASE_URL } from '../config';
 
 const UserChannel = () => {
     const [user, setUser] = useState({}); // Исправлено на объект
@@ -14,15 +15,15 @@ const UserChannel = () => {
     useEffect(() => {
         const fetchData = async () => {
           try {
-            const userResponse = await axios.get(`https://jsonplaceholder.typicode.com/users/${user_id}`);
-            setUser(userResponse.data);
-            const postsResponse = await axios.get(`https://jsonplaceholder.typicode.com/posts`, {
+            const userResponse = await axios.get(API_BASE_URL+`/user/${user_id}`);
+            setUser(userResponse.data.user);
+            setFriend(postsResponse.data.friendship)
+            const postsResponse = await axios.get(API_BASE_URL+`/posts`, {
               params: {
                 userId: user_id, 
               },
             });
             setPosts(postsResponse.data.posts);
-            setFriend(postsResponse.data.friendship)
 
             setLoading(false); 
           } catch (error) {
@@ -38,8 +39,8 @@ const UserChannel = () => {
       const handleFriendship = async () => {
         try {
             const friendshipResponse = await axios.post(``);
-            setIsSubscribed(friendshipResponse.data);
-            console.log(newSubscriptionStatus ? 'Подписан' : 'Отписан');
+            setFriend(friendshipResponse.data);
+            console.lognewisFrinedStatus( ? 'Подписан' : 'Отписан');
         } catch (error) {
             console.error('Ошибка при добавлении в друзья', error);
             setError('Ошибка при добавлении в друзья');
@@ -80,11 +81,11 @@ const UserChannel = () => {
             <h2 style={{ margin: '10px 0', color: '#333' }}>{user.name}</h2>
             <div style={{ marginTop: '15px' }}>
               <button 
-                onClick={handleSubscribe}
+                onClick={handleFriendship}
                 style={{ 
                   margin: '0 10px', 
                   padding: '10px 25px', 
-                  backgroundColor: isSubscribed ? '#dc3545' : '#007bff', 
+                  backgroundColor: isFriend ? '#dc3545' : '#007bff', 
                   color: '#fff', 
                   border: 'none', 
                   borderRadius: '25px',

@@ -12,7 +12,7 @@ const MainProfile = () => {
     useEffect(() => {
         const fetchData = async () => {
           try {
-            const userResponse = await axios.get(`https://jsonplaceholder.typicode.com/users`, {
+            const userResponse = await axios.get(`/`, {
             });
             console.log(userResponse.data[1]);
             setUser(userResponse.data);
