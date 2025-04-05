@@ -337,3 +337,7 @@ async def get_images_id_for_message(message_id: int, db: Session) -> List[int]:
 async def get_votes_on_voting_variant(variant_id: int, db: Session):
     result_db = await db.execute(select(Vote).filter(Vote.variant_id == variant_id))
     return result_db.scalars().all()
+
+async def get_user_posts(user_id: int, db: Session):
+    result_db = await db.execute(select(Post).filter(Post.author_id == user_id))
+    return result_db.scalars().all()

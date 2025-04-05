@@ -14,14 +14,7 @@ from backend.db.models import (
     User, Post, Comment, Vote, VotingVariant, Message, Friendship, FriendshipRequest, Like,
     MediaInPost, MediaInMessage
 )
-from backend.db.utils import (
-    delete_object, add_and_refresh_object, get_user_by_email,
-    get_like_on_post_from_user, get_likes_count, get_user_vote,
-    get_user_by_username, get_existing_friendship, get_existing_friendship_request,
-    get_all_from_table, get_comments_count, get_post_voting_variants, get_like_status,
-    get_images_id_for_post, get_object_by_id, get_post_comments, get_messages_between_two_users,
-    get_images_id_for_message, get_votes_on_voting_variant
-)
+from backend.db.utils import *
 from backend.application.utils import (
     hash_password, verify_password, WebSocketConnectionManager
 )
@@ -393,10 +386,6 @@ async def get_posts_view(user_id: int, db: Session):
     for post in posts_db:
         author = await get_object_by_id(object_type=User, id=post.author_id, db=db)
         like_status = await get_like_status(user_id=user_id, post_id=post.id, db=db)
-        if like_status:
-            status_str='liked'
-        else:
-            status_str='unliked'
         variants_db = await get_post_voting_variants(post_id=post.id, db=db)
         variants=[]
         for var in variants_db:
@@ -411,7 +400,7 @@ async def get_posts_view(user_id: int, db: Session):
             'created_at':post.created_at,
             'text':post.text,
             'likes_count':await get_likes_count(post_id=post.id, db=db),
-            'like_status':status_str,
+            'like_status':like_status,
             'comments_count':await get_comments_count(post_id=post.id, db=db),
             'images_id':await get_images_id_for_post(post_id=post.id, db=db),
             'voting_variants':variants
@@ -679,3 +668,39 @@ async def get_votes_view(voting_variant_id: int, user_id: int, db: Session):
             'username':vote_author.username,
         })
     return {'voted_users':voted_list}
+
+async def get_users_posts_view(user_id: int, db: Session):
+    """
+    Отдаёт данные для отрисовки постов пользователя.
+
+    Args:
+        user_id (str): ID пользователя.
+        db (Session): Сессия базы данных.
+    Returns:
+        dict: Данные в виде json
+    """
+    posts_db = await get_user_posts(user_id=user_id, db=db)
+    posts=[]
+    for post in posts_db:
+        author = await get_object_by_id(object_type=User, id=post.author_id, db=db)
+        like_status = await get_like_status(user_id=user_id, post_id=post.id, db=db)
+        variants_db = await get_post_voting_variants(post_id=post.id, db=db)
+        variants=[]
+        for var in variants_db:
+            variants.append({
+                'id':var.id,
+                'text':var.text
+            })
+        posts.append({
+            'id':post.id,
+            'author_id':post.author_id,
+            'author_username':author.username,
+            'created_at':post.created_at,
+            'text':post.text,
+            'likes_count':await get_likes_count(post_id=post.id, db=db),
+            'like_status':like_status,
+            'comments_count':await get_comments_count(post_id=post.id, db=db),
+            'images_id':await get_images_id_for_post(post_id=post.id, db=db),
+            'voting_variants':variants
+        })
+    return {'posts':posts}

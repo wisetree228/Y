@@ -7,15 +7,7 @@ from sqlalchemy.orm import Session
 from backend.db.models import SessionLocal, AsyncSession
 from .utils import get_current_user_id, WebSocketConnectionManager
 from .config import security, config
-from .views import (
-    register_view, login_view, create_post_view, create_comment_view,
-    create_friendship_request_view, edit_profile_view, create_or_delete_like_view,
-    vote_view, handle_websocket, add_media_to_post_view, get_posts_view,
-    get_post_img_view, get_post_view, add_media_to_message_view,
-    get_message_img_view, edit_post_view, delete_post_view, delete_comment_view,
-    delete_vote_view, delete_message_view, change_avatar_view, get_avatar_view,
-    get_chat_view, get_votes_view
-)
+from .views import *
 from .schemas import (
     RegisterFormData, LoginFormData, CreatePostData, CreateCommentData, EditProfileFormData,
     EditPostData
@@ -443,3 +435,29 @@ async def get_votes(voting_variant_id: int, user_id: str = Depends(get_current_u
         json - список голосовавших
     """
     return await get_votes_view(voting_variant_id = voting_variant_id, user_id = int(user_id), db=db)
+
+
+@router.get('/profile/posts', dependencies=[Depends(security.access_token_required)])
+async def get_users_posts(user_id: str = Depends(get_current_user_id), db: Session = Depends(get_db)):
+    """
+    Возвращает список постов пользователя
+    Args:
+        user_id (str): id пользователя
+        db (Session): сессия бд
+    Returns:
+        json - список постов
+    """
+    return await get_users_posts_view(user_id = int(user_id), db=db)
+
+
+@router.get('/users/{user_id}/posts', dependencies=[Depends(security.access_token_required)])
+async def get_user_posts(user_id: int, db: Session = Depends(get_db)):
+    """
+    Возвращает список постов пользователя
+    Args:
+        user_id (str): id пользователя
+        db (Session): сессия бд
+    Returns:
+        json - список постов
+    """
+    return await get_users_posts_view(user_id = user_id, db=db)
