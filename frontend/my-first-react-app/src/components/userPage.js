@@ -9,7 +9,7 @@ const UserChannel = () => {
     const [posts, setPosts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
-    const [isSubscribed, setIsSubscribed] = useState(false);
+    const [isFriend, setFriend] = useState(false);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -21,10 +21,8 @@ const UserChannel = () => {
                 userId: user_id, 
               },
             });
-            setPosts(postsResponse.data);
-
-            const subscriptionStatus = localStorage.getItem(`isSubscribed_${user_id}`) === 'true';
-            setIsSubscribed(subscriptionStatus);
+            setPosts(postsResponse.data.posts);
+            setFriend(postsResponse.data.friendship)
 
             setLoading(false); 
           } catch (error) {
@@ -36,16 +34,15 @@ const UserChannel = () => {
     
         fetchData(); 
       }, [user_id]); 
-
-      const handleSubscribe = async () => {
+      
+      const handleFriendship = async () => {
         try {
-            const newSubscriptionStatus = !isSubscribed;
-            setIsSubscribed(newSubscriptionStatus);
-
-            localStorage.setItem(`isSubscribed_${user_id}`, newSubscriptionStatus);
+            const friendshipResponse = await axios.post(``);
+            setIsSubscribed(friendshipResponse.data);
             console.log(newSubscriptionStatus ? 'Подписан' : 'Отписан');
         } catch (error) {
-            console.error('Ошибка при подписке:', error);
+            console.error('Ошибка при добавлении в друзья', error);
+            setError('Ошибка при добавлении в друзья');
         }
     };
     
@@ -99,7 +96,7 @@ const UserChannel = () => {
                   }
                 }}
               >
-                {isSubscribed ? 'Отписаться' : 'Подписаться'}
+                {isFriend ? 'Добавить в друзья' : 'Удалить из друзей'}
               </button>
               <button 
                 style={{ 

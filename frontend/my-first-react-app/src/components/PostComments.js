@@ -14,7 +14,7 @@ const PostComments = () => {
     useEffect(() => {
         axios.get('https://jsonplaceholder.typicode.com/posts')
           .then(response => {
-            setComments(response.data);
+            setComments(response.data.post['comments']);
             setLoading(false);
           })
           .catch(error => {
@@ -49,8 +49,8 @@ return (
 
         {post && (
         <div style={{ border: '1px solid #ccc', padding: '10px', margin: '10px 0' }}>
-            <h2>{post.title}</h2>
-            <p>{post.body}</p>
+            <h2>{post.author_username}</h2>
+            <p>{post.text}</p>
             <p><strong>Автор:</strong> {post.author}</p>
             <small>{new Date(post.created_at).toLocaleDateString()}</small>
         </div>

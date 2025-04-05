@@ -21,11 +21,11 @@ const Login = () => {
           title: "Login",
           body: JSON.stringify({ username, password }),
         });
-        if (response.status !== 201) {
+        if (response.status !== 'ok') {
           throw new Error('Ошибка при регистрации');
         }
         console.log('Ответ от сервера:', response.data);
-      if (response.status === 201) {
+      if (response.status === 'ok') {
         console.log('Авторизация успешна (тестовый ответ):', response.data);
         navigate('/posts');
         } else {
