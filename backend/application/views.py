@@ -14,7 +14,16 @@ from backend.db.models import (
     User, Post, Comment, Vote, VotingVariant, Message, Friendship, FriendshipRequest, Like,
     MediaInPost, MediaInMessage
 )
-from backend.db.utils import *
+from backend.db.utils import (
+    delete_object, add_and_refresh_object, get_user_by_email,
+    get_like_on_post_from_user, get_likes_count, get_user_vote,
+    get_user_by_username, get_existing_friendship, get_existing_friendship_request,
+    get_all_from_table, get_comments_count, get_post_voting_variants, get_like_status,
+    get_images_id_for_post, get_object_by_id, get_post_comments, get_messages_between_two_users,
+    get_images_id_for_message, get_votes_on_voting_variant, process_voting_variants,
+    get_user_posts
+
+)
 from backend.application.utils import (
     hash_password, verify_password, WebSocketConnectionManager
 )
@@ -384,27 +393,8 @@ async def get_posts_view(user_id: int, db: Session):
     posts_db = await get_all_from_table(object_type=Post, db=db)
     posts=[]
     for post in posts_db:
-        author = await get_object_by_id(object_type=User, id=post.author_id, db=db)
-        like_status = await get_like_status(user_id=user_id, post_id=post.id, db=db)
-        variants_db = await get_post_voting_variants(post_id=post.id, db=db)
-        variants=[]
-        for var in variants_db:
-            variants.append({
-                'id':var.id,
-                'text':var.text
-            })
-        posts.append({
-            'id':post.id,
-            'author_id':post.author_id,
-            'author_username':author.username,
-            'created_at':post.created_at,
-            'text':post.text,
-            'likes_count':await get_likes_count(post_id=post.id, db=db),
-            'like_status':like_status,
-            'comments_count':await get_comments_count(post_id=post.id, db=db),
-            'images_id':await get_images_id_for_post(post_id=post.id, db=db),
-            'voting_variants':variants
-        })
+        post_data = await get_post_view(post_id=post.id, user_id=user_id, db=db)
+        posts.append(post_data.get('post'))
     return {'posts':posts}
 
 
@@ -433,50 +423,48 @@ async def get_post_view(post_id: int, user_id: int, db: Session):
     Returns:
         json - данные поста
     """
-    post = {}
-    post_db = await get_object_by_id(object_type=Post, id=post_id, db=db)
+    stmt = (
+        select(Post)
+        .options(
+            selectinload(Post.author),
+            selectinload(Post.voting_variants).selectinload(VotingVariant.votes),
+            selectinload(Post.media),
+            selectinload(Post.likes),
+            selectinload(Post.comments).selectinload(Comment.author)
+        )
+        .where(Post.id == post_id)
+    )
+
+    result = await db.execute(stmt)
+    post_db = result.scalars().first()
+
     if not post_db:
-        raise HTTPException(status_code=400, detail="Такого поста не существует!")
-    author = await get_object_by_id(object_type=User, id=post_db.author_id, db=db)
+        raise HTTPException(status_code=404, detail="Post not found")
 
-    post['author_id'] = post_db.author_id
-    post['author_username'] = author.username
-    post['text'] = post_db.text
-    post['voting_variants'] = []
-    vars_db = await get_post_voting_variants(post_id=post_id, db=db)
-    votes_count=0
-    for var in vars_db:
-        votes_count += len(await get_votes_on_voting_variant(variant_id=var.id, db=db))
-    for var in vars_db:
-        if votes_count:
-            post['voting_variants'].append({
-                'id':var.id,
-                'text':var.text,
-                'percent':round(len(await get_votes_on_voting_variant(variant_id=var.id, db=db))/votes_count)
-            })
-        else:
-            post['voting_variants'].append({
-                'id': var.id,
-                'text': var.text,
-                'percent': 0
-            })
-    post['images_id'] = await get_images_id_for_post(post_id=post_id, db=db)
-    post['created_at'] = post_db.created_at
-    post['likes_count'] = await get_likes_count(post_id=post_id, db=db)
-    post['liked_status'] = await get_like_status(post_id=post_id, user_id=user_id, db=db)
-    comments =[]
-    for comm in await get_post_comments(post_id=post_id, db=db):
-        author_of_comm = await get_object_by_id(object_type=User, id=comm.author_id, db=db)
-        comments.append({
-            'id':comm.id,
-            'text':comm.text,
-            'author_id':author_of_comm.id,
-            'author_username':author_of_comm.username,
-            'created_at':comm.created_at
-        })
-    post['comments'] = comments
+    # Обработка данных
+    post = {
+        'id':post_id,
+        'author_id': post_db.author.id,
+        'author_username': post_db.author.username,
+        'text': post_db.text,
+        'created_at': post_db.created_at,
+        'images_id': [img.id for img in post_db.media],
+        'likes_count': len(post_db.likes),
+        'liked_status': any(like.author_id == user_id for like in post_db.likes),
+        'voting_variants': await process_voting_variants(post_db.voting_variants),
+        'comments': [
+            {
+                'id': comment.id,
+                'text': comment.text,
+                'author_id': comment.author.id,
+                'author_username': comment.author.username,
+                'created_at': comment.created_at
+            }
+            for comment in post_db.comments
+        ]
+    }
 
-    return {'post':post}
+    return {'post': post}
 
 
 async def get_message_img_view(image_id: int, db: Session):
@@ -665,22 +653,25 @@ async def get_chat_view(recipient_id: int, user_id: int, db: Session):
 async def get_votes_view(voting_variant_id: int, user_id: int, db: Session):
     """
     Возвращает список голосовавших за вариант голосования в посте
+    (оптимизированная версия с жадной загрузкой)
     Args:
         voting_variant_id (int): id варианта голосования
-        user_id (int): id пользователя
+        user_id (int): id пользователя (не используется в текущей реализации)
         db (Session): сессия бд
     Returns:
-        json - список голосовавших
+        dict - список голосовавших в формате {'voted_users': [{'id': int, 'username': str}, ...]}
     """
-    votes_db = await get_votes_on_voting_variant(variant_id=voting_variant_id, db=db)
-    voted_list = []
-    for vote in votes_db:
-        vote_author = await get_object_by_id(object_type=User, id=vote.user_id, db=db)
-        voted_list.append({
-            'id':vote_author.id,
-            'username':vote_author.username,
-        })
-    return {'voted_users':voted_list}
+    votes = await get_votes_on_voting_variant(variant_id=voting_variant_id, db=db)
+
+    return {
+        'voted_users': [
+            {
+                'id': vote.user.id,
+                'username': vote.user.username
+            }
+            for vote in votes
+        ]
+    }
 
 async def get_users_posts_view(user_id: int, db: Session):
     """
@@ -695,25 +686,6 @@ async def get_users_posts_view(user_id: int, db: Session):
     posts_db = await get_user_posts(user_id=user_id, db=db)
     posts=[]
     for post in posts_db:
-        author = await get_object_by_id(object_type=User, id=post.author_id, db=db)
-        like_status = await get_like_status(user_id=user_id, post_id=post.id, db=db)
-        variants_db = await get_post_voting_variants(post_id=post.id, db=db)
-        variants=[]
-        for var in variants_db:
-            variants.append({
-                'id':var.id,
-                'text':var.text
-            })
-        posts.append({
-            'id':post.id,
-            'author_id':post.author_id,
-            'author_username':author.username,
-            'created_at':post.created_at,
-            'text':post.text,
-            'likes_count':await get_likes_count(post_id=post.id, db=db),
-            'like_status':like_status,
-            'comments_count':await get_comments_count(post_id=post.id, db=db),
-            'images_id':await get_images_id_for_post(post_id=post.id, db=db),
-            'voting_variants':variants
-        })
+        post_data = await get_post_view(post_id=post.id, user_id=user_id, db=db)
+        posts.append(post_data.get('post'))
     return {'posts':posts}

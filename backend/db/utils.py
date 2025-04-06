@@ -3,7 +3,7 @@
 """
 from typing import Union, Type, List
 from sqlalchemy.future import select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import or_, and_, func, desc
 from .models import ( User, Post, Friendship, FriendshipRequest,
     VotingVariant, Like, Message, Vote, MediaInPost, Comment,
@@ -334,18 +334,37 @@ async def get_images_id_for_message(message_id: int, db: Session) -> List[int]:
     return id_list
 
 
-async def get_votes_on_voting_variant(variant_id: int, db: Session):
+async def get_votes_on_voting_variant(variant_id: int, db: Session) -> List[Vote]:
     """
-    Возвращает голоса на варианте голосования
+    Возвращает голоса на варианте голосования с жадной загрузкой пользователей
     Args:
         variant_id (int): id варианта голосования
         db (Session): сессия бд
     Returns:
-        list - массив обьектов Vote
+        List[Vote] - список голосов с подгруженными пользователями
     """
-    result_db = await db.execute(select(Vote).filter(Vote.variant_id == variant_id))
-    return result_db.scalars().all()
+    result = await db.execute(
+        select(Vote)
+        .options(joinedload(Vote.user))  # Жадная загрузка пользователя
+        .filter(Vote.variant_id == variant_id)
+    )
+    return result.scalars().all()
 
 async def get_user_posts(user_id: int, db: Session):
     result_db = await db.execute(select(Post).filter(Post.author_id == user_id))
     return result_db.scalars().all()
+
+
+async def process_voting_variants(variants):
+    if not variants:
+        return []
+
+    total_votes = sum(len(variant.votes) for variant in variants)
+    return [
+        {
+            'id': variant.id,
+            'text': variant.text,
+            'percent': round((len(variant.votes) / total_votes * 100) if total_votes else 0)
+        }
+        for variant in variants
+    ]
