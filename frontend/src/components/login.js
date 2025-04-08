@@ -2,11 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
-
+import { API_BASE_URL } from '../config';
 
 
 const Login = () => {
-    const [username, setUsername] = useState('');
+    const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const navigate = useNavigate();
@@ -15,17 +15,17 @@ const Login = () => {
   
     const handleSubmit = async (e) => {
       e.preventDefault();
-      console.log('Отправка данных:', { username, password });
+      console.log('Отправка данных:', { email, password });
       try {
-        const response = await axios.post('https://jsonplaceholder.typicode.com/posts', {
-          title: "Login",
-          body: JSON.stringify({ username, password }),
-        });
-        if (response.status !== 201) {
+        const response = await axios.post(API_BASE_URL + '/login', {
+          email,
+          password,
+        }, { withCredentials: true });
+        if (response.status !== 200) {
           throw new Error('Ошибка при регистрации');
         }
         console.log('Ответ от сервера:', response.data);
-      if (response.status === 201) {
+      if (response.status === 200) {
         console.log('Авторизация успешна (тестовый ответ):', response.data);
         navigate('/posts');
         } else {
@@ -53,9 +53,9 @@ const Login = () => {
                             <form onSubmit={handleSubmit}>
                               <input
                                 type="text"
-                                placeholder="Логин"
-                                value={username}
-                                onChange={(e) => setUsername(e.target.value)}
+                                placeholder="Email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
                               />
                               <input
                                 type="password"

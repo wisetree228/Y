@@ -461,7 +461,8 @@ async def get_post_view(post_id: int, user_id: int, db: Session):
                 'created_at': comment.created_at
             }
             for comment in post_db.comments
-        ]
+        ],
+        'comments_count':len(post_db.comments),
     }
 
     return {'post': post}
