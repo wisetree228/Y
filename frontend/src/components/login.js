@@ -25,34 +25,14 @@ const Login = () => {
                 navigate('/posts');
             }
         } catch (err) {
-            console.error('Ошибка при авторизации:', err);
-
-            // Проверяем наличие ответа от сервера
             if (err.response) {
-                // Обработка статус-кодов 401 и 402
-                if (err.response.status === 401) {
-                    setError('Неверный пароль');
-                    alert('Неверный пароль');
-                } else if (err.response.status === 402) {
-                    setError('Пользователя с таким email не существует, зарегистрируйтесь');
-                    alert('Пользователя с таким email не существует, зарегистрируйтесь');
-                } else {
-                    // Обработка других ошибок
-                    const errorMessage = err.response.data.detail || 
-                                          err.response.data.message || 
-                                          err.response.data.error || 
-                                          'Произошла ошибка при авторизации';
-                    setError(errorMessage);
-                    alert(errorMessage);
+                // Получаем статус код ответа
+                const statusCode = err.response.status;
+                if (statusCode === 401){
+                    alert('Неверный пароль!')
+                }else if (statusCode === 402){
+                    alert('Пользователя с таким email не существует!')
                 }
-            } else if (err.request) {
-                // Запрос был сделан, но ответ не получен
-                setError('Сервер не отвечает, проверьте подключение к интернету');
-                //alert('Сервер не отвечает, проверьте подключение к интернету');
-            } else {
-                // Что-то пошло не так при настройке запроса
-                setError('Ошибка при отправке запроса');
-                //alert('Ошибка при отправке запроса');
             }
         }
     };
