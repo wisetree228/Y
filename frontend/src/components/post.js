@@ -89,7 +89,7 @@ const Posts = () => {
           >
             <div style={{ display: 'flex', alignItems: 'center', marginBottom: '15px' }}>
               <img
-                src={`https://i.pravatar.cc/50?u=${post.author_id}`}
+                src={`${API_BASE_URL}/user/${post.author_id}/avatar`}
                 alt={`Аватар ${post.author_username}`}
                 style={{ 
                   width: '40px', 
