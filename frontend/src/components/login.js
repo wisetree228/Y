@@ -1,9 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
-import { Link } from 'react-router-dom';
 import { API_BASE_URL } from '../config';
-
 
 const Login = () => {
     const [email, setEmail] = useState('');
@@ -11,76 +9,97 @@ const Login = () => {
     const [error, setError] = useState('');
     const navigate = useNavigate();
 
-
-  
     const handleSubmit = async (e) => {
-      e.preventDefault();
-      console.log('Отправка данных:', { email, password });
-      try {
-        const response = await axios.post(API_BASE_URL + '/login', {
-          email,
-          password,
-        }, { withCredentials: true });
-        if (response.status !== 200) {
-          throw new Error('Ошибка при регистрации');
+        e.preventDefault();
+        console.log('Отправка данных:', { email, password });
+        try {
+            const response = await axios.post(API_BASE_URL + '/login', {
+                email,
+                password,
+            }, { withCredentials: true });
+            
+            console.log('Ответ от сервера:', response.data);
+            
+            if (response.status === 200) {
+                console.log('Авторизация успешна:', response.data);
+                navigate('/posts');
+            }
+        } catch (err) {
+            console.error('Ошибка при авторизации:', err);
+
+            // Проверяем наличие ответа от сервера
+            if (err.response) {
+                // Обработка статус-кодов 401 и 402
+                if (err.response.status === 401) {
+                    setError('Неверный пароль');
+                    alert('Неверный пароль');
+                } else if (err.response.status === 402) {
+                    setError('Пользователя с таким email не существует, зарегистрируйтесь');
+                    alert('Пользователя с таким email не существует, зарегистрируйтесь');
+                } else {
+                    // Обработка других ошибок
+                    const errorMessage = err.response.data.detail || 
+                                          err.response.data.message || 
+                                          err.response.data.error || 
+                                          'Произошла ошибка при авторизации';
+                    setError(errorMessage);
+                    alert(errorMessage);
+                }
+            } else if (err.request) {
+                // Запрос был сделан, но ответ не получен
+                setError('Сервер не отвечает, проверьте подключение к интернету');
+                //alert('Сервер не отвечает, проверьте подключение к интернету');
+            } else {
+                // Что-то пошло не так при настройке запроса
+                setError('Ошибка при отправке запроса');
+                //alert('Ошибка при отправке запроса');
+            }
         }
-        console.log('Ответ от сервера:', response.data);
-      if (response.status === 200) {
-        console.log('Авторизация успешна (тестовый ответ):', response.data);
-        navigate('/posts');
-        } else {
-          setError(response.message || 'Ошибка при регистрации'); 
-        }
-      } catch (err) {
-        console.error('Ошибка при авторизации:', err);
-        setError('Произошла ошибка при авторизации');
-      }
     };
-  
+
     return (
-          <div className="container">
-              <div className="background-shapes">
-                  <div className="shape shape-1"></div>
-                  <div className="shape shape-2"></div>
-                  <div className="shape shape-3"></div>
-              </div>
-      
-              <main>
-                  <div className="auth-container">
-                      <h1 className="logo">Y</h1>
-                      <div className="auth-card">
-                          <h2 className="auth-title">Вход</h2>
-                            <form onSubmit={handleSubmit}>
-                              <input
+        <div className="container">
+            <div className="background-shapes">
+                <div className="shape shape-1"></div>
+                <div className="shape shape-2"></div>
+                <div className="shape shape-3"></div>
+            </div>
+    
+            <main>
+                <div className="auth-container">
+                    <h1 className="logo">Y</h1>
+                    <div className="auth-card">
+                        <h2 className="auth-title">Вход</h2>
+                        <form onSubmit={handleSubmit}>
+                            <input
                                 type="text"
                                 placeholder="Email"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
-                              />
-                              <input
+                            />
+                            <input
                                 type="password"
                                 placeholder="Пароль"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
-                              />
-                              <button type="submit">Войти</button>
-                            </form>
-                          <p className="auth-switch">
-                              Нет аккаунта? <Link to="/register">
-                        Зарегистрироваться
-                          </Link>
-                          </p>
-                      </div>
-                  </div>
-              </main>
-      
-              <footer>
-                  <div className="footer-content">
-                      <p>© 2025 Y. Все права защищены</p>
-                  </div>
-              </footer>
-          </div>
+                            />
+                            <button type="submit">Войти</button>
+                        </form>
+                        {error && <p className="error-message">{error}</p>}
+                        <p className="auth-switch">
+                            Нет аккаунта? <Link to="/register">Зарегистрироваться</Link>
+                        </p>
+                    </div>
+                </div>
+            </main>
+    
+            <footer>
+                <div className="footer-content">
+                    <p>© 2025 Y. Все права защищены</p>
+                </div>
+            </footer>
+        </div>
     );
-  };
-  
-  export default Login;
+};
+
+export default Login;
