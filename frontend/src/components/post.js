@@ -169,7 +169,7 @@ const Posts = () => {
                 ❤️ {post.likes_count} лайков
               </button>
               
-              <Link to={`/posts/${post.id}/comments`}>
+              <Link to={`/posts/${post.id}`}>
                 <button style={{ 
                   background: 'none',
                   border: 'none',
@@ -185,7 +185,7 @@ const Posts = () => {
               <Link to={`/users/${post.author_id}`}>
                 <button style={{ marginRight: '10px' }}>Перейти в канал</button>
               </Link>
-              <Link to={`/posts/${post.id}/comments`}>
+              <Link to={`/posts/${post.id}`}>
                 <button>Комментарии</button>
               </Link>
             </div>

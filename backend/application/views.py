@@ -89,7 +89,7 @@ async def login_view(data: LoginFormData, response: Response, db: Session) -> di
     user = await get_user_by_email(data.email, db)
     if not user:
         raise HTTPException(
-            status_code=401,
+            status_code=402,
             detail="Пользователя с таким email не существует! Зарегистрируйтесь, пожалуйста."
         )
     if not verify_password(user.password, data.password):
