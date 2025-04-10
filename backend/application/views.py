@@ -20,12 +20,11 @@ from backend.db.utils import (
     get_user_by_username, get_existing_friendship, get_existing_friendship_request,
     get_all_from_table, get_comments_count, get_post_voting_variants, get_like_status,
     get_images_id_for_post, get_object_by_id, get_post_comments, get_messages_between_two_users,
-    get_images_id_for_message, get_votes_on_voting_variant, process_voting_variants,
-    get_user_posts
+    get_images_id_for_message, get_votes_on_voting_variant, get_user_posts
 
 )
 from backend.application.utils import (
-    hash_password, verify_password, WebSocketConnectionManager
+    hash_password, verify_password, WebSocketConnectionManager, process_voting_variants
 )
 from .schemas import (
     RegisterFormData, LoginFormData, CreatePostData, CreateCommentData, EditProfileFormData,
@@ -690,3 +689,44 @@ async def get_users_posts_view(user_id: int, db: Session):
         post_data = await get_post_view(post_id=post.id, user_id=user_id, db=db)
         posts.append(post_data.get('post'))
     return {'posts':posts}
+
+
+async def get_my_page_view(user_id: int, db: Session):
+    """
+    Возвращает пользователю информацию о нём
+    Args:
+        user_id (int): id пользователя
+        db (Session): сессия бд
+    Returns:
+        json - данные
+    """
+    user = await get_object_by_id(object_type=User, id=user_id, db=db)
+    posts = await get_users_posts_view(user_id=user_id, db=db)
+    return {
+        'username':user.username,
+        'name':user.name,
+        'surname':user.surname,
+        'email':user.email,
+        'posts': posts.get('posts')
+    }
+
+
+async def get_other_page_view(other_user_id: int, user_id: int, db: Session):
+    """
+    Возвращает пользователю информацию о нём
+    Args:
+        user_id (int): id пользователя
+        db (Session): сессия бд
+    Returns:
+        json - данные
+    """
+    user = await get_object_by_id(object_type=User, id=other_user_id, db=db)
+    posts = await get_users_posts_view(user_id=other_user_id, db=db)
+    return {
+        'username':user.username,
+        'name':user.name,
+        'surname':user.surname,
+        'email':user.email,
+        'posts': posts.get('posts')
+    }
+
