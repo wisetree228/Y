@@ -16,7 +16,8 @@ from .views import (
     get_post_img_view, get_post_view, add_media_to_message_view,
     get_message_img_view, edit_post_view, delete_post_view, delete_comment_view,
     delete_vote_view, delete_message_view, change_avatar_view, get_avatar_view,
-    get_chat_view, get_votes_view, get_users_posts_view
+    get_chat_view, get_votes_view, get_users_posts_view, get_my_page_view,
+    get_other_page_view
 )
 
 from .schemas import (
@@ -451,6 +452,22 @@ async def get_avatar(another_user_id: int, user_id: str = Depends(get_current_us
     return await get_avatar_view(another_user_id = another_user_id, user_id = int(user_id), db=db)
 
 
+@router.get('/mypage/avatar', dependencies=[Depends(security.access_token_required)])
+async def get_avatar(user_id: str = Depends(get_current_user_id),
+    db: Session = Depends(get_db)
+):
+    """
+    Возвращает аватарку пользователя
+    Args:
+        another_user_id (int): id пользователя, аватарку которого мы получаем
+        user_id (str): id пользователя
+        db (Session): сессия бд
+    Returns:
+        StreamingResponse - файл аватарки
+    """
+    return await get_avatar_view(another_user_id = int(user_id), user_id = int(user_id), db=db)
+
+
 @router.get('/chat/{recipient_id}', dependencies=[Depends(security.access_token_required)])
 async def get_chat(recipient_id: int, user_id: str = Depends(get_current_user_id),
     db: Session = Depends(get_db)
@@ -509,3 +526,34 @@ async def get_user_posts(user_id: int, db: Session = Depends(get_db)):
         json - список постов
     """
     return await get_users_posts_view(user_id = user_id, db=db)
+
+
+@router.get('/mypage', dependencies=[Depends(security.access_token_required)])
+async def get_my_page(user_id: str = Depends(get_current_user_id),
+    db: Session = Depends(get_db)
+):
+    """
+    Возвращает пользователю информацию о нём
+    Args:
+        user_id (str): id пользователя
+        db (Session): сессия бд
+    Returns:
+        json - данные
+    """
+    return await get_my_page_view(user_id=int(user_id), db=db)
+
+
+@router.get('/users/{other_user_id}', dependencies=[Depends(security.access_token_required)])
+async def get_other_page(other_user_id: int, user_id: str = Depends(get_current_user_id),
+    db: Session = Depends(get_db)
+):
+    """
+    Возвращает пользователю информацию о пользователе по id
+    Args:
+        other_user_id (int): id пользователя, информацию о котором мы получаем
+        user_id (str): id пользователя
+        db (Session): сессия бд
+    Returns:
+        json - данные
+    """
+    return await get_other_page_view(other_user_id=other_user_id, user_id=int(user_id), db=db)

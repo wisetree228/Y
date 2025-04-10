@@ -22,9 +22,9 @@ class CreatePostData(BaseModel):
 
 class EditProfileFormData(BaseModel):
     email : Optional[EmailStr] = None
-    username: Optional[str] = None
-    name: Optional[str] = None
-    surname: Optional[str] = None
+    username: Optional[constr(min_length=3, max_length=10000)] = None
+    name: Optional[constr(min_length=2, max_length=10000)] = None
+    surname: Optional[constr(min_length=2, max_length=10000)] = None
     password: Optional[str] = None
 
 

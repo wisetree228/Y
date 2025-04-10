@@ -350,21 +350,14 @@ async def get_votes_on_voting_variant(variant_id: int, db: Session) -> List[Vote
     )
     return result.scalars().all()
 
-async def get_user_posts(user_id: int, db: Session):
+async def get_user_posts(user_id: int, db: Session) -> list:
+    """
+    Возвращает посты пользователя
+    Args:
+        user_id (int): id пользователя
+        db (Session): сессия бд
+    Returns:
+        list
+    """
     result_db = await db.execute(select(Post).filter(Post.author_id == user_id))
     return result_db.scalars().all()
-
-
-async def process_voting_variants(variants):
-    if not variants:
-        return []
-
-    total_votes = sum(len(variant.votes) for variant in variants)
-    return [
-        {
-            'id': variant.id,
-            'text': variant.text,
-            'percent': round((len(variant.votes) / total_votes * 100) if total_votes else 0)
-        }
-        for variant in variants
-    ]
