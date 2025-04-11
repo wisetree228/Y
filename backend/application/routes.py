@@ -17,7 +17,7 @@ from .views import (
     get_message_img_view, edit_post_view, delete_post_view, delete_comment_view,
     delete_vote_view, delete_message_view, change_avatar_view, get_avatar_view,
     get_chat_view, get_votes_view, get_users_posts_view, get_my_page_view,
-    get_other_page_view, get_is_friend_view, get_friends_view
+    get_other_page_view, get_is_friend_view, get_friends_view, delete_friend_view
 )
 
 from .schemas import (
@@ -588,3 +588,19 @@ async def get_friends(user_id: str = Depends(get_current_user_id),
         json - данные
     """
     return await get_friends_view(user_id=int(user_id), db=db)
+
+
+@router.delete('/friend/{friend_id}', dependencies=[Depends(security.access_token_required)])
+async def delete_friend(friend_id: int, user_id: str = Depends(get_current_user_id),
+    db: Session = Depends(get_db)
+):
+    """
+    Удаляет друга
+    Args:
+        friend_id (int): id друга
+        user_id (str): id пользователя
+        db (Session): сессия бд
+    Returns:
+        json - статус операции
+    """
+    return await delete_friend_view(friend_id=friend_id, user_id=int(user_id), db=db)

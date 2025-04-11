@@ -769,3 +769,19 @@ async def get_friends_view(user_id: int, db: Session):
         ]
     }
 
+
+async def delete_friend_view(friend_id: int, user_id: int, db: Session):
+    """
+    Удаляет друга
+    Args:
+        friend_id (int): id друга
+        user_id (int): id пользователя
+        db (Session): сессия бд
+    Returns:
+        json - статус операции
+    """
+    friendship = await get_existing_friendship(first_friend_id=friend_id, second_friend_id=user_id, db=db)
+    if friendship:
+        await delete_object(object=friendship, db=db)
+    return {'status':'ok'}
+

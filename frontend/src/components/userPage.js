@@ -9,6 +9,9 @@ const UserChannel = () => {
     const [posts, setPosts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [isFriend, setIsFriend] = useState(false);
+    const [friendshipLoading, setFriendshipLoading] = useState(false);
+    const [friendRequestSent, setFriendRequestSent] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -41,6 +44,13 @@ const UserChannel = () => {
                     setPosts(userResponse.data.posts);
                 }
 
+                // Проверка статуса дружбы
+                const friendStatusResponse = await axios.get(
+                    `${API_BASE_URL}/isfriend/${authorId}`,
+                    { withCredentials: true }
+                );
+                setIsFriend(friendStatusResponse.data.isFriend);
+
 
                 setLoading(false);
             } catch (error) {
@@ -51,7 +61,38 @@ const UserChannel = () => {
         };
 
         fetchData();
-    }, []);
+    }, [authorId, navigate]);
+
+    const handleAddFriend = async () => {
+        try {
+            setFriendshipLoading(true);
+            await axios.post(
+                `${API_BASE_URL}/friendship_request/${authorId}`,
+                {},
+                { withCredentials: true }
+            );
+            setFriendRequestSent(true); // Только отмечаем что запрос отправлен
+        } catch (err) {
+            console.error('Ошибка при отправке запроса:', err);
+        } finally {
+            setFriendshipLoading(false);
+        }
+    };
+
+    const handleRemoveFriend = async () => {
+        try {
+            setFriendshipLoading(true);
+            await axios.delete(
+                `${API_BASE_URL}/friend/${authorId}`,
+                { withCredentials: true }
+            );
+            setIsFriend(false);
+        } catch (err) {
+            console.error('Ошибка при удалении из друзей:', err);
+        } finally {
+            setFriendshipLoading(false);
+        }
+    };
 
     const handleLike = async (postId) => {
         try {
@@ -133,6 +174,23 @@ const UserChannel = () => {
                 <p>{user.email}</p>
             </div>
 
+            <div style={{ marginTop: '15px' }}>
+            {isFriend ? (
+        <button onClick={handleRemoveFriend}>
+            Удалить из друзей
+        </button>
+    ) : (
+        <button 
+            onClick={handleAddFriend}
+            disabled={friendRequestSent || friendshipLoading}
+            style={{
+                backgroundColor: friendRequestSent ? '#ff9800' : '#4CAF50'
+            }}
+        >
+            {friendRequestSent ? 'Запрос отправлен' : 'Добавить в друзья'}
+        </button>
+    )}
+                </div>
        
             {/* Посты пользователя */}
             <div>
