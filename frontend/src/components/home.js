@@ -1,7 +1,34 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import axios from 'axios';
+import { API_BASE_URL } from '../config';
+import { Link, useNavigate } from 'react-router-dom';
 
 const Home = () => {
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        const fetchData = async () => {
+
+            try {
+                // Если это своя страница редиректим на свой профиль
+                const idResponse = await axios.get(`${API_BASE_URL}/my_id`, {
+                    withCredentials: true
+                });
+                if (idResponse.data.id){
+                    navigate('/posts')
+                }
+                
+            } catch (error) {
+                // всё ок
+            }
+
+        };
+
+        fetchData();
+    }, []);
+
+
+
   return (
         <div className="container">
             <div className="background-shapes">

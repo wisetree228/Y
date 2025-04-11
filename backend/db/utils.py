@@ -361,3 +361,31 @@ async def get_user_posts(user_id: int, db: Session) -> list:
     """
     result_db = await db.execute(select(Post).filter(Post.author_id == user_id))
     return result_db.scalars().all()
+
+
+async def get_user_friends(user_id: int, db: Session):
+    """
+    Возвращает список друзей пользователя
+    Args:
+        user_id (int): id пользователя
+        db (Session): сессия бд
+    Returns:
+        list
+    """
+    result_db = await db.execute(select(Friendship).filter(
+        or_(
+            Friendship.first_friend_id==user_id,
+            Friendship.second_friend_id==user_id
+        )
+    ).options(
+        joinedload(Friendship.first_friend),
+        joinedload(Friendship.second_friend)
+    ))
+    friends_list = []
+    for friendship in result_db.scalars().all():
+        if friendship.first_friend_id==user_id:
+            friends_list.append(friendship.second_friend)
+        else:
+            friends_list.append(friendship.first_friend)
+    return friends_list
+
