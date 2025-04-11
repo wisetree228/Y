@@ -13,6 +13,22 @@ const UserChannel = () => {
 
     useEffect(() => {
         const fetchData = async () => {
+
+            try {
+                // Если это своя страница редиректим на свой профиль
+                const idResponse = await axios.get(`${API_BASE_URL}/my_id`, {
+                    withCredentials: true
+                });
+                if (idResponse.data.id===Number(authorId)){
+                    navigate('/home')
+                }
+                
+            } catch (error) {
+                console.error('Ошибка при загрузке данных:', error);
+                setError('Ошибка при загрузке данных');
+                setLoading(false);
+            }
+
             try {
                 // Загрузка данных пользователя
                 const userResponse = await axios.get(`${API_BASE_URL}/users/${authorId}`, {

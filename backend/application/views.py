@@ -7,7 +7,7 @@ from fastapi import (HTTPException, Response, WebSocket, WebSocketDisconnect,
     UploadFile
 )
 from fastapi.responses import StreamingResponse, FileResponse
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
 from backend.db.models import (
@@ -20,7 +20,7 @@ from backend.db.utils import (
     get_user_by_username, get_existing_friendship, get_existing_friendship_request,
     get_all_from_table, get_comments_count, get_post_voting_variants, get_like_status,
     get_images_id_for_post, get_object_by_id, get_post_comments, get_messages_between_two_users,
-    get_images_id_for_message, get_votes_on_voting_variant, get_user_posts
+    get_images_id_for_message, get_votes_on_voting_variant, get_user_posts, get_user_friends
 
 )
 from backend.application.utils import (
@@ -425,13 +425,15 @@ async def get_post_view(post_id: int, user_id: int, db: Session):
     stmt = (
         select(Post)
         .options(
-            selectinload(Post.author),
-            selectinload(Post.voting_variants).selectinload(VotingVariant.votes),
-            selectinload(Post.media),
-            selectinload(Post.likes),
-            selectinload(Post.comments).selectinload(Comment.author)
+            joinedload(Post.author),
+            joinedload(Post.voting_variants).joinedload(VotingVariant.votes),
+            joinedload(Post.media),
+            joinedload(Post.likes),
+            joinedload(Post.comments).joinedload(Comment.author)
         )
         .where(Post.id == post_id)
+        # Убираем дубликаты из JOIN (если нужно)
+        .execution_options(populate_existing=True)
     )
 
     result = await db.execute(stmt)
@@ -728,5 +730,42 @@ async def get_other_page_view(other_user_id: int, user_id: int, db: Session):
         'surname':user.surname,
         'email':user.email,
         'posts': posts.get('posts')
+    }
+
+
+async def get_is_friend_view(friend_id: int, user_id: int, db: Session):
+    """
+    Возвращает пользователю, является ли этот человек другом или нет
+    Args:
+        friend_id_id (int): id пользователя, информацию о котором мы получаем
+        user_id (int): id пользователя
+        db (Session): сессия бд
+    Returns:
+        json - данные
+    """
+    friendship = await get_existing_friendship(first_friend_id=friend_id, second_friend_id=user_id, db=db)
+    if friendship:
+        return {'isFriend':True}
+    return {'isFriend':False}
+
+
+async def get_friends_view(user_id: int, db: Session):
+    """
+    Возвращает массив id пользователя
+    Args:
+        user_id (int): id пользователя
+        db (Session): сессия бд
+    Returns:
+        json - данные
+    """
+    friends_list = await get_user_friends(user_id=user_id, db=db)
+    return {
+        'friends_list':[
+            {
+                'id':friend.id,
+                'username':friend.username
+            }
+            for friend in friends_list
+        ]
     }
 

@@ -25,15 +25,16 @@ const Login = () => {
                 navigate('/posts');
             }
         } catch (err) {
-            if (err.response) {
-                // Получаем статус код ответа
-                const statusCode = err.response.status;
-                if (statusCode === 401){
-                    alert('Неверный пароль!')
-                }else if (statusCode === 402){
-                    alert('Пользователя с таким email не существует!')
-                }
-            }
+            //alert(err)
+            // if (err.response) {
+            //     // Получаем статус код ответа
+            //     const statusCode = err.response.status;
+            //     if (statusCode === 401){
+            //         alert('Неверный пароль!')
+            //     }else if (statusCode === 402){
+            //         alert('Пользователя с таким email не существует!')
+            //     }
+            // }
         }
     };
 

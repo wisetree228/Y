@@ -8,6 +8,9 @@ const MainProfile = () => {
     const [posts, setPosts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [friends, setFriends] = useState([]);
+    const [showFriends, setShowFriends] = useState(false);
+    const [friendsLoading, setFriendsLoading] = useState(false);
     const navigate = useNavigate();
     const [isEditing, setIsEditing] = useState(false);
     const [editData, setEditData] = useState({
@@ -17,6 +20,22 @@ const MainProfile = () => {
         surname: '',
         password: ''
     });
+
+    const fetchFriends = async () => {
+        try {
+            setFriendsLoading(true);
+            const response = await axios.get(`${API_BASE_URL}/friends`, {
+                withCredentials: true
+            });
+            setFriends(response.data.friends_list || []);
+            setShowFriends(!showFriends);
+        } catch (error) {
+            console.error('Ошибка при загрузке друзей:', error);
+        } finally {
+            setFriendsLoading(false);
+        }
+    };
+
 
     useEffect(() => {
         const fetchData = async () => {
@@ -42,8 +61,11 @@ const MainProfile = () => {
             }
         };
 
+
         fetchData();
     }, []);
+
+
 
     const handleLike = async (postId) => {
         try {
@@ -170,6 +192,24 @@ const MainProfile = () => {
                         objectFit: 'cover'
                     }}
                 />
+
+                {/* Кнопка для показа/скрытия списка друзей */}
+                <div style={{ marginTop: '15px' }}>
+                    <button 
+                        onClick={fetchFriends}
+                        disabled={friendsLoading}
+                        style={{ 
+                            padding: '8px 16px',
+                            backgroundColor: '#2196F3',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '4px',
+                            cursor: 'pointer',
+                            marginRight: '10px'
+                        }}
+                    >
+                        {friendsLoading ? 'Загрузка...' : (showFriends ? 'Скрыть друзей' : 'Показать друзей')}
+                    </button>
                 
                 {isEditing ? (
                     <div style={{ marginTop: '20px' }}>
@@ -278,6 +318,69 @@ const MainProfile = () => {
                             Редактировать профиль
                         </button>
                     </>
+                )}
+            </div>
+
+
+            {/* Список друзей */}
+            {showFriends && (
+                    <div style={{ 
+                        marginTop: '20px',
+                        borderTop: '1px solid #eee',
+                        paddingTop: '15px'
+                    }}>
+                        <h3>Друзья</h3>
+                        {friends.length === 0 ? (
+                            <p>У вас пока нет друзей</p>
+                        ) : (
+                            <div style={{ 
+                                display: 'grid',
+                                gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))',
+                                gap: '10px',
+                                marginTop: '10px'
+                            }}>
+                                {friends.map(friend => (
+                                    <Link 
+                                        to={`/users/${friend.id}`} 
+                                        key={friend.id}
+                                        style={{ 
+                                            textDecoration: 'none',
+                                            color: 'inherit',
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            alignItems: 'center',
+                                            padding: '10px',
+                                            borderRadius: '5px',
+                                            border: '1px solid #eee',
+                                            transition: 'background-color 0.2s'
+                                        }}
+                                    >
+                                        <img
+                                            src={`${API_BASE_URL}/user/${friend.id}/avatar`}
+                                            alt={`Аватар ${friend.username}`}
+                                            style={{ 
+                                                width: '50px', 
+                                                height: '50px', 
+                                                borderRadius: '50%',
+                                                objectFit: 'cover',
+                                                marginBottom: '5px'
+                                            }}
+                                            onError={(e) => {
+                                                e.target.src = '/default-avatar.png';
+                                            }}
+                                        />
+                                        <span style={{ 
+                                            fontSize: '0.9rem',
+                                            textAlign: 'center',
+                                            wordBreak: 'break-word'
+                                        }}>
+                                            {friend.username}
+                                        </span>
+                                    </Link>
+                                ))}
+                            </div>
+                        )}
+                    </div>
                 )}
             </div>
 

@@ -1,16 +1,27 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from '../config';
 
 const Posts = () => {
     const [posts, setPosts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const navigate = useNavigate();
   
     useEffect(() => {
+      checkAuthorization();
       fetchPosts();
     }, []);
+
+    const checkAuthorization = async () => {
+      try {
+        const response = await axios.get(API_BASE_URL + '/my_id', { withCredentials: true });
+      } catch (err) {
+        navigate('/')
+      }
+    };
+
 
     const fetchPosts = async () => {
       try {
