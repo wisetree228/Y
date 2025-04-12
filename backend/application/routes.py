@@ -17,7 +17,8 @@ from .views import (
     get_message_img_view, edit_post_view, delete_post_view, delete_comment_view,
     delete_vote_view, delete_message_view, change_avatar_view, get_avatar_view,
     get_chat_view, get_votes_view, get_users_posts_view, get_my_page_view,
-    get_other_page_view, get_is_friend_view, get_friends_view, delete_friend_view
+    get_other_page_view, get_is_friend_view, get_friends_view, delete_friend_view,
+    get_friendship_requests_view, delete_friendship_request_view
 )
 
 from .schemas import (
@@ -604,3 +605,34 @@ async def delete_friend(friend_id: int, user_id: str = Depends(get_current_user_
         json - статус операции
     """
     return await delete_friend_view(friend_id=friend_id, user_id=int(user_id), db=db)
+
+
+@router.get('/friendship_requests', dependencies=[Depends(security.access_token_required)])
+async def get_friendship_requests(user_id: str = Depends(get_current_user_id),
+    db: Session = Depends(get_db)
+):
+    """
+    Возвращает запросы дружбы, отправленные пользователю
+    Args:
+        user_id (str): id пользователя
+        db (Session): сессия бд
+    Returns:
+        json - запросы дружбы
+    """
+    return await get_friendship_requests_view(user_id=int(user_id), db=db)
+
+
+@router.delete('/friendship_request/{request_id}', dependencies=[Depends(security.access_token_required)])
+async def delete_friendship_request(request_id: int, user_id: str = Depends(get_current_user_id),
+    db: Session = Depends(get_db)
+):
+    """
+    Отклоняет входящий запрос дружбы
+    Args:
+        request_id (int): id запроса
+        user_id (str): id пользователя
+        db (Session): сессия бд
+    Returns:
+        json - статус операции
+    """
+    return await delete_friendship_request_view(request_id=request_id, user_id=int(user_id), db=db)

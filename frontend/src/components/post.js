@@ -100,7 +100,7 @@ const Posts = () => {
           >
             <div style={{ display: 'flex', alignItems: 'center', marginBottom: '15px' }}>
               <img
-                src={`${API_BASE_URL}/user/${post.author_id}/avatar`}
+                src={`${API_BASE_URL}/user/${post.author_id}/avatar?t=${Date.now()}`}
                 alt={`Аватар ${post.author_username}`}
                 style={{ 
                   width: '40px', 
@@ -129,7 +129,7 @@ const Posts = () => {
                 {post.images_id.map(imageId => (
                   <img
                     key={imageId}
-                    src={`${API_BASE_URL}/posts/image/${imageId}`}
+                    src={`${API_BASE_URL}/posts/image/${imageId}?t=${Date.now()}`}
                     alt="Изображение поста"
                     style={{
                       width: '100%',

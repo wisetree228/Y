@@ -25,16 +25,13 @@ const Login = () => {
                 navigate('/posts');
             }
         } catch (err) {
-            //alert(err)
-            // if (err.response) {
-            //     // Получаем статус код ответа
-            //     const statusCode = err.response.status;
-            //     if (statusCode === 401){
-            //         alert('Неверный пароль!')
-            //     }else if (statusCode === 402){
-            //         alert('Пользователя с таким email не существует!')
-            //     }
-            // }
+            // alert(err)
+            // alert(err.status)
+            // alert(err.data)
+            // alert(err.response)
+            // alert(err.response.status)
+            // Ничего из этого не работает, хз как поймать ошибку
+            
         }
     };
 

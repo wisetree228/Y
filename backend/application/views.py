@@ -18,9 +18,9 @@ from backend.db.utils import (
     delete_object, add_and_refresh_object, get_user_by_email,
     get_like_on_post_from_user, get_likes_count, get_user_vote,
     get_user_by_username, get_existing_friendship, get_existing_friendship_request,
-    get_all_from_table, get_comments_count, get_post_voting_variants, get_like_status,
-    get_images_id_for_post, get_object_by_id, get_post_comments, get_messages_between_two_users,
-    get_images_id_for_message, get_votes_on_voting_variant, get_user_posts, get_user_friends
+    get_all_from_table, get_post_voting_variants, get_object_by_id,
+    get_messages_between_two_users, get_images_id_for_message, get_votes_on_voting_variant,
+    get_user_posts, get_user_friends, get_friendship_requests_for_user
 
 )
 from backend.application.utils import (
@@ -661,8 +661,11 @@ async def get_votes_view(voting_variant_id: int, user_id: int, db: Session):
         user_id (int): id пользователя (не используется в текущей реализации)
         db (Session): сессия бд
     Returns:
-        dict - список голосовавших в формате {'voted_users': [{'id': int, 'username': str}, ...]}
+        dict - список голосовавших
     """
+    var = await get_object_by_id(object_type=VotingVariant, db=db)
+    if not var:
+        raise HTTPException(status_code=400, detail="Такого варианта не существует!")
     votes = await get_votes_on_voting_variant(variant_id=voting_variant_id, db=db)
 
     return {
@@ -723,6 +726,8 @@ async def get_other_page_view(other_user_id: int, user_id: int, db: Session):
         json - данные
     """
     user = await get_object_by_id(object_type=User, id=other_user_id, db=db)
+    if not user:
+        raise HTTPException(status_code=400, detail="Такого юзера не существует!")
     posts = await get_users_posts_view(user_id=other_user_id, db=db)
     return {
         'username':user.username,
@@ -785,3 +790,41 @@ async def delete_friend_view(friend_id: int, user_id: int, db: Session):
         await delete_object(object=friendship, db=db)
     return {'status':'ok'}
 
+
+async def get_friendship_requests_view(user_id: int, db: Session):
+    """
+    Возвращает запросы дружбы, отправленные пользователю
+    Args:
+        user_id (str): id пользователя
+        db (Session): сессия бд
+    Returns:
+        json - запросы дружбы
+    """
+    result_db = await get_friendship_requests_for_user(user_id=user_id, db=db)
+    return {
+        'friendship_requests':[ {
+            'id':request.id,
+            'author_id':request.author_id,
+            'author_username':request.author.username
+        }
+        for request in result_db.scalars().all() ]
+    }
+
+
+async def delete_friendship_request_view(request_id: int, user_id: int, db: Session):
+    """
+    Отклоняет входящий запрос дружбы
+    Args:
+        request_id (int): id запроса
+        user_id (int): id пользователя
+        db (Session): сессия бд
+    Returns:
+        json - статус операции
+    """
+    request = await get_object_by_id(object_type=FriendshipRequest, id=request_id, db=db)
+    if not request:
+        raise HTTPException(status_code=400, detail="Такого запроса не существует")
+    if request.getter_id!=user_id:
+        raise HTTPException(status_code=400, detail="Этот запрос направлен не вам")
+    await delete_object(object=request, db=db)
+    return {'status':'ok'}
