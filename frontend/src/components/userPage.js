@@ -160,7 +160,7 @@ const UserChannel = () => {
                 textAlign: 'center'
             }}>
                 <img
-                    src={`${API_BASE_URL}/user/${authorId}/avatar`}
+                    src={`${API_BASE_URL}/user/${authorId}/avatar?t=${Date.now()}`}
                     alt={`Аватар ${user.username}`}
                     style={{ 
                         width: '100px', 
@@ -213,7 +213,7 @@ const UserChannel = () => {
                             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                                 <div style={{ display: 'flex', alignItems: 'center', marginBottom: '15px' }}>
                                     <img
-                                        src={`${API_BASE_URL}/mypage/avatar`}
+                                        src={`${API_BASE_URL}/user/${post.author_id}/avatar?t=${Date.now()}`}
                                         alt={`Аватар ${user.username}`}
                                         style={{ 
                                             width: '40px', 
@@ -245,7 +245,7 @@ const UserChannel = () => {
                                     {post.images_id.map(imageId => (
                                         <img
                                             key={imageId}
-                                            src={`${API_BASE_URL}/posts/image/${imageId}`}
+                                            src={`${API_BASE_URL}/posts/image/${imageId}?t=${Date.now()}`}
                                             alt="Изображение поста"
                                             style={{
                                                 width: '100%',

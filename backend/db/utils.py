@@ -174,24 +174,6 @@ async def get_existing_friendship(
     return result.scalars().first()
 
 
-async def get_comments_count(post_id: int, db: Session) -> int:
-    """
-    Получает количество комментариев на посте
-    Args:
-        post_id (int): id поста
-        db (Session): сессия бд
-    Returns:
-        int количество комментариев
-    """
-    count_query = await db.execute(select(
-        func.count()
-    ).select_from(Comment).filter(
-        Comment.post_id==post_id
-    ))
-    count = count_query.scalar()
-    return count
-
-
 async def get_all_from_table(
         object_type: Union[Type[User], Type[Post], Type[Friendship], Type[FriendshipRequest],
         Type[VotingVariant], Type[Like], Type[Message], Type[Vote], Type[MediaInPost],
@@ -227,40 +209,6 @@ async def get_post_voting_variants(post_id: int, db: Session) -> list:
     return result_db.scalars().all()
 
 
-async def get_like_status(user_id: int, post_id: int, db: Session) -> bool:
-    """
-    Определяет, лайкнул ли пользователь пост
-    Args:
-        post_id (int): id поста
-        user_id (int): id юзера
-        db (Session): сессия бд
-    Returns:
-        True или False
-    """
-    result_db = await db.execute(select(Like).filter(
-        and_(Like.post_id==post_id, Like.author_id==user_id)
-    ))
-    if result_db.scalars().first():
-        return True
-    return False
-
-
-async def get_images_id_for_post(post_id: int, db: Session) -> List[int]:
-    """
-    Получает список id картинок в бд, прикреплённых к посту
-    Args:
-        post_id (int): id поста
-        db (Session): сессия бд
-    Returns:
-        list[int]
-    """
-    id_list=[]
-    result_db = await db.execute(select(MediaInPost).filter(MediaInPost.post_id==post_id))
-    for img in result_db.scalars().all():
-        id_list.append(img.id)
-    return id_list
-
-
 async def get_object_by_id(
         object_type: Union[Type[User], Type[Post], Type[Friendship], Type[FriendshipRequest],
         Type[VotingVariant], Type[Like], Type[Message], Type[Vote], Type[MediaInPost],
@@ -278,19 +226,6 @@ async def get_object_by_id(
     """
     result = await db.execute(select(object_type).filter(object_type.id==id))
     return result.scalars().first()
-
-
-async def get_post_comments(post_id: int, db: Session) -> list:
-    """
-    Возвращает список комментариев к посту
-    Args:
-        post_id (int): id поста
-        db (Session): сессия бд
-    Returns:
-        list - список обьектов Comment
-    """
-    result_db = await db.execute(select(Comment).filter(Comment.post_id==post_id))
-    return result_db.scalars().all()
 
 
 async def get_messages_between_two_users(first_user_id: int, second_user_id: int, db: Session) -> list:
@@ -388,4 +323,23 @@ async def get_user_friends(user_id: int, db: Session):
         else:
             friends_list.append(friendship.first_friend)
     return friends_list
+
+
+async def get_friendship_requests_for_user(user_id: int, db: Session):
+    """
+    Возвращает запросы дружбы отправленные пользователю, с
+    информацией об отправителе
+    Args:
+        user_id (int): id пользователя
+        db (Session): сессия бд
+    Returns:
+        массив обьектов
+    """
+    result_db = await db.execute(select(FriendshipRequest).filter(
+        FriendshipRequest.getter_id==user_id
+    ).options(
+        joinedload(FriendshipRequest.author)
+    ))
+    return result_db
+
 

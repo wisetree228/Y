@@ -20,6 +20,56 @@ const MainProfile = () => {
         surname: '',
         password: ''
     });
+    const [friendRequests, setFriendRequests] = useState([]);
+    const [showRequests, setShowRequests] = useState(false);
+    const [requestsLoading, setRequestsLoading] = useState(false);
+
+
+    const fetchFriendRequests = async () => {
+        try {
+            setRequestsLoading(true);
+            const response = await axios.get(`${API_BASE_URL}/friendship_requests`, {
+                withCredentials: true
+            });
+            setFriendRequests(response.data.friendship_requests || []);
+            setShowRequests(!showRequests);
+        } catch (error) {
+            console.error('Ошибка при загрузке запросов дружбы:', error);
+        } finally {
+            setRequestsLoading(false);
+        }
+    };
+
+
+    const handleAcceptRequest = async (authorId) => {
+        try {
+            await axios.post(
+                `${API_BASE_URL}/friendship_request/${authorId}`,
+                {},
+                { withCredentials: true }
+            );
+            // Обновляем список запросов и друзей
+            fetchFriendRequests();
+            fetchFriends();
+        } catch (error) {
+            console.error('Ошибка при принятии запроса:', error);
+        }
+    };
+
+    // Функция для отклонения запроса дружбы
+    const handleRejectRequest = async (requestId) => {
+        try {
+            await axios.delete(
+                `${API_BASE_URL}/friendship_request/${requestId}`,
+                { withCredentials: true }
+            );
+            // Обновляем список запросов
+            fetchFriendRequests();
+        } catch (error) {
+            console.error('Ошибка при отклонении запроса:', error);
+        }
+    };
+
 
     const fetchFriends = async () => {
         try {
@@ -51,6 +101,8 @@ const MainProfile = () => {
                     setPosts(userResponse.data.posts);
                 }
 
+
+                fetchFriendRequests();
                 
 
                 setLoading(false);
@@ -183,15 +235,19 @@ const MainProfile = () => {
                 textAlign: 'center'
             }}>
                 <img
-                    src={`${API_BASE_URL}/mypage/avatar`}
-                    alt={`Аватар ${user.username}`}
-                    style={{ 
-                        width: '100px', 
-                        height: '100px', 
-                        borderRadius: '50%',
-                        objectFit: 'cover'
-                    }}
-                />
+    src={`${API_BASE_URL}/mypage/avatar?t=${Date.now()}`} // Добавляем timestamp для избежания кеширования
+    alt={`Аватар ${user.username}`}
+    style={{ 
+        width: '100px', 
+        height: '100px', 
+        borderRadius: '50%',
+        objectFit: 'cover'
+    }}
+    onError={(e) => {
+        e.target.src = '/default-avatar.png'; // Локальный fallback
+        console.error('Ошибка загрузки аватарки');
+    }}
+/>
 
                 {/* Кнопка для показа/скрытия списка друзей */}
                 <div style={{ marginTop: '15px' }}>
@@ -322,6 +378,116 @@ const MainProfile = () => {
             </div>
 
 
+            {/* Кнопка для запросов дружбы */}
+            <button 
+                    onClick={fetchFriendRequests}
+                    disabled={requestsLoading}
+                    style={{ 
+                        padding: '8px 16px',
+                        backgroundColor: '#FF9800',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '4px',
+                        cursor: 'pointer',
+                        margin: '10px',
+                        position: 'relative'
+                    }}
+                >
+                    {requestsLoading ? 'Загрузка...' : `Запросы дружбы (${friendRequests.length})`}
+                </button>
+
+                {/* Список запросов дружбы */}
+                {showRequests && (
+                    <div style={{ 
+                        marginTop: '20px',
+                        borderTop: '1px solid #eee',
+                        paddingTop: '15px'
+                    }}>
+                        <h3>Входящие запросы дружбы</h3>
+                        {friendRequests.length === 0 ? (
+                            <p>Нет входящих запросов</p>
+                        ) : (
+                            <div style={{ 
+                                display: 'grid',
+                                gridTemplateColumns: '1fr',
+                                gap: '10px',
+                                marginTop: '10px'
+                            }}>
+                                {friendRequests.map(request => (
+                                    <div 
+                                        key={request.id}
+                                        style={{ 
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'space-between',
+                                            padding: '10px',
+                                            border: '1px solid #eee',
+                                            borderRadius: '5px'
+                                        }}
+                                    >
+                                        <Link 
+                                            to={`/users/${request.author_id}`}
+                                            style={{ 
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                textDecoration: 'none',
+                                                color: 'inherit',
+                                                flexGrow: 1
+                                            }}
+                                        >
+                                            <img
+                                                src={`${API_BASE_URL}/user/${request.author_id}/avatar?t=${Date.now()}`}
+                                                alt={`Аватар ${request.author_username}`}
+                                                style={{ 
+                                                    width: '40px', 
+                                                    height: '40px', 
+                                                    borderRadius: '50%',
+                                                    objectFit: 'cover',
+                                                    marginRight: '10px'
+                                                }}
+                                                onError={(e) => {
+                                                    e.target.src = '/default-avatar.png';
+                                                }}
+                                            />
+                                            <span>{request.author_username}</span>
+                                        </Link>
+                                        <div>
+                                            <button 
+                                                onClick={() => handleAcceptRequest(request.author_id)}
+                                                style={{ 
+                                                    padding: '5px 10px',
+                                                    backgroundColor: '#4CAF50',
+                                                    color: 'white',
+                                                    border: 'none',
+                                                    borderRadius: '4px',
+                                                    cursor: 'pointer',
+                                                    marginRight: '5px'
+                                                }}
+                                            >
+                                                Принять
+                                            </button>
+                                            <button 
+                                                onClick={() => handleRejectRequest(request.id)}
+                                                style={{ 
+                                                    padding: '5px 10px',
+                                                    backgroundColor: '#f44336',
+                                                    color: 'white',
+                                                    border: 'none',
+                                                    borderRadius: '4px',
+                                                    cursor: 'pointer'
+                                                }}
+                                            >
+                                                Отклонить
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                )}
+
+
             {/* Список друзей */}
             {showFriends && (
                     <div style={{ 
@@ -356,7 +522,7 @@ const MainProfile = () => {
                                         }}
                                     >
                                         <img
-                                            src={`${API_BASE_URL}/user/${friend.id}/avatar`}
+                                            src={`${API_BASE_URL}/user/${friend.id}/avatar?t=${Date.now()}`}
                                             alt={`Аватар ${friend.username}`}
                                             style={{ 
                                                 width: '50px', 
@@ -406,16 +572,19 @@ const MainProfile = () => {
                         >
                             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                                 <div style={{ display: 'flex', alignItems: 'center', marginBottom: '15px' }}>
-                                    <img
-                                        src={`${API_BASE_URL}/mypage/avatar`}
-                                        alt={`Аватар ${user.username}`}
-                                        style={{ 
-                                            width: '40px', 
-                                            height: '40px', 
-                                            borderRadius: '50%',
-                                            marginRight: '10px'
-                                        }}
-                                    />
+                                <img
+                                    src={`${API_BASE_URL}/user/${post.author_id}/avatar?t=${Date.now()}`}
+                                    alt={`Аватар ${post.author_username}`}
+                                    style={{ 
+                                        width: '40px', 
+                                        height: '40px', 
+                                        borderRadius: '50%',
+                                        marginRight: '10px'
+                                    }}
+                                    onError={(e) => {
+                                        e.target.src = '/default-avatar.png';
+                                    }}
+                                />
                                     <div>
                                         <p style={{ fontWeight: 'bold', margin: 0 }}>{user.username}</p>
                                         <p style={{ color: '#666', fontSize: '0.8rem', margin: 0 }}>
@@ -466,7 +635,7 @@ const MainProfile = () => {
                                     {post.images_id.map(imageId => (
                                         <img
                                             key={imageId}
-                                            src={`${API_BASE_URL}/posts/image/${imageId}`}
+                                            src={`${API_BASE_URL}/posts/image/${imageId}?t=${Date.now()}`}
                                             alt="Изображение поста"
                                             style={{
                                                 width: '100%',
