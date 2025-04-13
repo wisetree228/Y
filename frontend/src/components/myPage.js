@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from '../config';
@@ -23,6 +23,52 @@ const MainProfile = () => {
     const [friendRequests, setFriendRequests] = useState([]);
     const [showRequests, setShowRequests] = useState(false);
     const [requestsLoading, setRequestsLoading] = useState(false);
+    const fileInputRef = useRef(null);
+
+
+    const handleAvatarChange = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        // Проверка типа файла
+        if (!file.type.match('image.*')) {
+            alert('Пожалуйста, выберите файл изображения (JPEG, PNG и т.д.)');
+            return;
+        }
+
+        // Проверка размера файла (например, не более 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+            alert('Файл слишком большой. Максимальный размер - 5MB');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('uploaded_file', file);
+
+        try {
+            await axios.post(`${API_BASE_URL}/avatar`, formData, {
+                withCredentials: true,
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
+            
+            // Обновляем аватар, добавляя timestamp для избежания кеширования
+            setUser(prev => ({
+                ...prev,
+                avatar: `${API_BASE_URL}/mypage/avatar?t=${Date.now()}`
+            }));
+            
+            alert('Аватар успешно обновлен!');
+        } catch (error) {
+            console.error('Ошибка при обновлении аватара:', error);
+            //setError(error.response?.data?.detail || 'Ошибка при обновлении аватара');
+        }
+    };
+
+    const triggerFileInput = () => {
+        fileInputRef.current.click();
+    };
 
 
     const fetchFriendRequests = async () => {
@@ -234,20 +280,52 @@ const MainProfile = () => {
                 backgroundColor: '#fff',
                 textAlign: 'center'
             }}>
-                <img
-    src={`${API_BASE_URL}/mypage/avatar?t=${Date.now()}`} // Добавляем timestamp для избежания кеширования
-    alt={`Аватар ${user.username}`}
-    style={{ 
-        width: '100px', 
-        height: '100px', 
-        borderRadius: '50%',
-        objectFit: 'cover'
-    }}
-    onError={(e) => {
-        e.target.src = '/default-avatar.png'; // Локальный fallback
-        console.error('Ошибка загрузки аватарки');
-    }}
-/>
+                <div style={{ position: 'relative', display: 'inline-block' }}>
+                    <img
+                        src={`${API_BASE_URL}/mypage/avatar?t=${Date.now()}`}
+                        alt={`Аватар ${user.username}`}
+                        style={{ 
+                            width: '100px', 
+                            height: '100px', 
+                            borderRadius: '50%',
+                            objectFit: 'cover',
+                            cursor: 'pointer'
+                        }}
+                        onClick={triggerFileInput}
+                        onError={(e) => {
+                            e.target.src = '/default-avatar.png';
+                            console.error('Ошибка загрузки аватарки');
+                        }}
+                    />
+                    <button 
+                        onClick={triggerFileInput}
+                        style={{
+                            position: 'absolute',
+                            bottom: '0',
+                            right: '0',
+                            background: '#2196F3',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '50%',
+                            width: '30px',
+                            height: '30px',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                        }}
+                    >
+                        ✏️
+                    </button>
+                </div>
+                
+                <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleAvatarChange}
+                    accept="image/*"
+                    style={{ display: 'none' }}
+                />
 
                 {/* Кнопка для показа/скрытия списка друзей */}
                 <div style={{ marginTop: '15px' }}>
