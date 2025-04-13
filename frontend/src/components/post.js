@@ -84,7 +84,19 @@ const Posts = () => {
         <h1>Посты</h1>
         <Link to="/home">
           <button style={{ marginTop: '10px' }}>Профиль</button>
-        </Link>
+        </Link><br></br>
+        <Link to="/create-post">
+              <button style={{ 
+                backgroundColor: '#4CAF50',
+                color: 'white',
+                border: 'none',
+                padding: '10px 15px',
+                borderRadius: '4px',
+                cursor: 'pointer'
+              }}>
+                Создать пост
+              </button>
+            </Link>
         
         {posts.map(post => (
           <div 
