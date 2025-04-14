@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from '../config';
+import CheckAuthorization from '../utils';
 
 const PostComments = () => {
     const { postId } = useParams(); 
@@ -16,6 +17,7 @@ const PostComments = () => {
     useEffect(() => {
         const fetchPost = async () => {
             try {
+                await CheckAuthorization();
                 const response = await axios.get(`${API_BASE_URL}/posts/${postId}`, { 
                     withCredentials: true 
                 });

@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from '../config';
+import CheckAuthorization from '../utils';
 
 const MainProfile = () => {
     const [user, setUser] = useState(null);
@@ -137,6 +138,7 @@ const MainProfile = () => {
         const fetchData = async () => {
             try {
                 // Загрузка данных пользователя
+                await CheckAuthorization();
                 const userResponse = await axios.get(`${API_BASE_URL}/mypage`, {
                     withCredentials: true
                 });
