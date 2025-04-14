@@ -10,7 +10,6 @@ const Home = () => {
         const fetchData = async () => {
 
             try {
-                // Если это своя страница редиректим на свой профиль
                 const idResponse = await axios.get(`${API_BASE_URL}/my_id`, {
                     withCredentials: true
                 });

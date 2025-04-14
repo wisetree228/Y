@@ -8,6 +8,7 @@ import PostComments from './components/PostComments';
 import UserChannel from './components/userPage';
 import MainProfile from './components/myPage';
 import CreatePost from './components/create_post';
+import Chat from './components/oneChat';
 
 const App = () => {
   return (
@@ -21,6 +22,7 @@ const App = () => {
         <Route path="/users/:authorId" element={<UserChannel />} />
         <Route path="/home" element={<MainProfile />} />
         <Route path="/create-post" element={<CreatePost />} />
+        <Route path="/chat/:userId" element={<Chat />} />
       </Routes>
     </Router>
   );

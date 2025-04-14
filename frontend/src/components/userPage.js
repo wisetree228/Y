@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { API_BASE_URL } from '../config';
+import CheckAuthorization from '../utils';
 
 const UserChannel = () => {
     const [user, setUser] = useState(null);
@@ -16,7 +17,7 @@ const UserChannel = () => {
 
     useEffect(() => {
         const fetchData = async () => {
-
+            await CheckAuthorization();
             try {
                 // Если это своя страница редиректим на свой профиль
                 const idResponse = await axios.get(`${API_BASE_URL}/my_id`, {
@@ -176,9 +177,17 @@ const UserChannel = () => {
 
             <div style={{ marginTop: '15px' }}>
             {isFriend ? (
-        <button onClick={handleRemoveFriend}>
-            Удалить из друзей
-        </button>
+        <>
+            <button onClick={handleRemoveFriend}>
+                Удалить из друзей
+            </button>
+            {/* Кнопка для чата */}
+            <Link to={`/chat/${authorId}`} style={{ marginLeft: '10px' }}>
+                <button>
+                    Чат
+                </button>
+            </Link>
+        </>
     ) : (
         <button 
             onClick={handleAddFriend}
@@ -190,7 +199,7 @@ const UserChannel = () => {
             {friendRequestSent ? 'Запрос отправлен' : 'Добавить в друзья'}
         </button>
     )}
-                </div>
+            </div>
        
             {/* Посты пользователя */}
             <div>

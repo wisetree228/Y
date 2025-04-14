@@ -1,12 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from '../config';
+import CheckAuthorization from '../utils';
 
 const CreatePost = () => {
     const [postText, setPostText] = useState('');
     const [options, setOptions] = useState(['']); // Начальное состояние с одним пустым полем
     const navigate = useNavigate();
+
+    useEffect(() => {
+        CheckAuthorization();
+        
+    }, []);
 
     const handlePostTextChange = (e) => {
         setPostText(e.target.value);
