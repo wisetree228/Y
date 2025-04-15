@@ -134,6 +134,31 @@ const MainProfile = () => {
     };
 
 
+    const handleDeletePost = async (postId) => {
+        // Подтверждение удаления
+        const isConfirmed = window.confirm('Вы уверены, что хотите удалить этот пост?');
+        
+        if (!isConfirmed) return;
+    
+        try {
+            await axios.delete(`${API_BASE_URL}/post/${postId}`, {
+                withCredentials: true
+            });
+            
+            // Обновляем список постов после удаления
+            const response = await axios.get(`${API_BASE_URL}/mypage`, {
+                withCredentials: true
+            });
+            setPosts(response.data.posts || []);
+            
+            alert('Пост успешно удален');
+        } catch (error) {
+            console.error('Ошибка при удалении поста:', error);
+            alert('Не удалось удалить пост');
+        }
+    };
+
+
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -207,16 +232,8 @@ const MainProfile = () => {
         }
     };
 
-    const handleDeletePost = async (postId) => {
-        // Заглушка для удаления поста
-        console.log(`Удаление поста с ID: ${postId}`);
-        alert('Функция удаления поста будет реализована позже');
-    };
-
     const handleEditPost = async (postId) => {
-        // Заглушка для редактирования поста
-        console.log(`Редактирование поста с ID: ${postId}`);
-        alert('Функция редактирования поста будет реализована позже');
+        navigate(`/edit_post/${postId}`);
     };
 
 
