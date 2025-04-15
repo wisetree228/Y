@@ -502,7 +502,7 @@ async def edit_post_view(data: EditPostData, post_id: int, user_id: int, db: Ses
     if data.text:
         post.text = data.text
         await db.commit()
-    if data.options:
+    if data.options!=None:
         old_options = await get_post_voting_variants(post_id = post_id, db = db)
         for option in old_options:
             await delete_object(object = option, db = db)
@@ -828,3 +828,26 @@ async def delete_friendship_request_view(request_id: int, user_id: int, db: Sess
         raise HTTPException(status_code=400, detail="Этот запрос направлен не вам")
     await delete_object(object=request, db=db)
     return {'status':'ok'}
+
+
+async def delete_post_image_view(image_id: int, user_id: int, db: Session):
+    """
+    Удаляет изображение прикреплённое к посту
+    Args:
+        image_id (int): id картинки
+        user_id (int): id пользователя
+        db (Session): сессия бд
+    Returns:
+        json - статус операции
+    """
+    result = await db.execute(select(MediaInPost).options(
+        joinedload(MediaInPost.post)
+    ).where(MediaInPost.id == image_id))
+    image = result.scalars().first()
+    if not image:
+        raise HTTPException(status_code=400, detail="Такой картинки не существует!")
+    if image.post.author_id!=user_id:
+        raise HTTPException(status_code=400, detail="Вы не автор поста!")
+    await delete_object(object=image, db=db)
+    return {'status':'ok'}
+

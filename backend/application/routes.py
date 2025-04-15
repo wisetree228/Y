@@ -18,7 +18,8 @@ from .views import (
     delete_vote_view, delete_message_view, change_avatar_view, get_avatar_view,
     get_chat_view, get_votes_view, get_users_posts_view, get_my_page_view,
     get_other_page_view, get_is_friend_view, get_friends_view, delete_friend_view,
-    get_friendship_requests_view, delete_friendship_request_view
+    get_friendship_requests_view, delete_friendship_request_view,
+    delete_post_image_view
 )
 
 from .schemas import (
@@ -636,3 +637,19 @@ async def delete_friendship_request(request_id: int, user_id: str = Depends(get_
         json - статус операции
     """
     return await delete_friendship_request_view(request_id=request_id, user_id=int(user_id), db=db)
+
+
+@router.delete('/posts/image/{image_id}', dependencies=[Depends(security.access_token_required)])
+async def delete_post_image(image_id: int, user_id: str = Depends(get_current_user_id),
+    db: Session = Depends(get_db)
+):
+    """
+    Удаляет изображение прикреплённое к посту
+    Args:
+        image_id (int): id картинки
+        user_id (str): id пользователя
+        db (Session): сессия бд
+    Returns:
+        json - статус операции
+    """
+    return await delete_post_image_view(image_id=image_id, user_id=int(user_id), db=db)
