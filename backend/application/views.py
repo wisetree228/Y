@@ -552,19 +552,27 @@ async def delete_comment_view(comment_id: int, user_id: int, db: AsyncSession):
     return {'status': 'ok'}
 
 
-async def delete_vote_view(variant_id: int, user_id: int, db: AsyncSession):
+async def delete_vote_view(post_id: int, user_id: int, db: AsyncSession):
     """
-    Удаляет голос пользователя на варианте голосования
+    Удаляет голос пользователя на варианте голосования в посте
     Args:
-        variant_id (int): id варианта голосования
+        post_id (int): id поста
         user_id (int): ID пользователя.
         db (AsyncSession): сессия бд
     Returns:
         json - статус операции
     """
-    vote = await get_user_vote(var_id=variant_id, user_id=user_id, db=db)
-    if vote:
-        await delete_object(object=vote, db=db)
+    result = await db.execute(select(Post).where(Post.id==post_id).options(
+        joinedload(Post.voting_variants)
+    ))
+    post = result.scalars().first()
+    if not post:
+        raise HTTPException(status_code=400, detail="Такого поста не существует")
+    for var in post.voting_variants:
+        vote = await get_user_vote(var_id=var.id, user_id=user_id, db=db)
+        if vote:
+            await delete_object(object=vote, db=db)
+    await db.commit()
     return {'status':'ok'}
 
 

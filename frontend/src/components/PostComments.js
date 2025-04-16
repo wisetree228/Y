@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { useParams, useLocation, useNavigate } from 'react-router-dom';
+import { useParams, useLocation, useNavigate, Link } from 'react-router-dom';
 import { API_BASE_URL } from '../config';
 import CheckAuthorization from '../utils';
 
@@ -13,6 +13,7 @@ const PostComments = () => {
     const [error, setError] = useState('');
     const [newComment, setNewComment] = useState('');
     const [images, setImages] = useState([]);
+    const [currentUserId, setCurrentUserId] = useState(null);
 
     useEffect(() => {
         const fetchPost = async () => {
@@ -39,7 +40,19 @@ const PostComments = () => {
             }
         };
 
+        const fetchId = async() => {
+            const userResponse = await axios.get(`${API_BASE_URL}/my_id`, { 
+            withCredentials: true 
+            });
+        setCurrentUserId(userResponse.data.id);
+        
+        }
+
+        fetchId();
+        //alert(currentUserId);
         fetchPost();
+
+        
     }, [postId]);
 
     const handleLike = async () => {
@@ -95,6 +108,41 @@ const PostComments = () => {
             alert(error.response?.data?.detail || 'Ошибка при добавлении комментария');
         }
     };
+
+    const handleDeleteVote = async (postId) => {
+        try {
+          await axios.delete(
+            `${API_BASE_URL}/vote/${postId}`,
+            { withCredentials: true }
+          );
+        } catch (err) {
+          console.error('Ошибка при удалении голоса:', err);
+        }
+        const response = await axios.get(`${API_BASE_URL}/posts/${postId}`, { 
+            withCredentials: true 
+        });
+        const postData = response.data.post;
+        setPost(postData);
+      };
+    
+
+      const handleDeleteComment = async (commentId) => {
+        try {
+            await axios.delete(`${API_BASE_URL}/comment/${commentId}`, { 
+                withCredentials: true 
+            });
+            
+            // Обновляем данные поста
+            const response = await axios.get(`${API_BASE_URL}/posts/${postId}`, { 
+                withCredentials: true 
+            });
+            setPost(response.data.post);
+        } catch (error) {
+            console.error('Ошибка при удалении комментария:', error);
+            alert(error.response?.data?.detail || 'Ошибка при удалении комментария');
+        }
+    };
+
 
     if (loading) {
         return <p>Загрузка...</p>;
@@ -223,6 +271,21 @@ const PostComments = () => {
                 )}
             </div>
 
+            <button 
+              onClick={() => handleDeleteVote(postId)}
+              style={{
+                backgroundColor: '#f44336',
+                color: 'white',
+                border: 'none',
+                padding: '5px 10px',
+                borderRadius: '4px',
+                margintop: '10px',
+                cursor: 'pointer'
+              }}
+            >
+              Удалить мой голос
+            </button>
+
             <div style={{ marginBottom: '30px' }}>
                 <h3>Добавить комментарий:</h3>
                 <form onSubmit={handleCommentSubmit}>
@@ -272,12 +335,29 @@ const PostComments = () => {
                             }}
                         >
                             <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
+                            
+                            <Link 
+                                to={`/users/${comment.author_id}`}
+                                style={{ 
+                                    display: 'flex', 
+                                    alignItems: 'center', 
+                                    marginBottom: '10px',
+                                    textDecoration: 'none',
+                                    color: 'inherit'
+                                }}
+                            >
                                 <strong style={{ marginRight: '10px' }}>{comment.author_username}</strong>
                                 <small style={{ color: '#666' }}>
                                     {new Date(comment.created_at).toLocaleString()}
                                 </small>
+                            </Link>
                             </div>
                             <p style={{ margin: 0 }}>{comment.text}</p>
+                            {currentUserId === comment.author_id && (
+    <button onClick={() => handleDeleteComment(comment.id)}>
+        Удалить
+    </button>
+)}
                         </div>
                     ))
                 )}

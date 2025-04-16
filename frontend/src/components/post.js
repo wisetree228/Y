@@ -71,6 +71,18 @@ const Posts = () => {
         console.error('Ошибка при голосовании:', err);
       }
     };
+
+    const handleDeleteVote = async (postId) => {
+      try {
+        await axios.delete(
+          `${API_BASE_URL}/vote/${postId}`,
+          { withCredentials: true }
+        );
+        fetchPosts(); // Обновляем список постов
+      } catch (err) {
+        console.error('Ошибка при удалении голоса:', err);
+      }
+    };
   
     if (loading) {
       return <p>Загрузка...</p>;
@@ -212,6 +224,25 @@ const Posts = () => {
                 <button>Комментарии</button>
               </Link>
             </div>
+
+            {post.voting_variants.length > 0 && (
+              <button 
+              onClick={() => handleDeleteVote(post.id)}
+              style={{
+                backgroundColor: '#f44336',
+                color: 'white',
+                border: 'none',
+                padding: '5px 10px',
+                borderRadius: '4px',
+                margintop: '10px',
+                cursor: 'pointer'
+              }}
+            >
+              Удалить мой голос
+            </button>
+            )}
+            
+
             
             <small>{new Date(post.created_at).toLocaleDateString()}</small>
           </div>
