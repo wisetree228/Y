@@ -392,20 +392,20 @@ async def delete_comment(
     return await delete_comment_view(comment_id=comment_id, user_id=int(user_id), db=db)
 
 
-@router.delete('/vote/{variant_id}', dependencies=[Depends(security.access_token_required)])
+@router.delete('/vote/{post_id}', dependencies=[Depends(security.access_token_required)])
 async def delete_vote(
-    variant_id: int, db: SessionDep, user_id: str = Depends(get_current_user_id)
+    post_id: int, db: SessionDep, user_id: str = Depends(get_current_user_id)
 ) -> dict:
     """
-    Удаляет голос пользователя на варианте голосования
+    Удаляет голос пользователя на варианте голосования в посте
     Args:
-        variant_id (int): id варианта голосования
+        post_id (int): id поста
         user_id (str): ID пользователя.
         db (AsyncSession): сессия бд
     Returns:
         json - статус операции
     """
-    return await delete_vote_view(variant_id=variant_id, user_id=int(user_id), db=db)
+    return await delete_vote_view(post_id=post_id, user_id=int(user_id), db=db)
 
 
 @router.delete('/message/{message_id}', dependencies=[Depends(security.access_token_required)])

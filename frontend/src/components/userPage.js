@@ -135,6 +135,21 @@ const UserChannel = () => {
         }
     };
 
+    const handleDeleteVote = async (postId) => {
+        try {
+          await axios.delete(
+            `${API_BASE_URL}/vote/${postId}`,
+            { withCredentials: true }
+          );
+          const updatedPosts = await axios.get(`${API_BASE_URL}/users/${authorId}/posts`, {
+            withCredentials: true
+        });
+        setPosts(updatedPosts.data.posts || []);
+        } catch (err) {
+          console.error('Ошибка при удалении голоса:', err);
+        }
+      };
+
     
 
     if (loading) {
@@ -315,6 +330,23 @@ const UserChannel = () => {
                                         💬 {post.comments_count} комментариев
                                     </button>
                                 </Link>
+
+                                {post.voting_variants.length > 0 && (
+              <button 
+              onClick={() => handleDeleteVote(post.id)}
+              style={{
+                backgroundColor: '#f44336',
+                color: 'white',
+                border: 'none',
+                padding: '5px 10px',
+                borderRadius: '4px',
+                margintop: '10px',
+                cursor: 'pointer'
+              }}
+            >
+              Удалить мой голос
+            </button>
+            )}
                             </div>
                         </div>
                     ))
