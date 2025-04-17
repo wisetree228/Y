@@ -5,6 +5,8 @@ from fastapi import Request, HTTPException, status
 from jose import JWTError, jwt
 from fastapi import WebSocket
 from typing import Dict
+from datetime import datetime
+import json
 
 # Настройка контекста для хэширования
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -91,6 +93,7 @@ class WebSocketConnectionManager:
     """
     Упрощает обработку websocket-соединений
     """
+
     def __init__(self):
         self.active_connections: Dict[str, WebSocket] = {}
 
@@ -102,11 +105,36 @@ class WebSocketConnectionManager:
         if user_id in self.active_connections:
             del self.active_connections[user_id]
 
-    async def send_personal_message(self, message: str, user_id: str):
+    async def send_personal_message(self, author_id: str, text: str, user_id: str):
+        """
+        Отправляет персональное сообщение в формате JSON
+
+        Args:
+            author_id: ID отправителя
+            text: Текст сообщения
+            user_id: ID получателя
+        """
         if user_id in self.active_connections:
-            await self.active_connections[user_id].send_text(message)
+            message_data = {
+                'author_id': author_id,
+                'text': text,
+                'created_at': datetime.now().isoformat()
+            }
+            await self.active_connections[user_id].send_text(json.dumps(message_data))
 
-    async def broadcast(self, message: str):
+    async def broadcast(self, author_id: str, text: str):
+        """
+        Рассылает сообщение всем подключенным клиентам в формате JSON
+
+        Args:
+            author_id: ID отправителя
+            text: Текст сообщения
+        """
+        message_data = {
+            'author_id': author_id,
+            'text': text,
+            'created_at': datetime.now().isoformat()
+        }
+        json_message = json.dumps(message_data)
         for connection in self.active_connections.values():
-            await connection.send_text(message)
-
+            await connection.send_text(json_message)
