@@ -656,3 +656,33 @@ async def delete_post_image(
         json - статус операции
     """
     return await delete_post_image_view(image_id=image_id, user_id=int(user_id), db=db)
+
+
+
+
+@router.get('/complaint_post/{post_id}', dependencies=[Depends(security.access_token_required)])
+async def complaint_post(post_id: int, user_id: str = Depends(get_current_user_id), db: Session = Depends(get_db)):
+    """
+    Возвращает список голосовавших за вариант голосования в посте
+    Args:
+        post_id (int): id поста 
+        user_id (str): id пользователя
+        db (Session): сессия бд
+    Returns:
+        json - статус операции
+    """
+    return await complaint_post_view(post_id = post_id, user_id = int(user_id), db=db)
+
+
+@router.get('/complaint_comment/{comment_id}', dependencies=[Depends(security.access_token_required)])
+async def complaint_comment(comment_id: int, user_id: str = Depends(get_current_user_id), db: Session = Depends(get_db)):
+    """
+    Возвращает список голосовавших за вариант голосования в посте
+    Args:
+        comment_id (int): id поста 
+        user_id (str): id пользователя
+        db (Session): сессия бд
+    Returns:
+        json - статус операции
+    """
+    return await complaint_comment_view(comment_id = comment_id, user_id = int(user_id), db=db)

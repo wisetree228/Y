@@ -13,7 +13,7 @@ from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
 from backend.db.models import (
     User, Post, Comment, Vote, VotingVariant, Message, Friendship, FriendshipRequest, Like,
-    MediaInPost, MediaInMessage
+    MediaInPost, MediaInMessage, ComplaintAboutPost, ComplaintAboutComment
 )
 from backend.db.utils import (
     delete_object, add_and_refresh_object, get_user_by_email,
@@ -860,3 +860,44 @@ async def delete_post_image_view(image_id: int, user_id: int, db: AsyncSession):
     await delete_object(object=image, db=db)
     return {'status':'ok'}
 
+
+async def complaint_post_view(post_id: int, user_id: int, db: AsyncSession):
+    """
+    Создание жалобы о посте
+    Args:
+        post_id (int): id поста
+        user_id (str): ID пользователя.
+        db (AsyncSession): Сессия базы данных.
+    Returns:
+        dict: Статус операции
+    """
+    post = await get_object_by_id(object_type=Post, id=post_id, db=db)
+    
+    if not post:
+        raise HTTPException(status_code=404, detail="Пост не найден")
+
+    new_complaint = ComplaintAboutPost(post_id=post_id, author_id=post.author_id)
+
+    await add_and_refresh_object(object=new_complaint, db=db)
+    return {'status': 'ok'}
+
+
+async def complaint_comment_view(comment_id: int, user_id: int, db: AsyncSession):
+    """
+    Создание жалобы о комментарии
+    Args:
+        post_id (int): id поста
+        user_id (str): ID пользователя.
+        db (AsyncSession): Сессия базы данных.
+    Returns:
+        dict: Статус операции
+    """
+    comment = await get_object_by_id(object_type=Comment, id=comment_id, db=db)
+    
+    if not comment:
+        raise HTTPException(status_code=404, detail="Комментарий не найден")
+
+    new_complaint = ComplaintAboutComment(comment_id=comment_id, author_id=comment.author_id)
+
+    await add_and_refresh_object(object=new_complaint, db=db)
+    return {'status': 'ok'}
