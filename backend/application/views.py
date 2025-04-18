@@ -7,7 +7,8 @@ from fastapi import (HTTPException, Response, WebSocket, WebSocketDisconnect,
     UploadFile
 )
 from fastapi.responses import StreamingResponse, FileResponse
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import joinedload
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
 from backend.db.models import (
@@ -18,12 +19,13 @@ from backend.db.utils import (
     delete_object, add_and_refresh_object, get_user_by_email,
     get_like_on_post_from_user, get_likes_count, get_user_vote,
     get_user_by_username, get_existing_friendship, get_existing_friendship_request,
-    get_all_from_table, get_comments_count, get_post_voting_variants, get_like_status,
-    get_images_id_for_post, get_object_by_id, get_post_comments, get_messages_between_two_users,
-    get_images_id_for_message, get_votes_on_voting_variant
+    get_all_from_table, get_post_voting_variants, get_object_by_id,
+    get_messages_between_two_users, get_images_id_for_message, get_votes_on_voting_variant,
+    get_user_posts, get_user_friends, get_friendship_requests_for_user
+
 )
 from backend.application.utils import (
-    hash_password, verify_password, WebSocketConnectionManager
+    hash_password, verify_password, WebSocketConnectionManager, process_voting_variants
 )
 from .schemas import (
     RegisterFormData, LoginFormData, CreatePostData, CreateCommentData, EditProfileFormData,
@@ -32,14 +34,14 @@ from .schemas import (
 from .config import config, security
 
 
-async def register_view(data: RegisterFormData, response: Response, db: Session) -> dict:
+async def register_view(data: RegisterFormData, response: Response, db: AsyncSession) -> dict:
     """
     Регистрирует нового пользователя.
 
     Args:
         data (RegisterFormData): Данные для регистрации.
         response (Response): Объект ответа FastAPI.
-        db (Session): Сессия базы данных.
+        db (AsyncSession): Сессия базы данных.
 
     Returns:
         dict: Статус операции.
@@ -72,14 +74,14 @@ async def register_view(data: RegisterFormData, response: Response, db: Session)
     return {'status': 'ok'}
 
 
-async def login_view(data: LoginFormData, response: Response, db: Session) -> dict:
+async def login_view(data: LoginFormData, response: Response, db: AsyncSession) -> dict:
     """
     Аутентифицирует пользователя.
 
     Args:
         data (LoginFormData): Данные для входа.
         response (Response): Объект ответа FastAPI.
-        db (Session): Сессия базы данных.
+        db (AsyncSession): Сессия базы данных.
 
     Returns:
         dict: Токен аутентификации.
@@ -87,7 +89,7 @@ async def login_view(data: LoginFormData, response: Response, db: Session) -> di
     user = await get_user_by_email(data.email, db)
     if not user:
         raise HTTPException(
-            status_code=401,
+            status_code=402,
             detail="Пользователя с таким email не существует! Зарегистрируйтесь, пожалуйста."
         )
     if not verify_password(user.password, data.password):
@@ -98,14 +100,14 @@ async def login_view(data: LoginFormData, response: Response, db: Session) -> di
     return {"auth_token": token}
 
 
-async def create_post_view(data: CreatePostData, user_id: int, db: Session) -> dict:
+async def create_post_view(data: CreatePostData, user_id: int, db: AsyncSession) -> dict:
     """
     Создает новый пост.
 
     Args:
         data (CreatePostData): Данные для создания поста.
         user_id (int): ID автора поста.
-        db (Session): Сессия базы данных.
+        db (AsyncSession): Сессия базы данных.
 
     Returns:
         dict: Статус операции.
@@ -122,14 +124,14 @@ async def create_post_view(data: CreatePostData, user_id: int, db: Session) -> d
 
 
 async def create_friendship_request_view(
-        author_id: int, getter_id: int, db: Session) -> dict:
+        author_id: int, getter_id: int, db: AsyncSession) -> dict:
     """
     Создает запрос на дружбу.
 
     Args:
         author_id (int): ID пользователя, отправляющего запрос.
         getter_id (int): ID пользователя, получающего запрос.
-        db (Session): Сессия базы данных.
+        db (AsyncSession): Сессия базы данных.
 
     Returns:
         dict: Статус операции.
@@ -166,14 +168,14 @@ async def create_friendship_request_view(
 
 
 async def edit_profile_view(
-        data: EditProfileFormData, author_id: int, db: Session) -> dict:
+        data: EditProfileFormData, author_id: int, db: AsyncSession) -> dict:
     """
     Редактирует профиль пользователя.
 
     Args:
         data (EditProfileFormData): Данные для редактирования.
         author_id (int): ID пользователя.
-        db (Session): Сессия базы данных.
+        db (AsyncSession): Сессия базы данных.
 
     Returns:
         dict: Статус операции.
@@ -210,7 +212,7 @@ async def edit_profile_view(
 
 
 async def create_comment_view(
-        data: CreateCommentData, post_id: int, user_id: int, db: Session) -> dict:
+        data: CreateCommentData, post_id: int, user_id: int, db: AsyncSession) -> dict:
     """
     Создает комментарий к посту.
 
@@ -218,7 +220,7 @@ async def create_comment_view(
         data (CreateCommentData): Данные для создания комментария.
         post_id (int): ID поста.
         user_id (int): ID автора комментария.
-        db (Session): Сессия базы данных.
+        db (AsyncSession): Сессия базы данных.
 
     Returns:
         dict: Статус операции.
@@ -232,14 +234,14 @@ async def create_comment_view(
     return {'status': 'ok'}
 
 
-async def create_or_delete_like_view(post_id: int, user_id: int, db: Session) -> dict:
+async def create_or_delete_like_view(post_id: int, user_id: int, db: AsyncSession) -> dict:
     """
     Создает или удаляет лайк на посте.
 
     Args:
         post_id (int): ID поста.
         user_id (int): ID пользователя.
-        db (Session): Сессия базы данных.
+        db (AsyncSession): Сессия базы данных.
 
     Returns:
         dict: Статус операции и количество лайков.
@@ -259,7 +261,7 @@ async def create_or_delete_like_view(post_id: int, user_id: int, db: Session) ->
 
 
 async def handle_websocket(
-        websocket: WebSocket, user_id: str, manager: WebSocketConnectionManager, db: Session) -> None:
+        websocket: WebSocket, user_id: str, manager: WebSocketConnectionManager, db: AsyncSession) -> None:
     """
     Обрабатывает WebSocket-соединение.
 
@@ -267,7 +269,7 @@ async def handle_websocket(
         websocket (WebSocket): WebSocket-соединение.
         user_id (str): ID пользователя.
         manager (WebSocketConnectionManager): Менеджер соединений.
-        db (Session): Сессия базы данных.
+        db (AsyncSession): Сессия базы данных.
     """
     await manager.connect(user_id, websocket)
     try:
@@ -292,14 +294,14 @@ async def handle_websocket(
         await manager.send_personal_message(f"User {user_id} left the chat", recipient_id)
 
 
-async def vote_view(variant_id: int, user_id: int, db: Session) -> dict:
+async def vote_view(variant_id: int, user_id: int, db: AsyncSession) -> dict:
     """
     Обрабатывает голосование.
 
     Args:
         variant_id (int): ID варианта голосования.
         user_id (int): ID пользователя.
-        db (Session): Сессия базы данных.
+        db (AsyncSession): Сессия базы данных.
 
     Returns:
         dict: Статус операции.
@@ -324,14 +326,14 @@ async def vote_view(variant_id: int, user_id: int, db: Session) -> dict:
     return {'status': 'ok'}
 
 
-async def add_media_to_post_view(uploaded_file: UploadFile, post_id: int, user_id: int, db: Session):
+async def add_media_to_post_view(uploaded_file: UploadFile, post_id: int, user_id: int, db: AsyncSession):
     """
     Добавляет в бд картинку, связанную с постом
     Args:
         uploaded_file (UploadFile): картинка от пользователя
         post_id (int): id поста
         user_id (str): ID пользователя.
-        db (Session): Сессия базы данных.
+        db (AsyncSession): Сессия базы данных.
     Returns:
         dict: Статус операции
     """
@@ -351,14 +353,14 @@ async def add_media_to_post_view(uploaded_file: UploadFile, post_id: int, user_i
     return {'status': 'file successfully added'}
 
 
-async def add_media_to_message_view(uploaded_file: UploadFile, message_id: int, user_id: int, db: Session):
+async def add_media_to_message_view(uploaded_file: UploadFile, message_id: int, user_id: int, db: AsyncSession):
     """
     Добавляет в бд картинку, связанную с сообщением
     Args:
         uploaded_file (UploadFile): картинка от пользователя
         message_id (int): id сообщения
         user_id (str): ID пользователя.
-        db (Session): Сессия базы данных.
+        db (AsyncSession): Сессия базы данных.
     Returns:
         dict: Статус операции
     """
@@ -378,53 +380,30 @@ async def add_media_to_message_view(uploaded_file: UploadFile, message_id: int, 
     return {'status': 'file successfully added'}
 
 
-async def get_posts_view(user_id: int, db: Session):
+async def get_posts_view(user_id: int, db: AsyncSession):
     """
     Отдаёт данные для отрисовки ленты постов.
 
     Args:
         user_id (str): ID пользователя.
-        db (Session): Сессия базы данных.
+        db (AsyncSession): Сессия базы данных.
     Returns:
         dict: Данные в виде json
     """
     posts_db = await get_all_from_table(object_type=Post, db=db)
     posts=[]
     for post in posts_db:
-        author = await get_object_by_id(object_type=User, id=post.author_id, db=db)
-        like_status = await get_like_status(user_id=user_id, post_id=post.id, db=db)
-        if like_status:
-            status_str='liked'
-        else:
-            status_str='unliked'
-        variants_db = await get_post_voting_variants(post_id=post.id, db=db)
-        variants=[]
-        for var in variants_db:
-            variants.append({
-                'id':var.id,
-                'text':var.text
-            })
-        posts.append({
-            'id':post.id,
-            'author_id':post.author_id,
-            'author_username':author.username,
-            'created_at':post.created_at,
-            'text':post.text,
-            'likes_count':await get_likes_count(post_id=post.id, db=db),
-            'like_status':status_str,
-            'comments_count':await get_comments_count(post_id=post.id, db=db),
-            'images_id':await get_images_id_for_post(post_id=post.id, db=db),
-            'voting_variants':variants
-        })
+        post_data = await get_post_view(post_id=post.id, user_id=user_id, db=db)
+        posts.append(post_data.get('post'))
     return {'posts':posts}
 
 
-async def get_post_img_view(image_id: int, db: Session):
+async def get_post_img_view(image_id: int, db: AsyncSession):
     """
     Отдаёт файл картинки, прикреплённой к посту
     Args:
         image_id (int): id картинки в бд
-        db (Session): Сессия базы данных.
+        db (AsyncSession): Сессия базы данных.
     Returns:
         StreamingResponse: файл картинки
     """
@@ -434,55 +413,69 @@ async def get_post_img_view(image_id: int, db: Session):
     return StreamingResponse(BytesIO(img_db.image), media_type='image/png')
 
 
-async def get_post_view(post_id: int, user_id: int, db: Session):
+async def get_post_view(post_id: int, user_id: int, db: AsyncSession):
     """
     Возвращает данные в json для просмотра отдельного поста
     Args:
         post_id (int): id поста
         user_id (str): ID пользователя.
-        db (Session): сессия бд
+        db (AsyncSession): сессия бд
     Returns:
         json - данные поста
     """
-    post = {}
-    post_db = await get_object_by_id(object_type=Post, id=post_id, db=db)
+    stmt = (
+        select(Post)
+        .options(
+            joinedload(Post.author),
+            joinedload(Post.voting_variants).joinedload(VotingVariant.votes),
+            joinedload(Post.media),
+            joinedload(Post.likes),
+            joinedload(Post.comments).joinedload(Comment.author)
+        )
+        .where(Post.id == post_id)
+        # Убираем дубликаты из JOIN (если нужно)
+        .execution_options(populate_existing=True)
+    )
+
+    result = await db.execute(stmt)
+    post_db = result.scalars().first()
+
     if not post_db:
-        raise HTTPException(status_code=400, detail="Такого поста не существует!")
-    author = await get_object_by_id(object_type=User, id=post_db.author_id, db=db)
+        raise HTTPException(status_code=404, detail="Post not found")
 
-    post['author_id'] = post_db.author_id
-    post['author_username'] = author.username
-    post['text'] = post_db.text
-    post['voting_variants'] = [ {'id':var.id, 'text':var.text} for var in await get_post_voting_variants(post_id=post_id, db=db) ]
-    post['images_id'] = await get_images_id_for_post(post_id=post_id, db=db)
-    post['created_at'] = post_db.created_at
-    post['likes_count'] = await get_likes_count(post_id=post_id, db=db)
-    if await get_like_status(post_id=post_id, user_id=user_id, db=db):
-        post['liked_status'] = 'liked'
-    else:
-        post['liked_status'] = 'unliked'
-    comments=[]
+    # Обработка данных
+    post = {
+        'id':post_id,
+        'author_id': post_db.author.id,
+        'author_username': post_db.author.username,
+        'text': post_db.text,
+        'created_at': post_db.created_at,
+        'images_id': [img.id for img in post_db.media],
+        'likes_count': len(post_db.likes),
+        'liked_status': any(like.author_id == user_id for like in post_db.likes),
+        'voting_variants': await process_voting_variants(post_db.voting_variants),
+        'comments': [
+            {
+                'id': comment.id,
+                'text': comment.text,
+                'author_id': comment.author.id,
+                'author_username': comment.author.username,
+                'created_at': comment.created_at
+            }
+            for comment in post_db.comments
+        ],
+        'comments_count':len(post_db.comments),
+    }
 
-    for comm in await get_post_comments(post_id=post_id, db=db):
-        author_of_comm = await get_object_by_id(object_type=User, id=comm.author_id, db=db)
-        comments.append({
-            'id':comm.id,
-            'text':comm.text,
-            'author_id':author_of_comm.id,
-            'author_username':author_of_comm.username,
-            'created_at':comm.created_at
-        })
-    post['comments'] = comments
-
-    return {'post':post}
+    return {'post': post}
 
 
-async def get_message_img_view(image_id: int, db: Session):
+async def get_message_img_view(image_id: int, db: AsyncSession):
     """
     Отдаёт файл картинки, прикреплённой к посту
     Args:
         image_id (int): id картинки в бд
-        db (Session): Сессия базы данных.
+        db (AsyncSession): Сессия базы данных.
     Returns:
         StreamingResponse: файл картинки
     """
@@ -492,13 +485,13 @@ async def get_message_img_view(image_id: int, db: Session):
     return StreamingResponse(BytesIO(img_db.image), media_type='image/png')
 
 
-async def edit_post_view(data: EditPostData, post_id: int, user_id: int, db: Session):
+async def edit_post_view(data: EditPostData, post_id: int, user_id: int, db: AsyncSession):
     """
     Редактирует пост
     Args:
         post_id (int): id поста
         user_id (int): ID пользователя.
-        db (Session): сессия бд
+        db (AsyncSession): сессия бд
     Returns:
         json - статус операции
     """
@@ -510,7 +503,7 @@ async def edit_post_view(data: EditPostData, post_id: int, user_id: int, db: Ses
     if data.text:
         post.text = data.text
         await db.commit()
-    if data.options:
+    if data.options!=None:
         old_options = await get_post_voting_variants(post_id = post_id, db = db)
         for option in old_options:
             await delete_object(object = option, db = db)
@@ -521,13 +514,13 @@ async def edit_post_view(data: EditPostData, post_id: int, user_id: int, db: Ses
     return {'status':'ok'}
 
 
-async def delete_post_view(post_id: int, user_id: int, db: Session):
+async def delete_post_view(post_id: int, user_id: int, db: AsyncSession):
     """
     Удаляет пост
     Args:
         post_id (int): id поста
         user_id (int): ID пользователя.
-        db (Session): сессия бд
+        db (AsyncSession): сессия бд
     Returns:
         json - статус операции
     """
@@ -540,13 +533,13 @@ async def delete_post_view(post_id: int, user_id: int, db: Session):
     return {'status':'ok'}
 
 
-async def delete_comment_view(comment_id: int, user_id: int, db: Session):
+async def delete_comment_view(comment_id: int, user_id: int, db: AsyncSession):
     """
     Удаляет комментарий
     Args:
         comment_id (int): id комментария
         user_id (int): ID пользователя.
-        db (Session): сессия бд
+        db (AsyncSession): сессия бд
     Returns:
         json - статус операции
     """
@@ -559,29 +552,37 @@ async def delete_comment_view(comment_id: int, user_id: int, db: Session):
     return {'status': 'ok'}
 
 
-async def delete_vote_view(variant_id: int, user_id: int, db: Session):
+async def delete_vote_view(post_id: int, user_id: int, db: AsyncSession):
     """
-    Удаляет голос пользователя на варианте голосования
+    Удаляет голос пользователя на варианте голосования в посте
     Args:
-        variant_id (int): id варианта голосования
+        post_id (int): id поста
         user_id (int): ID пользователя.
-        db (Session): сессия бд
+        db (AsyncSession): сессия бд
     Returns:
         json - статус операции
     """
-    vote = await get_user_vote(var_id=variant_id, user_id=user_id, db=db)
-    if vote:
-        await delete_object(object=vote, db=db)
+    result = await db.execute(select(Post).where(Post.id==post_id).options(
+        joinedload(Post.voting_variants)
+    ))
+    post = result.scalars().first()
+    if not post:
+        raise HTTPException(status_code=400, detail="Такого поста не существует")
+    for var in post.voting_variants:
+        vote = await get_user_vote(var_id=var.id, user_id=user_id, db=db)
+        if vote:
+            await delete_object(object=vote, db=db)
+    await db.commit()
     return {'status':'ok'}
 
 
-async def delete_message_view(message_id: int, user_id: int, db: Session):
+async def delete_message_view(message_id: int, user_id: int, db: AsyncSession):
     """
     Удаляет сообщение
     Args:
         message_id (int): id варианта голосования
         user_id (int): ID пользователя.
-        db (Session): сессия бд
+        db (AsyncSession): сессия бд
     Returns:
         json - статус операции
     """
@@ -594,13 +595,13 @@ async def delete_message_view(message_id: int, user_id: int, db: Session):
     return {'status': 'ok'}
 
 
-async def change_avatar_view(uploaded_file: UploadFile, user_id: int, db: Session):
+async def change_avatar_view(uploaded_file: UploadFile, user_id: int, db: AsyncSession):
     """
     Меняет аватарку пользователя
     Args:
         uploaded_file (UploadFile): загруженное изображение
         user_id (int): id пользователя
-        db (Session): сессия бд
+        db (AsyncSession): сессия бд
     Returns:
         json - статус операции
     """
@@ -611,13 +612,13 @@ async def change_avatar_view(uploaded_file: UploadFile, user_id: int, db: Sessio
     return {'status':'ok'}
 
 
-async def get_avatar_view(another_user_id: int, user_id: int, db: Session):
+async def get_avatar_view(another_user_id: int, user_id: int, db: AsyncSession):
     """
     Возвращает аватарку пользователя
     Args:
         another_user_id (int): id пользователя, аватарку которого мы получаем
         user_id (int): id пользователя
-        db (Session): сессия бд
+        db (AsyncSession): сессия бд
     Returns:
         StreamingResponse - файл аватарки, или None
     """
@@ -629,13 +630,13 @@ async def get_avatar_view(another_user_id: int, user_id: int, db: Session):
     return StreamingResponse(BytesIO(user.avatar), media_type='image/png')
 
 
-async def get_chat_view(recipient_id: int, user_id: int, db: Session):
+async def get_chat_view(recipient_id: int, user_id: int, db: AsyncSession):
     """
     Возвращает данные для страницы чата (массив сообщений)
     Args:
         recipient_id (int): id собеседника
         user_id (int): id пользователя
-        db (Session): сессия бд
+        db (AsyncSession): сессия бд
     Returns:
         json - массив сообщений
     """
@@ -660,22 +661,202 @@ async def get_chat_view(recipient_id: int, user_id: int, db: Session):
     }
 
 
-async def get_votes_view(voting_variant_id: int, user_id: int, db: Session):
+async def get_votes_view(voting_variant_id: int, user_id: int, db: AsyncSession):
     """
     Возвращает список голосовавших за вариант голосования в посте
+    (оптимизированная версия с жадной загрузкой)
     Args:
         voting_variant_id (int): id варианта голосования
-        user_id (int): id пользователя
-        db (Session): сессия бд
+        user_id (int): id пользователя (не используется в текущей реализации)
+        db (AsyncSession): сессия бд
     Returns:
-        json - список голосовавших
+        dict - список голосовавших
     """
-    votes_db = await get_votes_on_voting_variant(variant_id=voting_variant_id, db=db)
-    voted_list = []
-    for vote in votes_db:
-        vote_author = await get_object_by_id(object_type=User, id=vote.user_id, db=db)
-        voted_list.append({
-            'id':vote_author.id,
-            'username':vote_author.username,
-        })
-    return {'voted_users':voted_list}
+    var = await get_object_by_id(object_type=VotingVariant, db=db)
+    if not var:
+        raise HTTPException(status_code=400, detail="Такого варианта не существует!")
+    votes = await get_votes_on_voting_variant(variant_id=voting_variant_id, db=db)
+
+    return {
+        'voted_users': [
+            {
+                'id': vote.user.id,
+                'username': vote.user.username
+            }
+            for vote in votes
+        ]
+    }
+
+async def get_users_posts_view(user_id: int, db: AsyncSession):
+    """
+    Отдаёт данные для отрисовки постов пользователя.
+
+    Args:
+        user_id (str): ID пользователя.
+        db (AsyncSession): Сессия базы данных.
+    Returns:
+        dict: Данные в виде json
+    """
+    posts_db = await get_user_posts(user_id=user_id, db=db)
+    posts=[]
+    for post in posts_db:
+        post_data = await get_post_view(post_id=post.id, user_id=user_id, db=db)
+        posts.append(post_data.get('post'))
+    return {'posts':posts}
+
+
+async def get_my_page_view(user_id: int, db: AsyncSession):
+    """
+    Возвращает пользователю информацию о нём
+    Args:
+        user_id (int): id пользователя
+        db (AsyncSession): сессия бд
+    Returns:
+        json - данные
+    """
+    user = await get_object_by_id(object_type=User, id=user_id, db=db)
+    posts = await get_users_posts_view(user_id=user_id, db=db)
+    return {
+        'username':user.username,
+        'name':user.name,
+        'surname':user.surname,
+        'email':user.email,
+        'posts': posts.get('posts')
+    }
+
+
+async def get_other_page_view(other_user_id: int, user_id: int, db: AsyncSession):
+    """
+    Возвращает пользователю информацию о нём
+    Args:
+        user_id (int): id пользователя
+        db (AsyncSession): сессия бд
+    Returns:
+        json - данные
+    """
+    user = await get_object_by_id(object_type=User, id=other_user_id, db=db)
+    if not user:
+        raise HTTPException(status_code=400, detail="Такого юзера не существует!")
+    posts = await get_users_posts_view(user_id=other_user_id, db=db)
+    return {
+        'username':user.username,
+        'name':user.name,
+        'surname':user.surname,
+        'email':user.email,
+        'posts': posts.get('posts')
+    }
+
+
+async def get_is_friend_view(friend_id: int, user_id: int, db: AsyncSession):
+    """
+    Возвращает пользователю, является ли этот человек другом или нет
+    Args:
+        friend_id_id (int): id пользователя, информацию о котором мы получаем
+        user_id (int): id пользователя
+        db (AsyncSession): сессия бд
+    Returns:
+        json - данные
+    """
+    friendship = await get_existing_friendship(first_friend_id=friend_id, second_friend_id=user_id, db=db)
+    if friendship:
+        return {'isFriend':True}
+    return {'isFriend':False}
+
+
+async def get_friends_view(user_id: int, db: AsyncSession):
+    """
+    Возвращает массив id пользователя
+    Args:
+        user_id (int): id пользователя
+        db (AsyncSession): сессия бд
+    Returns:
+        json - данные
+    """
+    friends_list = await get_user_friends(user_id=user_id, db=db)
+    return {
+        'friends_list':[
+            {
+                'id':friend.id,
+                'username':friend.username
+            }
+            for friend in friends_list
+        ]
+    }
+
+
+async def delete_friend_view(friend_id: int, user_id: int, db: AsyncSession):
+    """
+    Удаляет друга
+    Args:
+        friend_id (int): id друга
+        user_id (int): id пользователя
+        db (AsyncSession): сессия бд
+    Returns:
+        json - статус операции
+    """
+    friendship = await get_existing_friendship(first_friend_id=friend_id, second_friend_id=user_id, db=db)
+    if friendship:
+        await delete_object(object=friendship, db=db)
+    return {'status':'ok'}
+
+
+async def get_friendship_requests_view(user_id: int, db: AsyncSession):
+    """
+    Возвращает запросы дружбы, отправленные пользователю
+    Args:
+        user_id (str): id пользователя
+        db (AsyncSession): сессия бд
+    Returns:
+        json - запросы дружбы
+    """
+    result_db = await get_friendship_requests_for_user(user_id=user_id, db=db)
+    return {
+        'friendship_requests':[ {
+            'id':request.id,
+            'author_id':request.author_id,
+            'author_username':request.author.username
+        }
+        for request in result_db.scalars().all() ]
+    }
+
+
+async def delete_friendship_request_view(request_id: int, user_id: int, db: AsyncSession):
+    """
+    Отклоняет входящий запрос дружбы
+    Args:
+        request_id (int): id запроса
+        user_id (int): id пользователя
+        db (AsyncSession): сессия бд
+    Returns:
+        json - статус операции
+    """
+    request = await get_object_by_id(object_type=FriendshipRequest, id=request_id, db=db)
+    if not request:
+        raise HTTPException(status_code=400, detail="Такого запроса не существует")
+    if request.getter_id!=user_id:
+        raise HTTPException(status_code=400, detail="Этот запрос направлен не вам")
+    await delete_object(object=request, db=db)
+    return {'status':'ok'}
+
+
+async def delete_post_image_view(image_id: int, user_id: int, db: AsyncSession):
+    """
+    Удаляет изображение прикреплённое к посту
+    Args:
+        image_id (int): id картинки
+        user_id (int): id пользователя
+        db (AsyncSession): сессия бд
+    Returns:
+        json - статус операции
+    """
+    result = await db.execute(select(MediaInPost).options(
+        joinedload(MediaInPost.post)
+    ).where(MediaInPost.id == image_id))
+    image = result.scalars().first()
+    if not image:
+        raise HTTPException(status_code=400, detail="Такой картинки не существует!")
+    if image.post.author_id!=user_id:
+        raise HTTPException(status_code=400, detail="Вы не автор поста!")
+    await delete_object(object=image, db=db)
+    return {'status':'ok'}
+

@@ -1,36 +1,33 @@
-import React, { useState, useEffect } from 'react';
-import './App.css';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Home from './components/home';
+import Login from './components/login';
+import Register from './components/register';
+import Posts from './components/post';
+import PostComments from './components/PostComments';
+import UserChannel from './components/userPage';
+import MainProfile from './components/myPage';
+import CreatePost from './components/create_post';
+import Chat from './components/oneChat';
+import EditPost from './components/edit_post';
 
-function App() {
-  const [data, setData] = useState([]);
-  const base_url = 'http://localhost:8000';
-
-  useEffect(() => {
-    fetch(base_url)
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('Сетевая ошибка');
-        }
-        return response.json();
-      })
-      .then(json => setData(json))
-      .catch(error => {
-        console.error('Ошибка:', error);
-        setData({ ok: 'no' });  // Устанавливаем данные в случае ошибки
-      });
-  }, []);
-
+const App = () => {
   return (
-    <div className="App">
-      <h1>Привет, мир!</h1>
-      <p>
-        Это моё первое React-приложение. Статус запроса: {data.status || 'загрузка...'}
-      </p>
-      <p>
-        Если в конце верхней строки вы видите "ok", значит запрос к API сработал. Если "no", то нет.
-      </p>
-    </div>
+    <Router>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/posts" element={<Posts />} />
+        <Route path="/posts/:postId" element={<PostComments />} />
+        <Route path="/users/:authorId" element={<UserChannel />} />
+        <Route path="/home" element={<MainProfile />} />
+        <Route path="/create-post" element={<CreatePost />} />
+        <Route path="/chat/:userId" element={<Chat />} />
+        <Route path="/edit_post/:postId" element={<EditPost />} />
+      </Routes>
+    </Router>
   );
-}
+};
 
 export default App;
