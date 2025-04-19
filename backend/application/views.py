@@ -863,7 +863,7 @@ async def delete_post_image_view(image_id: int, user_id: int, db: AsyncSession):
 
 async def complaint_post_view(post_id: int, user_id: int, db: AsyncSession):
     """
-    Создание жалобы о посте
+    Создание жалобы на пост
     Args:
         post_id (int): id поста
         user_id (str): ID пользователя.
@@ -884,7 +884,7 @@ async def complaint_post_view(post_id: int, user_id: int, db: AsyncSession):
 
 async def complaint_comment_view(comment_id: int, user_id: int, db: AsyncSession):
     """
-    Создание жалобы о комментарии
+    Создание жалобы на комментарий
     Args:
         post_id (int): id поста
         user_id (str): ID пользователя.
