@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useParams } from 'react-router-dom';
 import { API_BASE_URL } from '../config';
 import CheckAuthorization from '../utils';
+import './css/Chat.css';
 
 const Chat = () => {
     const { userId } = useParams();
@@ -16,6 +17,7 @@ const Chat = () => {
     const socketRef = useRef(null);
     const messagesEndRef = useRef(null);
 
+    // Функция для прокрутки к последнему сообщению при обновлении
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     };
@@ -32,28 +34,25 @@ const Chat = () => {
             try {
                 await CheckAuthorization();
 
-                const userResponse = await axios.get(`${API_BASE_URL}/my_id`, {
-                    withCredentials: true
-                });
+                const userResponse = await axios.get(`${API_BASE_URL}/my_id`, { withCredentials: true });
                 const myId = userResponse.data.id;
-                if (!isMounted) return;
+                if (!isMounted) return; // Проверка на размонтирование
                 setCurrentUserId(myId);
 
-                const chatResponse = await axios.get(`${API_BASE_URL}/chat/${userId}`, {
-                    withCredentials: true
-                });
-                if (!isMounted) return;
+                const chatResponse = await axios.get(`${API_BASE_URL}/chat/${userId}`, { withCredentials: true });
+                if (!isMounted) return; // Проверка на размонтирование
                 setMessages(chatResponse.data.messages || []);
                 setRecipient({
                     id: chatResponse.data.recipient_id,
                     username: chatResponse.data.recipient_username
                 });
 
+                // Инициализация WebSocket
                 socketRef.current = new WebSocket(`${wsUrl}${myId}`);
 
                 socketRef.current.onopen = () => {
                     console.log('WebSocket connected');
-                    if (!isMounted) return;
+                    if (!isMounted) return; // Проверка на размонтирование
                     setIsConnected(true);
                     setLoading(false);
                 };
@@ -61,16 +60,16 @@ const Chat = () => {
                 socketRef.current.onmessage = (event) => {
                     try {
                         const message = JSON.parse(event.data);
-                        alert(message)
-                        
                         // Проверяем, что сообщение имеет нужный формат
-                        if (message.author_id && message.text) {
+                        if (message.id && message.author_id && message.text) {
                             setMessages(prev => [...prev, {
-                                id: Date.now(), // Можем использовать Date.now() как временный ID
+                                id: message.id,
                                 author_id: message.author_id,
                                 text: message.text,
                                 created_at: message.created_at
                             }]);
+                        } else {
+                            console.error('Received message in unexpected format', message);
                         }
                     } catch (err) {
                         console.error('Error parsing message:', err);
@@ -79,13 +78,13 @@ const Chat = () => {
 
                 socketRef.current.onclose = () => {
                     console.log('WebSocket disconnected');
-                    if (!isMounted) return;
+                    if (!isMounted) return; // Проверка на размонтирование
                     setIsConnected(false);
                 };
 
                 socketRef.current.onerror = (error) => {
                     console.error('WebSocket error:', error);
-                    if (!isMounted) return;
+                    if (!isMounted) return; // Проверка на размонтирование
                     setError('Connection error');
                     setIsConnected(false);
                     setLoading(false);
@@ -93,7 +92,7 @@ const Chat = () => {
 
             } catch (err) {
                 console.error('Initialization error:', err);
-                if (!isMounted) return;
+                if (!isMounted) return; // Проверка на размонтирование
                 setError(err.response?.data?.detail || 'Chat loading error');
                 setLoading(false);
             }
@@ -101,6 +100,7 @@ const Chat = () => {
 
         initializeChat();
 
+        // Очистка при размонтировании компонента
         return () => {
             isMounted = false;
             if (socketRef.current) {
@@ -109,31 +109,35 @@ const Chat = () => {
         };
     }, [userId]);
 
+    useEffect(() => {
+        scrollToBottom(); // Прокрутка вниз при загрузке или изменении сообщений
+    }, [messages]);
+
     const handleSendMessage = async (e) => {
         e.preventDefault();
         if (!newMessage.trim() || !isConnected) return;
 
         const messageData = {
-            recipient_id: parseInt(userId),
+            recipient_id: userId,
             message: newMessage
         };
 
         const tempMessage = {
-            id: Date.now(),
+            id: Date.now(), // Временный ID
             author_id: currentUserId,
             text: newMessage,
             created_at: new Date().toISOString(),
-            isOptimistic: true
         };
 
+        // Оптимистическое обновление UI
         setMessages(prev => [...prev, tempMessage]);
         setNewMessage('');
 
         try {
-            socketRef.current.send(JSON.stringify(messageData));
+            await socketRef.current.send(JSON.stringify(messageData));
         } catch (err) {
             console.error('Send message error:', err);
-            setError('Send message error');
+            // Убрать временное сообщение, если произошла ошибка
             setMessages(prev => prev.filter(msg => msg.id !== tempMessage.id));
         }
     };
@@ -194,7 +198,6 @@ const Chat = () => {
                 <button 
                     type="submit" 
                     className="send-button"
-                    disabled={!isConnected || !newMessage.trim()}
                 >
                     Отправить
                 </button>

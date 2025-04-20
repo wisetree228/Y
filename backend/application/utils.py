@@ -105,7 +105,7 @@ class WebSocketConnectionManager:
         if user_id in self.active_connections:
             del self.active_connections[user_id]
 
-    async def send_personal_message(self, author_id: str, text: str, user_id: str):
+    async def send_personal_message(self, message_id: int, author_id: str, text: str, user_id: str):
         """
         Отправляет персональное сообщение в формате JSON
 
@@ -116,6 +116,7 @@ class WebSocketConnectionManager:
         """
         if user_id in self.active_connections:
             message_data = {
+                'id':message_id,
                 'author_id': author_id,
                 'text': text,
                 'created_at': datetime.now().isoformat()
