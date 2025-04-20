@@ -280,18 +280,18 @@ async def handle_websocket(
             message = message_data.get("message")
 
             if recipient_id and message:
-                await manager.send_personal_message(f"User {user_id}: {message}", recipient_id)
                 new_message = Message(
                     text=message,
                     author_id=int(user_id),
                     getter_id=int(recipient_id)
                 )
                 await add_and_refresh_object(new_message, db)
+                await manager.send_personal_message(message_id=new_message.id, author_id=user_id, text=message, user_id=recipient_id)
             else:
                 await websocket.send_text("Invalid message format")
     except WebSocketDisconnect:
         manager.disconnect(user_id)
-        await manager.send_personal_message(f"User {user_id} left the chat", recipient_id)
+        #await manager.send_personal_message(f"User {user_id} left the chat", recipient_id)
 
 
 async def vote_view(variant_id: int, user_id: int, db: AsyncSession) -> dict:
