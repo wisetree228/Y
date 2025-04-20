@@ -229,7 +229,7 @@ async def create_or_delete_vote(
     return await vote_view(variant_id=variant_id, user_id=int(user_id), db=db)
 
 
-@router.websocket("/chat/{user_id}")
+@router.websocket("/chatsocket/{user_id}")
 async def websocket_endpoint(
     websocket: WebSocket, db: SessionDep, user_id: str
 ) -> None:
