@@ -21,7 +21,8 @@ from backend.db.utils import (
     get_user_by_username, get_existing_friendship, get_existing_friendship_request,
     get_all_from_table, get_post_voting_variants, get_object_by_id,
     get_messages_between_two_users, get_images_id_for_message, get_votes_on_voting_variant,
-    get_user_posts, get_user_friends, get_friendship_requests_for_user
+    get_user_posts, get_user_friends, get_friendship_requests_for_user,
+    get_voted_users_on_voting_variant
 
 )
 from backend.application.utils import (
@@ -860,3 +861,17 @@ async def delete_post_image_view(image_id: int, user_id: int, db: AsyncSession):
     await delete_object(object=image, db=db)
     return {'status':'ok'}
 
+
+async def get_voted_users_view(voting_variant_id: int, user_id: int, db: AsyncSession) -> dict:
+    """
+    Возвращает информацию о проголосовавших за конкретный
+    вариант голосования пользователей
+    Args:
+        voting_variant_id (int): id варианта голосования
+        db (AsyncSession): сессия бд
+        user_id (int): id пользователя
+    Returns:
+        json - данные
+    """
+    users = await get_voted_users_on_voting_variant(voting_variant_id, db)
+    return {'users': [{'id': user.id, 'username': user.username} for user in users]}

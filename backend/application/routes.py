@@ -17,7 +17,7 @@ from .views import (
     get_chat_view, get_votes_view, get_users_posts_view, get_my_page_view,
     get_other_page_view, get_is_friend_view, get_friends_view, delete_friend_view,
     get_friendship_requests_view, delete_friendship_request_view,
-    delete_post_image_view
+    delete_post_image_view, get_voted_users_view
 )
 
 from .schemas import (
@@ -656,3 +656,18 @@ async def delete_post_image(
         json - статус операции
     """
     return await delete_post_image_view(image_id=image_id, user_id=int(user_id), db=db)
+
+
+@router.get('/voted_users/{voting_variant_id}', dependencies=[Depends(security.access_token_required)])
+async def get_voted_users(voting_variant_id: int, db: SessionDep, user_id = Depends(get_current_user_id)) -> dict:
+    """
+    Возвращает информацию о проголосовавших за конкретный
+    вариант голосования пользователей
+    Args:
+        voting_variant_id (int): id варианта голосования
+        db (AsyncSession): сессия бд
+        user_id (str): id пользователя
+    Returns:
+        json - данные
+    """
+    return await get_voted_users_view(voting_variant_id=voting_variant_id, user_id=int(user_id), db=db)
