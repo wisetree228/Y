@@ -5,8 +5,8 @@ import { API_BASE_URL } from '../config';
 import CheckAuthorization from '../utils';
 
 const PostComments = () => {
-    const { postId } = useParams(); 
-    const location = useLocation(); 
+    const { postId } = useParams();
+    const location = useLocation();
     const navigate = useNavigate();
     const [post, setPost] = useState(location.state?.post || null);
     const [loading, setLoading] = useState(true);
@@ -19,19 +19,19 @@ const PostComments = () => {
         const fetchPost = async () => {
             try {
                 await CheckAuthorization();
-                const response = await axios.get(`${API_BASE_URL}/posts/${postId}`, { 
-                    withCredentials: true 
+                const response = await axios.get(`${API_BASE_URL}/posts/${postId}?t=${Date.now()}`, {
+                    withCredentials: true
                 });
                 const postData = response.data.post;
                 setPost(postData);
-                
+
                 if (postData.images_id && postData.images_id.length > 0) {
-                    const imageUrls = postData.images_id.map(id => 
+                    const imageUrls = postData.images_id.map(id =>
                         `${API_BASE_URL}/posts/image/${id}`
                     );
                     setImages(imageUrls);
                 }
-                
+
                 setLoading(false);
             } catch (error) {
                 console.error('Ошибка при загрузке поста:', error);
@@ -40,25 +40,15 @@ const PostComments = () => {
             }
         };
 
-        const fetchId = async() => {
-            const userResponse = await axios.get(`${API_BASE_URL}/my_id`, { 
-            withCredentials: true 
-            });
-        setCurrentUserId(userResponse.data.id);
-        
-        }
-
-        fetchId();
-        //alert(currentUserId);
         fetchPost();
 
-        
+
     }, [postId]);
 
     const handleLike = async () => {
         try {
-            const response = await axios.post(`${API_BASE_URL}/post/${postId}/like`, {}, { 
-                withCredentials: true 
+            const response = await axios.post(`${API_BASE_URL}/post/${postId}/like`, {}, {
+                withCredentials: true
             });
             setPost(prev => ({
                 ...prev,
@@ -73,12 +63,12 @@ const PostComments = () => {
 
     const handleVote = async (variantId) => {
         try {
-            await axios.post(`${API_BASE_URL}/vote/${variantId}`, {}, { 
-                withCredentials: true 
+            await axios.post(`${API_BASE_URL}/vote/${variantId}`, {}, {
+                withCredentials: true
             });
-            
-            const response = await axios.get(`${API_BASE_URL}/posts/${postId}`, { 
-                withCredentials: true 
+
+            const response = await axios.get(`${API_BASE_URL}/posts/${postId}`, {
+                withCredentials: true
             });
             setPost(response.data.post);
         } catch (error) {
@@ -92,14 +82,14 @@ const PostComments = () => {
         if (!newComment.trim()) return;
 
         try {
-            await axios.post(`${API_BASE_URL}/post/${postId}/comment`, {
+            await axios.post(`${API_BASE_URL}/post/${postId}/comment?t=${Date.now()}`, {
                 text: newComment
-            }, { 
-                withCredentials: true 
+            }, {
+                withCredentials: true
             });
-            
-            const response = await axios.get(`${API_BASE_URL}/posts/${postId}`, { 
-                withCredentials: true 
+
+            const response = await axios.get(`${API_BASE_URL}/posts/${postId}?t=${Date.now()}`, {
+                withCredentials: true
             });
             setPost(response.data.post);
             setNewComment('');
@@ -111,30 +101,30 @@ const PostComments = () => {
 
     const handleDeleteVote = async (postId) => {
         try {
-          await axios.delete(
-            `${API_BASE_URL}/vote/${postId}`,
-            { withCredentials: true }
-          );
+            await axios.delete(
+                `${API_BASE_URL}/vote/${postId}?t=${Date.now()}`,
+                { withCredentials: true }
+            );
         } catch (err) {
-          console.error('Ошибка при удалении голоса:', err);
+            console.error('Ошибка при удалении голоса:', err);
         }
-        const response = await axios.get(`${API_BASE_URL}/posts/${postId}`, { 
-            withCredentials: true 
+        const response = await axios.get(`${API_BASE_URL}/posts/${postId}?t=${Date.now()}`, {
+            withCredentials: true
         });
         const postData = response.data.post;
         setPost(postData);
-      };
-    
+    };
 
-      const handleDeleteComment = async (commentId) => {
+
+    const handleDeleteComment = async (commentId) => {
         try {
-            await axios.delete(`${API_BASE_URL}/comment/${commentId}`, { 
-                withCredentials: true 
+            await axios.delete(`${API_BASE_URL}/comment/${commentId}`, {
+                withCredentials: true
             });
-            
+
             // Обновляем данные поста
-            const response = await axios.get(`${API_BASE_URL}/posts/${postId}`, { 
-                withCredentials: true 
+            const response = await axios.get(`${API_BASE_URL}/posts/${postId}?t=${Date.now()}`, {
+                withCredentials: true
             });
             setPost(response.data.post);
         } catch (error) {
@@ -159,7 +149,7 @@ const PostComments = () => {
     return (
         <div style={{ maxWidth: '800px', margin: '0 auto', padding: '20px' }}>
             <button
-                onClick={() => navigate(-1)} 
+                onClick={() => navigate(-1)}
                 style={{
                     padding: '10px 20px',
                     backgroundColor: '#007bff',
@@ -173,35 +163,35 @@ const PostComments = () => {
                 Назад
             </button>
 
-            <div style={{ 
-                border: '1px solid #ccc', 
-                padding: '20px', 
+            <div style={{
+                border: '1px solid #ccc',
+                padding: '20px',
                 marginBottom: '20px',
                 borderRadius: '8px',
                 backgroundColor: '#fff'
             }}>
                 <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
                     <h2 style={{ margin: 0 }}>{post.author_username}</h2>
-                    <span style={{ 
-                        marginLeft: '10px', 
-                        fontSize: '14px', 
+                    <span style={{
+                        marginLeft: '10px',
+                        fontSize: '14px',
                         color: '#666'
                     }}>
                         {new Date(post.created_at).toLocaleString()}
                     </span>
                 </div>
-                
+
                 <p style={{ fontSize: '16px', marginBottom: '15px' }}>{post.text}</p>
-                
+
                 {images.length > 0 && (
                     <div style={{ marginBottom: '15px' }}>
                         {images.map((imgUrl, index) => (
-                            <img 
+                            <img
                                 key={index}
                                 src={imgUrl}
                                 alt={`Прикрепленное изображение ${index + 1}`}
-                                style={{ 
-                                    maxWidth: '100%', 
+                                style={{
+                                    maxWidth: '100%',
                                     maxHeight: '400px',
                                     marginBottom: '10px',
                                     display: 'block'
@@ -213,9 +203,9 @@ const PostComments = () => {
                         ))}
                     </div>
                 )}
-                
+
                 <div style={{ display: 'flex', alignItems: 'center', marginBottom: '15px' }}>
-                    <button 
+                    <button
                         onClick={handleLike}
                         style={{
                             background: 'none',
@@ -230,7 +220,7 @@ const PostComments = () => {
                     </button>
                     <span>{post.likes_count}</span>
                 </div>
-                
+
                 {post.voting_variants && post.voting_variants.length > 0 && (
                     <div style={{ marginBottom: '20px' }}>
                         <h3>Голосование:</h3>
@@ -254,7 +244,7 @@ const PostComments = () => {
                                         <span>{variant.text}</span>
                                         <span>{variant.percent}% ({variant.votes?.length || 0})</span>
                                     </div>
-                                    <div 
+                                    <div
                                         style={{
                                             height: '10px',
                                             width: `${variant.percent}%`,
@@ -265,25 +255,36 @@ const PostComments = () => {
                                         }}
                                     />
                                 </button>
+                                <Link
+                                            to={`/voted_users/${variant.id}`}
+                                            style={{
+                                                textDecoration: 'none',
+                                                color: 'blue',
+                                                marginLeft: '10px',
+                                                cursor: 'pointer'
+                                            }}
+                                        >
+                                            Кто голосовал?
+                                        </Link>
                             </div>
                         ))}
                     </div>
                 )}
             </div>
 
-            <button 
-              onClick={() => handleDeleteVote(postId)}
-              style={{
-                backgroundColor: '#f44336',
-                color: 'white',
-                border: 'none',
-                padding: '5px 10px',
-                borderRadius: '4px',
-                margintop: '10px',
-                cursor: 'pointer'
-              }}
+            <button
+                onClick={() => handleDeleteVote(postId)}
+                style={{
+                    backgroundColor: '#f44336',
+                    color: 'white',
+                    border: 'none',
+                    padding: '5px 10px',
+                    borderRadius: '4px',
+                    margintop: '10px',
+                    cursor: 'pointer'
+                }}
             >
-              Удалить мой голос
+                Удалить мой голос
             </button>
 
             <div style={{ marginBottom: '30px' }}>
@@ -302,7 +303,7 @@ const PostComments = () => {
                         }}
                         placeholder="Напишите ваш комментарий..."
                     />
-                    <button 
+                    <button
                         type="submit"
                         style={{
                             padding: '10px 20px',
@@ -324,40 +325,40 @@ const PostComments = () => {
                     <p>Пока нет комментариев</p>
                 ) : (
                     post.comments?.map(comment => (
-                        <div 
-                            key={comment.id} 
-                            style={{ 
-                                border: '1px solid #eee', 
-                                padding: '15px', 
+                        <div
+                            key={comment.id}
+                            style={{
+                                border: '1px solid #eee',
+                                padding: '15px',
                                 marginBottom: '15px',
                                 borderRadius: '8px',
                                 backgroundColor: '#f9f9f9'
                             }}
                         >
                             <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
-                            
-                            <Link 
-                                to={`/users/${comment.author_id}`}
-                                style={{ 
-                                    display: 'flex', 
-                                    alignItems: 'center', 
-                                    marginBottom: '10px',
-                                    textDecoration: 'none',
-                                    color: 'inherit'
-                                }}
-                            >
-                                <strong style={{ marginRight: '10px' }}>{comment.author_username}</strong>
-                                <small style={{ color: '#666' }}>
-                                    {new Date(comment.created_at).toLocaleString()}
-                                </small>
-                            </Link>
+
+                                <Link
+                                    to={`/users/${comment.author_id}`}
+                                    style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        marginBottom: '10px',
+                                        textDecoration: 'none',
+                                        color: 'inherit'
+                                    }}
+                                >
+                                    <strong style={{ marginRight: '10px' }}>{comment.author_username}</strong>
+                                    <small style={{ color: '#666' }}>
+                                        {new Date(comment.created_at).toLocaleString()}
+                                    </small>
+                                </Link>
                             </div>
                             <p style={{ margin: 0 }}>{comment.text}</p>
                             {currentUserId === comment.author_id && (
-    <button onClick={() => handleDeleteComment(comment.id)}>
-        Удалить
-    </button>
-)}
+                                <button onClick={() => handleDeleteComment(comment.id)}>
+                                    Удалить
+                                </button>
+                            )}
                         </div>
                     ))
                 )}

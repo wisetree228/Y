@@ -10,6 +10,7 @@ import MainProfile from './components/myPage';
 import CreatePost from './components/create_post';
 import Chat from './components/oneChat';
 import EditPost from './components/edit_post';
+import VotedUsers from './components/votedUsers';
 
 const App = () => {
   return (
@@ -25,6 +26,7 @@ const App = () => {
         <Route path="/create-post" element={<CreatePost />} />
         <Route path="/chat/:userId" element={<Chat />} />
         <Route path="/edit_post/:postId" element={<EditPost />} />
+        <Route path="/voted_users/:votingVariantId" element={<VotedUsers />} />
       </Routes>
     </Router>
   );

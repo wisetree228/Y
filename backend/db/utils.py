@@ -344,3 +344,18 @@ async def get_friendship_requests_for_user(user_id: int, db: AsyncSession):
     return result_db
 
 
+async def get_voted_users_on_voting_variant(variant_id: int, db: AsyncSession) -> list:
+    """
+    Возвращает список пользователей проголосовавших за
+    вариант голосования
+    Args:
+        variant_id (int):
+        db (AsyncSession):
+    Returns:
+        list - список обьектов
+    """
+    result_db = await db.execute(
+    select(User).join(Vote, Vote.user_id == User.id).where(Vote.variant_id == variant_id)
+    )
+    return result_db.scalars().all()
+
