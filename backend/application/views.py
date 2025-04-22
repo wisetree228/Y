@@ -873,5 +873,8 @@ async def get_voted_users_view(voting_variant_id: int, user_id: int, db: AsyncSe
     Returns:
         json - данные
     """
+    variant = await get_object_by_id(object_type=VotingVariant, id=voting_variant_id, db=db)
+    if not variant:
+        raise HTTPException(status_code=400, detail="Такого варианта не существует!")
     users = await get_voted_users_on_voting_variant(voting_variant_id, db)
     return {'users': [{'id': user.id, 'username': user.username} for user in users]}
