@@ -15,6 +15,9 @@ Base = declarative_base()
 
 
 class User(Base):
+    """
+    Модель юзера
+    """
     __tablename__ = 'users'
     id = Column(Integer, primary_key=True)
     username = Column(String, unique=True, nullable=False)
@@ -41,6 +44,9 @@ class User(Base):
 
 
 class Comment(Base):
+    """
+    Модель комментария
+    """
     __tablename__ = 'comments'
     id = Column(Integer, primary_key=True)
     text = Column(Text, nullable=False)
@@ -75,6 +81,9 @@ class Comment(Base):
 
 
 class Post(Base):
+    """
+    Модель поста
+    """
     __tablename__ = 'posts'
     id = Column(Integer, primary_key=True)
     text = Column(Text, nullable=False)
@@ -90,6 +99,9 @@ class Post(Base):
 
 
 class VotingVariant(Base):
+    """
+    Модель варианта голосования в посте
+    """
     __tablename__ = 'voting_variants'
     id = Column(Integer, primary_key=True)
     text = Column(String, nullable=False)
@@ -101,6 +113,9 @@ class VotingVariant(Base):
 
 
 class Vote(Base):
+    """
+    Модель голоса в голосовании
+    """
     __tablename__ = 'votes'
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
@@ -112,6 +127,9 @@ class Vote(Base):
 
 
 class Friendship(Base):
+    """
+    Модель дружбы
+    """
     __tablename__ = 'friendship'
     id = Column(Integer, primary_key=True)
     first_friend_id = Column(Integer, ForeignKey('users.id'), nullable=False)
@@ -123,6 +141,9 @@ class Friendship(Base):
 
 
 class FriendshipRequest(Base):
+    """
+    Модель запроса дружбы
+    """
     __tablename__ = 'friendship_requests'
     id = Column(Integer, primary_key=True)
     author_id = Column(Integer, ForeignKey('users.id'), nullable=False)
@@ -145,6 +166,9 @@ class FriendshipRequest(Base):
 
 
 class MediaInPost(Base):
+    """
+    Модель картинки, прикреплённой к посту
+    """
     __tablename__ = 'media_in_post'
     id = Column(Integer, primary_key=True)
     image = Column(LargeBinary)
@@ -153,6 +177,9 @@ class MediaInPost(Base):
 
 
 class Message(Base):
+    """
+    Модель сообщения
+    """
     __tablename__ = 'messages'
     id = Column(Integer, primary_key=True)
     text = Column(Text, nullable=False)
@@ -166,6 +193,9 @@ class Message(Base):
 
 
 class MediaInMessage(Base):
+     """
+     Модель картинки в сообщении
+     """
      __tablename__ = 'media_in_message'
      id = Column(Integer, primary_key=True)
      message_id = Column(Integer, ForeignKey('messages.id'), nullable=False)
@@ -176,6 +206,9 @@ class MediaInMessage(Base):
 
 
 class Like(Base):
+    """
+    Модель лайка
+    """
     __tablename__ = 'likes'
     id = Column(Integer, primary_key=True)
     author_id = Column(Integer, ForeignKey('users.id'), nullable=False)
