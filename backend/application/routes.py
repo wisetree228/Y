@@ -175,7 +175,8 @@ async def edit_profile(
 
 @router.post('/post/{post_id}/comment', dependencies=[Depends(security.access_token_required)])
 async def create_comment(
-    post_id: int, data: CreateCommentData, db: SessionDep, user_id: str = Depends(get_current_user_id)
+    post_id: int, data: CreateCommentData, db: SessionDep,
+    user_id: str = Depends(get_current_user_id)
 ) -> dict:
     """
     Создает комментарий к посту.
@@ -245,7 +246,8 @@ async def websocket_endpoint(
 
 @router.post('/posts/{post_id}/media', dependencies=[Depends(security.access_token_required)])
 async def add_media_to_post(
-    post_id: int, uploaded_file: UploadFile, db: SessionDep, user_id: str = Depends(get_current_user_id)
+    post_id: int, uploaded_file: UploadFile, db: SessionDep,
+    user_id: str = Depends(get_current_user_id)
 ):
     """
     Добавляет в бд картинку, связанную с постом
@@ -264,7 +266,8 @@ async def add_media_to_post(
 @router.post('/message/{message_id}/media',
 dependencies=[Depends(security.access_token_required)])
 async def add_media_to_message(
-    message_id: int, uploaded_file: UploadFile, db: SessionDep, user_id: str = Depends(get_current_user_id)
+    message_id: int, uploaded_file: UploadFile, db: SessionDep,
+    user_id: str = Depends(get_current_user_id)
 ):
     """
     Добавляет в бд картинку, связанную с сообщением
@@ -440,7 +443,8 @@ async def change_avatar(
     return await change_avatar_view(uploaded_file=uploaded_file, user_id=int(user_id), db=db)
 
 
-@router.get('/user/{another_user_id}/avatar', dependencies=[Depends(security.access_token_required)])
+@router.get('/user/{another_user_id}/avatar',
+dependencies=[Depends(security.access_token_required)])
 async def get_avatar(
     another_user_id: int, db: SessionDep, user_id: str = Depends(get_current_user_id)
 ) -> dict:
