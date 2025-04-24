@@ -14,7 +14,7 @@ from .views import (
     get_post_img_view, get_post_view, add_media_to_message_view,
     get_message_img_view, edit_post_view, delete_post_view, delete_comment_view,
     delete_vote_view, delete_message_view, change_avatar_view, get_avatar_view,
-    get_chat_view, get_votes_view, get_users_posts_view, get_my_page_view,
+    get_chat_view, get_users_posts_view, get_my_page_view,
     get_other_page_view, get_is_friend_view, get_friends_view, delete_friend_view,
     get_friendship_requests_view, delete_friendship_request_view,
     delete_post_image_view, get_voted_users_view
@@ -489,22 +489,6 @@ async def get_chat(
         json - массив сообщений
     """
     return await get_chat_view(recipient_id=recipient_id, user_id=int(user_id), db=db)
-
-
-@router.get('/votes/{voting_variant_id}', dependencies=[Depends(security.access_token_required)])
-async def get_votes(
-    voting_variant_id: int, db: SessionDep, user_id: str = Depends(get_current_user_id)
-) -> dict:
-    """
-    Возвращает список голосовавших за вариант голосования в посте
-    Args:
-        voting_variant_id (int): id варианта голосования
-        user_id (str): id пользователя
-        db (AsyncSession): сессия бд
-    Returns:
-        json - список голосовавших
-    """
-    return await get_votes_view(voting_variant_id=voting_variant_id, user_id=int(user_id), db=db)
 
 
 @router.get('/profile/posts', dependencies=[Depends(security.access_token_required)])
