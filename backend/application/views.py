@@ -21,7 +21,8 @@ from backend.db.utils import (
     get_user_by_username, get_existing_friendship, get_existing_friendship_request,
     get_all_from_table, get_post_voting_variants, get_object_by_id,
     get_messages_between_two_users, get_images_id_for_message, get_votes_on_voting_variant,
-    get_user_posts, get_user_friends, get_friendship_requests_for_user
+    get_user_posts, get_user_friends, get_friendship_requests_for_user,
+
 
 )
 from backend.application.utils import (
@@ -32,6 +33,7 @@ from .schemas import (
     EditPostData
 )
 from .config import config, security
+from backend.log.log_config import logger
 
 
 async def register_view(data: RegisterFormData, response: Response, db: AsyncSession) -> dict:
@@ -68,6 +70,7 @@ async def register_view(data: RegisterFormData, response: Response, db: AsyncSes
         password=hash_password(data.password)
     )
     await add_and_refresh_object(new_user, db)
+    logger.info(f'Пользователь c id {new_user.id} зарегистрировался')
 
     token = security.create_access_token(uid=str(new_user.id))
     response.set_cookie(config.JWT_ACCESS_COOKIE_NAME, token)
@@ -97,6 +100,7 @@ async def login_view(data: LoginFormData, response: Response, db: AsyncSession) 
 
     token = security.create_access_token(uid=str(user.id))
     response.set_cookie(config.JWT_ACCESS_COOKIE_NAME, token)
+    logger.info(f'Пользователь c id {user.id} вошёл в аккаунт')
     return {"auth_token": token}
 
 
@@ -120,6 +124,7 @@ async def create_post_view(data: CreatePostData, user_id: int, db: AsyncSession)
             var = VotingVariant(post_id=post.id, text=option)
             await add_and_refresh_object(var, db)
 
+    logger.info(f'Пользователь c id {user_id} создал пост с id {post.id}')
     return {'status': 'ok'}
 
 
@@ -160,10 +165,12 @@ async def create_friendship_request_view(
         new_friendship = Friendship(first_friend_id=author_id, second_friend_id=getter_id)
         await delete_object(mutual_request, db)
         await add_and_refresh_object(new_friendship, db)
+        logger.info(f'Пользователь c id {author_id} теперь дружит с {getter_id}')
         return {'status': 'you got a new friend!'}
 
     new_request = FriendshipRequest(author_id=author_id, getter_id=getter_id)
     await add_and_refresh_object(new_request, db)
+    logger.info(f'Пользователь c id {author_id} отправил запрос дружбы пользователю {getter_id}')
     return {'status': 'запрос отправлен, ожидайте ответа от пользователя'}
 
 
@@ -208,6 +215,7 @@ async def edit_profile_view(
 
     await db.commit()
     await db.refresh(user)
+    logger.info(f'Пользователь c id {author_id} изменил свой профиль')
     return {'status': 'ok'}
 
 
@@ -511,6 +519,7 @@ async def edit_post_view(data: EditPostData, post_id: int, user_id: int, db: Asy
         for option in data.options:
             var = VotingVariant(post_id=post.id, text=option)
             await add_and_refresh_object(var, db)
+    logger.info(f'Пользователь c id {user_id} редактировал пост {post_id}')
     return {'status':'ok'}
 
 
@@ -530,6 +539,7 @@ async def delete_post_view(post_id: int, user_id: int, db: AsyncSession):
     if post.author_id != user_id:
         raise HTTPException(status_code=400, detail="Вы не являетесь автором поста!")
     await delete_object(object=post, db=db)
+    logger.info(f'Пользователь c id {user_id} удалил пост с текстом "{post.text}"')
     return {'status':'ok'}
 
 
@@ -549,6 +559,7 @@ async def delete_comment_view(comment_id: int, user_id: int, db: AsyncSession):
     if comment.author_id != user_id:
         raise HTTPException(status_code=400, detail="Вы не являетесь автором комментария!")
     await delete_object(object=comment, db=db)
+    logger.info(f'Пользователь c id {user_id} удалил коммент с текстом "{comment.text}"')
     return {'status': 'ok'}
 
 
@@ -660,32 +671,6 @@ async def get_chat_view(recipient_id: int, user_id: int, db: AsyncSession):
         'messages':messages
     }
 
-
-async def get_votes_view(voting_variant_id: int, user_id: int, db: AsyncSession):
-    """
-    Возвращает список голосовавших за вариант голосования в посте
-    (оптимизированная версия с жадной загрузкой)
-    Args:
-        voting_variant_id (int): id варианта голосования
-        user_id (int): id пользователя (не используется в текущей реализации)
-        db (AsyncSession): сессия бд
-    Returns:
-        dict - список голосовавших
-    """
-    var = await get_object_by_id(object_type=VotingVariant, db=db)
-    if not var:
-        raise HTTPException(status_code=400, detail="Такого варианта не существует!")
-    votes = await get_votes_on_voting_variant(variant_id=voting_variant_id, db=db)
-
-    return {
-        'voted_users': [
-            {
-                'id': vote.user.id,
-                'username': vote.user.username
-            }
-            for vote in votes
-        ]
-    }
 
 async def get_users_posts_view(user_id: int, db: AsyncSession):
     """
@@ -860,6 +845,31 @@ async def delete_post_image_view(image_id: int, user_id: int, db: AsyncSession):
     await delete_object(object=image, db=db)
     return {'status':'ok'}
 
+
+async def get_voted_users_view(voting_variant_id: int, user_id: int, db: AsyncSession) -> dict:
+    """
+        Возвращает список голосовавших за вариант голосования в посте
+        Args:
+            voting_variant_id (int): id варианта голосования
+            user_id (int): id пользователя (не используется в текущей реализации)
+            db (AsyncSession): сессия бд
+        Returns:
+            dict - список голосовавших
+        """
+    var = await get_object_by_id(object_type=VotingVariant, id=voting_variant_id, db=db)
+    if not var:
+        raise HTTPException(status_code=400, detail="Такого варианта не существует!")
+    votes = await get_votes_on_voting_variant(variant_id=voting_variant_id, db=db)
+
+    return {
+        'users': [
+            {
+                'id': vote.user.id,
+                'username': vote.user.username
+            }
+            for vote in votes
+        ]
+    }
 
 async def complaint_post_view(post_id: int, user_id: int, db: AsyncSession):
     """

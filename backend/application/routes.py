@@ -14,10 +14,10 @@ from .views import (
     get_post_img_view, get_post_view, add_media_to_message_view,
     get_message_img_view, edit_post_view, delete_post_view, delete_comment_view,
     delete_vote_view, delete_message_view, change_avatar_view, get_avatar_view,
-    get_chat_view, get_votes_view, get_users_posts_view, get_my_page_view,
+    get_chat_view, get_users_posts_view, get_my_page_view,
     get_other_page_view, get_is_friend_view, get_friends_view, delete_friend_view,
     get_friendship_requests_view, delete_friendship_request_view,
-    delete_post_image_view
+    delete_post_image_view, get_voted_users_view
 )
 
 from .schemas import (
@@ -175,7 +175,8 @@ async def edit_profile(
 
 @router.post('/post/{post_id}/comment', dependencies=[Depends(security.access_token_required)])
 async def create_comment(
-    post_id: int, data: CreateCommentData, db: SessionDep, user_id: str = Depends(get_current_user_id)
+    post_id: int, data: CreateCommentData, db: SessionDep,
+    user_id: str = Depends(get_current_user_id)
 ) -> dict:
     """
     Создает комментарий к посту.
@@ -245,7 +246,8 @@ async def websocket_endpoint(
 
 @router.post('/posts/{post_id}/media', dependencies=[Depends(security.access_token_required)])
 async def add_media_to_post(
-    post_id: int, uploaded_file: UploadFile, db: SessionDep, user_id: str = Depends(get_current_user_id)
+    post_id: int, uploaded_file: UploadFile, db: SessionDep,
+    user_id: str = Depends(get_current_user_id)
 ):
     """
     Добавляет в бд картинку, связанную с постом
@@ -264,7 +266,8 @@ async def add_media_to_post(
 @router.post('/message/{message_id}/media',
 dependencies=[Depends(security.access_token_required)])
 async def add_media_to_message(
-    message_id: int, uploaded_file: UploadFile, db: SessionDep, user_id: str = Depends(get_current_user_id)
+    message_id: int, uploaded_file: UploadFile, db: SessionDep,
+    user_id: str = Depends(get_current_user_id)
 ):
     """
     Добавляет в бд картинку, связанную с сообщением
@@ -440,7 +443,8 @@ async def change_avatar(
     return await change_avatar_view(uploaded_file=uploaded_file, user_id=int(user_id), db=db)
 
 
-@router.get('/user/{another_user_id}/avatar', dependencies=[Depends(security.access_token_required)])
+@router.get('/user/{another_user_id}/avatar',
+dependencies=[Depends(security.access_token_required)])
 async def get_avatar(
     another_user_id: int, db: SessionDep, user_id: str = Depends(get_current_user_id)
 ) -> dict:
@@ -485,22 +489,6 @@ async def get_chat(
         json - массив сообщений
     """
     return await get_chat_view(recipient_id=recipient_id, user_id=int(user_id), db=db)
-
-
-@router.get('/votes/{voting_variant_id}', dependencies=[Depends(security.access_token_required)])
-async def get_votes(
-    voting_variant_id: int, db: SessionDep, user_id: str = Depends(get_current_user_id)
-) -> dict:
-    """
-    Возвращает список голосовавших за вариант голосования в посте
-    Args:
-        voting_variant_id (int): id варианта голосования
-        user_id (str): id пользователя
-        db (AsyncSession): сессия бд
-    Returns:
-        json - список голосовавших
-    """
-    return await get_votes_view(voting_variant_id=voting_variant_id, user_id=int(user_id), db=db)
 
 
 @router.get('/profile/posts', dependencies=[Depends(security.access_token_required)])
@@ -686,3 +674,18 @@ async def complaint_comment(comment_id: int, user_id: str = Depends(get_current_
         json - статус операции
     """
     return await complaint_comment_view(comment_id = comment_id, user_id = int(user_id), db=db)
+
+
+@router.get('/voted_users/{voting_variant_id}', dependencies=[Depends(security.access_token_required)])
+async def get_voted_users(voting_variant_id: int, db: SessionDep, user_id = Depends(get_current_user_id)) -> dict:
+    """
+    Возвращает информацию о проголосовавших за конкретный
+    вариант голосования пользователей
+    Args:
+        voting_variant_id (int): id варианта голосования
+        db (AsyncSession): сессия бд
+        user_id (str): id пользователя
+    Returns:
+        json - данные
+    """
+    return await get_voted_users_view(voting_variant_id=voting_variant_id, user_id=int(user_id), db=db)

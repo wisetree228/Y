@@ -16,110 +16,92 @@ const Register = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        // Простая проверка на наличие всех необходимых полей
+        if (!username || !email || !password || !name || !surname || !confirmation) {
+            setError('Пожалуйста, заполните все поля');
+            return;
+        }
+
+        // Проверка соответствия паролей
         if (password !== confirmation) {
             setError('Пароли не совпадают');
             return;
         }
+
         try {
-            const response = await axios.post(API_BASE_URL + '/register', {
+            const response = await axios.post(`${API_BASE_URL}/register`, {
                 username,
                 email,
-                password, 
-                name, 
-                surname
-            }, { 
-                withCredentials: true 
+                password,
+                name,
+                surname,
             });
-            
-            console.log('Ответ от сервера:', response.data);
-            
-            if (response.status === 200) {
-                console.log('Регистрация успешна:', response.data);
-                navigate('/posts');
-            } else {
-                setError(response.data.message || 'Ошибка при регистрации'); 
-            }
+            // Перенаправление на страницу после успешной регистрации
+            alert('Успешная регистрация! Теперь войдите в свой аккаунт!')
+            navigate('/login');
         } catch (err) {
-            console.error('Ошибка при регистрации:', err);
-            if (err.response) {
-                setError(err.response.data.detail || 'Произошла ошибка при регистрации');
+            // Обработка ошибок от сервера
+            if (err.response && err.response.data) {
+                setError(err.response.data.message || 'Ошибка регистрации');
             } else {
-                setError('Произошла ошибка при регистрации');
+                setError('Произошла ошибка. Попробуйте еще раз');
             }
         }
     };
 
     return (
-        <div className="container">
-            <div className="background-shapes">
-                <div className="shape shape-1"></div>
-                <div className="shape shape-2"></div>
-                <div className="shape shape-3"></div>
-            </div>
-
-            <main>
-                <div className="auth-container">
-                    <h1 className="logo">Y</h1>
-                    <div className="auth-card">
-                        <h2 className="auth-title">Регистрация</h2>
-                        {error && <p className="error-message">{error}</p>}
-                        <form onSubmit={handleSubmit}>
-                            <input
-                                type="email"
-                                placeholder="Email"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                required
-                            />
-                            <input
-                                type="text"
-                                placeholder="Username"
-                                value={username}
-                                onChange={(e) => setUsername(e.target.value)}
-                                required
-                            />
-                            <input
-                                type="password"
-                                placeholder="Пароль"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                required
-                            />
-                            <input
-                                type="password"
-                                placeholder="Подтверждение пароля"
-                                value={confirmation}
-                                onChange={(e) => setConfirmation(e.target.value)}
-                                required
-                            />
-                            <input
-                                type="text"
-                                placeholder="Имя"
-                                value={name}
-                                onChange={(e) => setName(e.target.value)}
-                                required
-                            />
-                            <input
-                                type="text"
-                                placeholder="Фамилия"
-                                value={surname}
-                                onChange={(e) => setSurname(e.target.value)}
-                                required
-                            />
-                            <button type="submit">Зарегистрироваться</button>
-                        </form>
-                        <p className="auth-switch">
-                            Уже есть аккаунт? <Link to="/login">Войти</Link>
-                        </p>
-                    </div>
-                </div>
-            </main>
-
-            <footer>
-                <div className="footer-content">
-                    <p>© 2025 Y. Все права защищены</p>
-                </div>
-            </footer>
+        <div>
+            <h2>Регистрация</h2>
+            <form onSubmit={handleSubmit}>
+                {error && <div className="error">{error}</div>}
+                <input
+                    type="text"
+                    placeholder="Имя пользователя"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    required
+                />
+                <input
+                    type="email"
+                    placeholder="Email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                />
+                <input
+                    type="password"
+                    placeholder="Пароль"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                />
+                <input
+                    type="password"
+                    placeholder="Подтвердите пароль"
+                    value={confirmation}
+                    onChange={(e) => setConfirmation(e.target.value)}
+                    required
+                />
+                <input
+                    type="text"
+                    placeholder="Имя"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    required
+                />
+                <input
+                    type="text"
+                    placeholder="Фамилия"
+                    value={surname}
+                    onChange={(e) => setSurname(e.target.value)}
+                    required
+                />
+                <button type="submit">Зарегистрироваться</button>
+            </form>
+            <p>
+                Уже есть аккаунт? <Link to="/login">Войти</Link>
+            </p>
         </div>
     );
 };

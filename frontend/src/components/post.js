@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from '../config';
+import CheckAuthorization from '../utils';
 
 const Posts = () => {
     const [posts, setPosts] = useState([]);
@@ -10,17 +11,10 @@ const Posts = () => {
     const navigate = useNavigate();
   
     useEffect(() => {
-      checkAuthorization();
+      CheckAuthorization();
       fetchPosts();
     }, []);
 
-    const checkAuthorization = async () => {
-      try {
-        const response = await axios.get(API_BASE_URL + '/my_id', { withCredentials: true });
-      } catch (err) {
-        navigate('/')
-      }
-    };
 
 
     const fetchPosts = async () => {

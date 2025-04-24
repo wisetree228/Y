@@ -236,6 +236,18 @@ const MainProfile = () => {
         navigate(`/edit_post/${postId}`);
     };
 
+    const handleLogout = async () => {
+        try {
+            await axios.post(`${API_BASE_URL}/logout`, {}, {
+                withCredentials: true
+            });
+            await CheckAuthorization();
+        } catch (error) {
+            console.error('Ошибка при выходе:', error);
+            setError('Не удалось выйти из аккаунта');
+        }
+    };
+
 
     const handleEditToggle = () => {
       setIsEditing(!isEditing);
@@ -305,6 +317,26 @@ const MainProfile = () => {
 
     return (
         <div style={{ maxWidth: '800px', margin: '0 auto', padding: '20px' }}>
+            {/* Добавляем кнопку выхода в верхний правый угол */}
+            <div style={{ 
+                display: 'flex', 
+                justifyContent: 'flex-end',
+                marginBottom: '20px'
+            }}>
+                <button 
+                    onClick={handleLogout}
+                    style={{ 
+                        padding: '8px 16px',
+                        backgroundColor: '#f44336',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '4px',
+                        cursor: 'pointer'
+                    }}
+                >
+                    Выйти из аккаунта
+                </button>
+            </div>
             {/* Шапка профиля */}
             <div style={{ 
                 border: '1px solid #ccc', 
