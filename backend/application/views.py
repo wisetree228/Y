@@ -848,14 +848,14 @@ async def delete_post_image_view(image_id: int, user_id: int, db: AsyncSession):
 
 async def get_voted_users_view(voting_variant_id: int, user_id: int, db: AsyncSession) -> dict:
     """
-        Возвращает список голосовавших за вариант голосования в посте
-        Args:
-            voting_variant_id (int): id варианта голосования
-            user_id (int): id пользователя (не используется в текущей реализации)
-            db (AsyncSession): сессия бд
-        Returns:
-            dict - список голосовавших
-        """
+    Возвращает список голосовавших за вариант голосования в посте
+    Args:
+        voting_variant_id (int): id варианта голосования
+        user_id (int): id пользователя (не используется в текущей реализации)
+        db (AsyncSession): сессия бд
+    Returns:
+        dict - список голосовавших
+    """
     var = await get_object_by_id(object_type=VotingVariant, id=voting_variant_id, db=db)
     if not var:
         raise HTTPException(status_code=400, detail="Такого варианта не существует!")
