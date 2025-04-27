@@ -5,10 +5,12 @@ FROM node:16
 WORKDIR /app
 
 # Копируем package.json и package-lock.json
-COPY package*.json ./
+COPY --chown=node:node package.json .
+RUN cd /usr/src/app && npm install
 
-# Устанавливаем зависимости
-RUN npm install
+COPY --chown=node:node . .
+USER node
+#RUN chmod 777 /app/node_modules
 
 # Копируем исходный код
 COPY . .
