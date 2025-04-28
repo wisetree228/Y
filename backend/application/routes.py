@@ -68,7 +68,7 @@ async def submit_form(
     Returns:
         dict: Результат регистрации.
     """
-    return await register_view(data=data, response=response, db=db)
+    return await register_view(data=data, db=db)
 
 
 @router.post('/login')

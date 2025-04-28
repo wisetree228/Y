@@ -43,7 +43,7 @@ const Register = () => {
         } catch (err) {
             // Обработка ошибок от сервера
             if (err.response && err.response.data) {
-                setError(err.response.data.message || 'Ошибка регистрации');
+                setError(err.response.data.detail || 'Ошибка регистрации');
             } else {
                 setError('Произошла ошибка. Попробуйте еще раз');
             }

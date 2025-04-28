@@ -19,7 +19,7 @@ const PostComments = () => {
         const fetchPost = async () => {
             try {
                 await CheckAuthorization();
-                const response = await axios.get(`${API_BASE_URL}/posts/${postId}?t=${Date.now()}`, {
+                const response = await axios.get(`${API_BASE_URL}/posts/${postId}`, {
                     withCredentials: true
                 });
                 const postData = response.data.post;
@@ -34,13 +34,30 @@ const PostComments = () => {
 
                 setLoading(false);
             } catch (error) {
-                console.error('Ошибка при загрузке поста:', error);
-                setError('Ошибка при загрузке поста');
-                setLoading(false);
+                alert('Ошибка на стороне сервера, попробуйте ещё раз!')
+            }
+        };
+
+        const fetchId = async () => {
+            try {
+                await CheckAuthorization();
+                const response = await axios.get(`${API_BASE_URL}/my_id`, {
+                    withCredentials: true
+                });
+                const Id = response.data.id;
+                setCurrentUserId(Id);
+
+                
+                }
+
+                
+             catch (error) {
+                alert('Ошибка на стороне сервера, попробуйте ещё раз!')
             }
         };
 
         fetchPost();
+        fetchId();
 
 
     }, [postId]);
@@ -56,8 +73,7 @@ const PostComments = () => {
                 likes_count: response.data.likes_count
             }));
         } catch (error) {
-            console.error('Ошибка при обработке лайка:', error);
-            alert(error.response?.data?.detail || 'Ошибка при обработке лайка');
+            alert('Ошибка на стороне сервера, попробуйте ещё раз!')
         }
     };
 
@@ -72,8 +88,7 @@ const PostComments = () => {
             });
             setPost(response.data.post);
         } catch (error) {
-            console.error('Ошибка при голосовании:', error);
-            alert(error.response?.data?.detail || 'Ошибка при голосовании');
+            alert('Ошибка на стороне сервера, попробуйте ещё раз!')
         }
     };
 
@@ -82,33 +97,32 @@ const PostComments = () => {
         if (!newComment.trim()) return;
 
         try {
-            await axios.post(`${API_BASE_URL}/post/${postId}/comment?t=${Date.now()}`, {
+            await axios.post(`${API_BASE_URL}/post/${postId}/comment`, {
                 text: newComment
             }, {
                 withCredentials: true
             });
 
-            const response = await axios.get(`${API_BASE_URL}/posts/${postId}?t=${Date.now()}`, {
+            const response = await axios.get(`${API_BASE_URL}/posts/${postId}`, {
                 withCredentials: true
             });
             setPost(response.data.post);
             setNewComment('');
         } catch (error) {
-            console.error('Ошибка при добавлении комментария:', error);
-            alert(error.response?.data?.detail || 'Ошибка при добавлении комментария');
+            alert('Ошибка на стороне сервера, попробуйте ещё раз!')
         }
     };
 
     const handleDeleteVote = async (postId) => {
         try {
             await axios.delete(
-                `${API_BASE_URL}/vote/${postId}?t=${Date.now()}`,
+                `${API_BASE_URL}/vote/${postId}`,
                 { withCredentials: true }
             );
         } catch (err) {
-            console.error('Ошибка при удалении голоса:', err);
+            alert('Ошибка на стороне сервера, попробуйте ещё раз!')
         }
-        const response = await axios.get(`${API_BASE_URL}/posts/${postId}?t=${Date.now()}`, {
+        const response = await axios.get(`${API_BASE_URL}/posts/${postId}`, {
             withCredentials: true
         });
         const postData = response.data.post;
@@ -123,13 +137,12 @@ const PostComments = () => {
             });
 
             // Обновляем данные поста
-            const response = await axios.get(`${API_BASE_URL}/posts/${postId}?t=${Date.now()}`, {
+            const response = await axios.get(`${API_BASE_URL}/posts/${postId}`, {
                 withCredentials: true
             });
             setPost(response.data.post);
         } catch (error) {
-            console.error('Ошибка при удалении комментария:', error);
-            alert(error.response?.data?.detail || 'Ошибка при удалении комментария');
+            alert('Ошибка на стороне сервера, попробуйте ещё раз!')
         }
     };
 

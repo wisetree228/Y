@@ -18,19 +18,10 @@ const Login = () => {
                 password,
             }, { withCredentials: true });
             
-            console.log('Ответ от сервера:', response.data);
+            navigate('/posts');
             
-            if (response.status === 200) {
-                console.log('Авторизация успешна:', response.data);
-                navigate('/posts');
-            }
         } catch (err) {
-            // alert(err)
-            // alert(err.status)
-            // alert(err.data)
-            // alert(err.response)
-            // alert(err.response.status)
-            // Ничего из этого не работает, хз как поймать ошибку
+            alert("При входе произошла ошибка! Проверьте корректность адреса и пароля, если вы впервые на нашем сайте - зарегистрируйтесь!")
             
         }
     };
