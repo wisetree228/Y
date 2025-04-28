@@ -74,7 +74,7 @@ const UserChannel = () => {
             );
             setFriendRequestSent(true); // Только отмечаем что запрос отправлен
         } catch (err) {
-            console.error('Ошибка при отправке запроса:', err);
+            alert('Ошибка на стороне сервера, попробуйте ещё раз!')
         } finally {
             setFriendshipLoading(false);
         }
@@ -89,7 +89,7 @@ const UserChannel = () => {
             );
             setIsFriend(false);
         } catch (err) {
-            console.error('Ошибка при удалении из друзей:', err);
+            alert('Ошибка на стороне сервера, попробуйте ещё раз!')
         } finally {
             setFriendshipLoading(false);
         }
@@ -114,7 +114,7 @@ const UserChannel = () => {
                 return post;
             }));
         } catch (err) {
-            console.error('Ошибка при лайке:', err);
+            alert('Ошибка на стороне сервера, попробуйте ещё раз!')
         }
     };
 
@@ -131,7 +131,7 @@ const UserChannel = () => {
             });
             setPosts(updatedPosts.data.posts || []);
         } catch (err) {
-            console.error('Ошибка при голосовании:', err);
+            alert('Ошибка на стороне сервера, попробуйте ещё раз!')
         }
     };
 
@@ -146,7 +146,7 @@ const UserChannel = () => {
         });
         setPosts(updatedPosts.data.posts || []);
         } catch (err) {
-          console.error('Ошибка при удалении голоса:', err);
+            alert('Ошибка на стороне сервера, попробуйте ещё раз!')
         }
       };
 

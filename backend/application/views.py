@@ -36,7 +36,7 @@ from .config import config, security
 from backend.log.log_config import logger
 
 
-async def register_view(data: RegisterFormData, response: Response, db: AsyncSession) -> dict:
+async def register_view(data: RegisterFormData, db: AsyncSession) -> dict:
     """
     Регистрирует нового пользователя.
 
@@ -72,8 +72,6 @@ async def register_view(data: RegisterFormData, response: Response, db: AsyncSes
     await add_and_refresh_object(new_user, db)
     logger.info(f'Пользователь c id {new_user.id} зарегистрировался')
 
-    token = security.create_access_token(uid=str(new_user.id))
-    response.set_cookie(config.JWT_ACCESS_COOKIE_NAME, token)
     return {'status': 'ok'}
 
 
@@ -92,11 +90,11 @@ async def login_view(data: LoginFormData, response: Response, db: AsyncSession) 
     user = await get_user_by_email(data.email, db)
     if not user:
         raise HTTPException(
-            status_code=402,
+            status_code=400,
             detail="Пользователя с таким email не существует! Зарегистрируйтесь, пожалуйста."
         )
     if not verify_password(user.password, data.password):
-        raise HTTPException(status_code=401, detail="Неверный пароль!")
+        raise HTTPException(status_code=400, detail="Неверный пароль!")
 
     token = security.create_access_token(uid=str(user.id))
     response.set_cookie(config.JWT_ACCESS_COOKIE_NAME, token)

@@ -53,8 +53,7 @@ const EditPost = () => {
             
             setLoading(false);
         } catch (err) {
-            setError(err.response?.data?.detail || 'Ошибка загрузки поста');
-            setLoading(false);
+            alert('Ошибка на стороне сервера, попробуйте ещё раз!')
         }
     };
 
@@ -96,8 +95,7 @@ const EditPost = () => {
             });
             setImages(images.filter(img => img.id !== imageId));
         } catch (err) {
-            console.error('Ошибка удаления изображения:', err);
-            alert('Не удалось удалить изображение');
+            alert('Ошибка на стороне сервера, попробуйте ещё раз!')
         }
     };
 
@@ -133,8 +131,7 @@ const EditPost = () => {
 
             navigate(`/posts/${postId}`);
         } catch (err) {
-            console.error('Ошибка при редактировании поста:', err);
-            alert('Не удалось сохранить изменения');
+            alert('Ошибка на стороне сервера, попробуйте ещё раз!')
         }
     };
 

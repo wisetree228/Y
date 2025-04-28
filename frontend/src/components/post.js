@@ -23,7 +23,7 @@ const Posts = () => {
         setPosts(response.data.posts);
         setLoading(false);
       } catch (err) {
-        console.error('Ошибка при загрузке постов:', err);
+        console.error('Ошибка на стороне сервера при загрузке постов:', err);
         setError('Ошибка при загрузке постов');
         setLoading(false);
       }
@@ -48,7 +48,7 @@ const Posts = () => {
           return post;
         }));
       } catch (err) {
-        console.error('Ошибка при лайке:', err);
+        alert('Ошибка на стороне сервера, попробуйте ещё раз!')
       }
     };
 
@@ -62,7 +62,7 @@ const Posts = () => {
         // Обновляем данные постов после голосования
         fetchPosts();
       } catch (err) {
-        console.error('Ошибка при голосовании:', err);
+        alert('Ошибка на стороне сервера, попробуйте ещё раз!')
       }
     };
 
@@ -74,7 +74,7 @@ const Posts = () => {
         );
         fetchPosts(); // Обновляем список постов
       } catch (err) {
-        console.error('Ошибка при удалении голоса:', err);
+        alert('Ошибка на стороне сервера, попробуйте ещё раз!')
       }
     };
   
