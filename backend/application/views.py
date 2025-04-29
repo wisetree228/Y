@@ -386,7 +386,7 @@ async def add_media_to_message_view(uploaded_file: UploadFile, message_id: int, 
     return {'status': 'file successfully added'}
 
 
-async def get_posts_view(user_id: int, db: AsyncSession):
+async def get_posts_view(user_id: int, db: AsyncSession, skip: int, limit: int):
     """
     Отдаёт данные для отрисовки ленты постов.
 
@@ -396,7 +396,7 @@ async def get_posts_view(user_id: int, db: AsyncSession):
     Returns:
         dict: Данные в виде json
     """
-    posts_db = await get_all_from_table(object_type=Post, db=db)
+    posts_db = await get_all_from_table(object_type=Post, db=db, limit=limit, skip=skip)
     posts=[]
     for post in posts_db:
         post_data = await get_post_view(post_id=post.id, user_id=user_id, db=db)
