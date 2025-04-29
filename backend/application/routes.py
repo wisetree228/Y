@@ -2,7 +2,7 @@
 Модуль routes.py содержит маршруты FastAPI для обработки HTTP-запросов и WebSocket-соединений.
 """
 from typing import Generator, Annotated
-from fastapi import Response, WebSocket, APIRouter, Depends, UploadFile
+from fastapi import Response, WebSocket, APIRouter, Depends, UploadFile, Query
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 from backend.db.models import engine
 from .utils import get_current_user_id, WebSocketConnectionManager
@@ -68,7 +68,7 @@ async def submit_form(
     Returns:
         dict: Результат регистрации.
     """
-    return await register_view(data=data, response=response, db=db)
+    return await register_view(data=data, db=db)
 
 
 @router.post('/login')
@@ -285,7 +285,8 @@ async def add_media_to_message(
 
 @router.get('/posts', dependencies=[Depends(security.access_token_required)])
 async def get_posts(
-    db: SessionDep, user_id: str = Depends(get_current_user_id)
+    db: SessionDep, user_id: str = Depends(get_current_user_id),
+    skip: int = Query(0), limit: int = Query(10)
 ) -> dict:
     """
     Отдаёт данные для отрисовки ленты постов.
@@ -296,7 +297,7 @@ async def get_posts(
     Returns:
         json: Данные в виде json
     """
-    return await get_posts_view(user_id=int(user_id), db=db)
+    return await get_posts_view(user_id=int(user_id), db=db, skip=skip, limit=limit)
 
 
 @router.get('/posts/image/{image_id}', dependencies=[Depends(security.access_token_required)])

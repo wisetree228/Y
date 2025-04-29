@@ -44,7 +44,7 @@ const CreatePost = () => {
             await axios.post(`${API_BASE_URL}/post`, postData, { withCredentials: true });
             navigate('/'); // Перенаправление на главную страницу после успешной публикации
         } catch (error) {
-            console.error('Ошибка при создании поста:', error);
+            alert('Ошибка на стороне сервера, попробуйте ещё раз! Возможные причины ошибки: некорректный формат данных')
         }
     };
 
