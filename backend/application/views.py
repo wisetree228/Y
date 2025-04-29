@@ -873,7 +873,7 @@ async def get_voted_users_view(voting_variant_id: int, user_id: int, db: AsyncSe
 
 async def complaint_post_view(post_id: int, user_id: int, db: AsyncSession):
     """
-    Создание жалобы о посте
+    Создание жалобы на пост
     Args:
         post_id (int): id поста
         user_id (str): ID пользователя.
@@ -894,7 +894,7 @@ async def complaint_post_view(post_id: int, user_id: int, db: AsyncSession):
 
 async def complaint_comment_view(comment_id: int, user_id: int, db: AsyncSession):
     """
-    Создание жалобы о комментарии
+    Создание жалобы на комментарий
     Args:
         post_id (int): id поста
         user_id (str): ID пользователя.

@@ -17,7 +17,7 @@ from .views import (
     get_chat_view, get_users_posts_view, get_my_page_view,
     get_other_page_view, get_is_friend_view, get_friends_view, delete_friend_view,
     get_friendship_requests_view, delete_friendship_request_view,
-    delete_post_image_view, get_voted_users_view
+    delete_post_image_view, complaint_post_view, complaint_comment_view, get_voted_users_view
 )
 
 from .schemas import (
@@ -649,9 +649,9 @@ async def delete_post_image(
 
 
 @router.get('/complaint_post/{post_id}', dependencies=[Depends(security.access_token_required)])
-async def complaint_post(post_id: int, user_id: str = Depends(get_current_user_id), db: Session = Depends(get_db)):
+async def complaint_post(db: SessionDep, post_id: int, user_id: str = Depends(get_current_user_id)):
     """
-    Возвращает список голосовавших за вариант голосования в посте
+    Создаёт жалобу на пост
     Args:
         post_id (int): id поста 
         user_id (str): id пользователя
@@ -663,9 +663,9 @@ async def complaint_post(post_id: int, user_id: str = Depends(get_current_user_i
 
 
 @router.get('/complaint_comment/{comment_id}', dependencies=[Depends(security.access_token_required)])
-async def complaint_comment(comment_id: int, user_id: str = Depends(get_current_user_id), db: Session = Depends(get_db)):
+async def complaint_comment(db: SessionDep, comment_id: int, user_id: str = Depends(get_current_user_id)):
     """
-    Возвращает список голосовавших за вариант голосования в посте
+    Создаёт жалобу на коментарий
     Args:
         comment_id (int): id поста 
         user_id (str): id пользователя
