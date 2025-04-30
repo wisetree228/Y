@@ -8,21 +8,33 @@ const Login = () => {
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const navigate = useNavigate();
+    const [loading, setLoading] = useState(true);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         console.log('Отправка данных:', { email, password });
         try {
+            setLoading(true); 
             const response = await axios.post(API_BASE_URL + '/login', {
                 email,
                 password,
             }, { withCredentials: true });
-            
-            navigate('/posts');
-            
+    
+            if (response.status === 200) {
+                
+    
+                navigate('/posts'); 
+                setLoading(false); 
+            } else {
+                
+                setError("При входе произошла ошибка! Проверьте корректность email и пароля.");
+                 setLoading(false); 
+                console.error('Ошибка:', response.status, response.data); 
+            }
         } catch (err) {
-            alert("При входе произошла ошибка! Проверьте корректность адреса и пароля, если вы впервые на нашем сайте - зарегистрируйтесь!")
-            
+            alert('Ошибка! Проверьте корректность введённых данных и попробуйте ещё раз!')
+            setLoading(false); 
+            console.error('Ошибка:', err); 
         }
     };
 

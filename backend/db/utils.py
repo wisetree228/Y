@@ -179,7 +179,7 @@ async def get_all_from_table(
         object_type: Union[Type[User], Type[Post], Type[Friendship], Type[FriendshipRequest],
         Type[VotingVariant], Type[Like], Type[Message], Type[Vote], Type[MediaInPost],
         Type[MediaInMessage], Type[Comment]],
-        db: AsyncSession, limit=None, skip=None
+        db: AsyncSession, limit=None, skip=0
 ) -> list:
     """
     Получает все обьекты из таблицы бд
@@ -192,7 +192,7 @@ async def get_all_from_table(
     Returns:
         список обьектов
     """
-    if limit and skip:
+    if limit:
         result = await db.execute(select(object_type).offset(skip).limit(limit))
         return result.scalars().all()
     result = await db.execute(select(object_type))
