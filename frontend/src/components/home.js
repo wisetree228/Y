@@ -2,63 +2,57 @@ import React, { useEffect } from 'react';
 import axios from 'axios';
 import { API_BASE_URL } from '../config';
 import { Link, useNavigate } from 'react-router-dom';
+import './css/main_page.css';
 
 const Home = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
         const fetchData = async () => {
-
             try {
                 const idResponse = await axios.get(`${API_BASE_URL}/my_id`, {
                     withCredentials: true
                 });
-                if (idResponse.data.id){
-                    navigate('/posts')
+                if (idResponse.data.id) {
+                    navigate('/posts');
                 }
-                
             } catch (error) {
-                // всё ок
+                // Всё в порядке, пользователь не авторизован
             }
-
         };
-
         fetchData();
     }, []);
 
-
-
-  return (
-        <div className="container">
-            <div className="background-shapes">
-                <div className="shape shape-1"></div>
-                <div className="shape shape-2"></div>
-                <div className="shape shape-3"></div>
+    return (
+        <div className="pp-container">
+            <div className="pp-background">
+                <div className="pp-blur-circle pp-blur-circle--1"></div>
+                <div className="pp-blur-circle pp-blur-circle--2"></div>
             </div>
             
-            <header>
-                <h1 className="title">Y</h1>
-                <div className="title-underline"></div>
-            </header>
+            <div className="pp-content">
+                <header className="pp-header">
+                    <h1 className="pp-logo">Y</h1>
+                    <div className="pp-logo-underline"></div>
+                </header>
+                
+                <main className="pp-main">
+                    <div className="pp-buttons">
+                        <Link to="/login" className="pp-button pp-button--primary">
+                            Войти
+                        </Link>
+                        <Link to="/register" className="pp-button pp-button--secondary">
+                            Зарегистрироваться
+                        </Link>
+                    </div>
+                </main>
+            </div>
             
-            <main>
-                <div className="buttons">
-                    <Link to="/login">
-                        <button>Войти</button>
-                      </Link>
-                      <Link to="/register">
-                        <button>Зарегистрироваться</button>
-                      </Link>
-                </div>
-            </main>
-    
-            <footer>
-                <div className="footer-content">
-                    <p>© 2025 Y. Все права защищены</p>
-                </div>
+            <footer className="pp-footer">
+                <p className="pp-copyright">© 2025 Y. Все права защищены</p>
             </footer>
         </div>
-  );
+    );
 };
 
 export default Home;
