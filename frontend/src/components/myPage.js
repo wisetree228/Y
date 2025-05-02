@@ -3,6 +3,7 @@ import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from '../config';
 import CheckAuthorization from '../utils';
+import './css/myPage.css';
 
 const MainProfile = () => {
     const [user, setUser] = useState(null);
@@ -343,7 +344,7 @@ const MainProfile = () => {
                 padding: '20px', 
                 marginBottom: '20px',
                 borderRadius: '8px',
-                backgroundColor: '#fff',
+                backgroundColor: '#5aabe5',
                 textAlign: 'center'
             }}>
                 <div style={{ position: 'relative', display: 'inline-block' }}>
@@ -499,7 +500,9 @@ const MainProfile = () => {
                     </div>
                 ) : (
                     <>
-                        <h1>{user.username}</h1>
+                        <h1 style={{
+                            color: 'black',
+                        }}>{user.username}</h1>
                         <p>{user.name} {user.surname}</p>
                         <p>{user.email}</p>
                         
@@ -547,7 +550,9 @@ const MainProfile = () => {
                         borderTop: '1px solid #eee',
                         paddingTop: '15px'
                     }}>
-                        <h3>Входящие запросы дружбы</h3>
+                        <h3 style={{
+                            color: 'black',
+                        }}>Входящие запросы дружбы</h3>
                         {friendRequests.length === 0 ? (
                             <p>Нет входящих запросов</p>
                         ) : (
@@ -710,7 +715,7 @@ const MainProfile = () => {
                                 padding: '20px',
                                 marginBottom: '20px',
                                 borderRadius: '8px',
-                                backgroundColor: '#fff',
+                                backgroundColor: '#5aabe5',
                                 boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
                             }}
                         >
