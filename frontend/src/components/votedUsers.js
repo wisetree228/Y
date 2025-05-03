@@ -16,6 +16,101 @@ const VotedUsers = () => {
   useEffect(() => {
     CheckAuthorization();
     fetchVotedUsers();
+    const styleElement = document.createElement('style');
+    styleElement.innerHTML = `
+      /* Основные стили */
+body {
+  background-color: #396687;
+  color: #e0e0e0;
+  font-family: Arial, sans-serif;
+  padding: 20px;
+}
+
+/* Контейнер */
+div[style*="max-width: '800px'"] {
+  background-color: #2d4d66;
+  border: 1px solid #3c91cf;
+  border-radius: 8px;
+  padding: 20px;
+  margin: 20px auto;
+  color: #fff;
+}
+
+/* Заголовок */
+h1 {
+  color: #fff;
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 1.5rem;
+}
+
+/* Сообщение о пустом списке */
+p[style*="color: 'gray'"] {
+  color: #aaa !important;
+  text-align: center;
+  margin: 20px 0;
+}
+
+/* Список пользователей */
+ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* Элементы списка */
+li {
+  margin-bottom: 10px;
+}
+
+/* Ссылки на пользователей */
+a {
+  display: block;
+  padding: 12px;
+  background-color: rgba(60, 145, 207, 0.2);
+  border: 1px solid #3c91cf;
+  border-radius: 6px;
+  color: #fff;
+  text-decoration: none;
+  transition: background-color 0.2s;
+}
+
+a:hover {
+  background-color: rgba(60, 145, 207, 0.4);
+}
+
+/* Индикатор загрузки */
+div[style*="textAlign: 'center'"] {
+  background-color: #2d4d66;
+  border: 1px solid #3c91cf;
+  border-radius: 8px;
+  padding: 20px;
+  margin: 50px auto;
+  max-width: 300px;
+}
+
+div[style*="textAlign: 'center'"] p {
+  color: #aaa;
+}
+
+/* Сообщение об ошибке */
+p[style*="color: 'red'"] {
+  color: #ff6b6b !important;
+  background-color: #2d4d66;
+  padding: 15px;
+  border-radius: 6px;
+  text-align: center;
+  border: 1px solid #e53935;
+  max-width: 500px;
+  margin: 20px auto;
+}
+    `;
+    
+    // Добавляем в head документа
+    document.head.appendChild(styleElement);
+    return () => {
+        document.head.removeChild(styleElement);
+      };
   }, [votingVariantId]);
 
 
@@ -58,7 +153,7 @@ const VotedUsers = () => {
 
   return (
     <div style={{ maxWidth: '800px', margin: '50px auto', padding: '20px', border: '1px solid #eee', borderRadius: '8px', backgroundColor: '#f9f9f9' }}>
-      <h1 style={{ textAlign: 'center', marginBottom: '20px' }}>Проголосовавшие за вариант {votingVariantId}</h1>
+      <h1 style={{ textAlign: 'center', marginBottom: '20px', color: '#000' }}>Проголосовавшие за вариант {votingVariantId}</h1>
 
       {noVotesMessage && (
         <p style={{ color: 'gray', textAlign: 'center', marginBottom: '10px' }}>{noVotesMessage}</p>
