@@ -286,7 +286,7 @@ async def add_media_to_message(
 @router.get('/posts', dependencies=[Depends(security.access_token_required)])
 async def get_posts(
     db: SessionDep, user_id: str = Depends(get_current_user_id),
-    skip: int = Query(0), limit: int = Query(10)
+    skip: int = Query(0), limit: int = Query(100)
 ) -> dict:
     """
     Отдаёт данные для отрисовки ленты постов.

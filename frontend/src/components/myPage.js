@@ -188,6 +188,196 @@ const MainProfile = () => {
 
 
         fetchData();
+
+        const styleElement = document.createElement('style');
+    styleElement.innerHTML = `
+      /* Основные стили */
+body {
+  background-color: #396687;
+  color: #fff;
+  font-family: Arial, sans-serif;
+  line-height: 1.6;
+  margin: 0;
+  padding: 20px;
+}
+
+/* Контейнер */
+div[style*="max-width: '800px'"] {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 20px;
+  margin: 0 auto;
+}
+
+/* Заголовки */
+h1, h2, h3 {
+  color: white;
+  margin-top: 0;
+}
+
+h1 {
+  font-size: 1.8rem;
+  margin-bottom: 10px;
+}
+
+h2 {
+  font-size: 1.5rem;
+  margin: 20px 0 15px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  padding-bottom: 8px;
+}
+
+h3 {
+  font-size: 1.3rem;
+  margin: 15px 0 10px;
+}
+
+/* Карточки */
+div[style*="border: '1px solid #ccc'"],
+div[style*="border: '1px solid #e0e0e0'"] {
+  background-color: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: 10px !important;
+  padding: 20px !important;
+  margin-bottom: 20px !important;
+  backdrop-filter: blur(5px);
+}
+
+/* Аватар */
+img[alt^="Аватар"] {
+  border: 2px solid #3c91cf !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Кнопки (общие) */
+button {
+  background-color: #3c91cf !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 6px !important;
+  padding: 8px 16px !important;
+  cursor: pointer !important;
+  transition: all 0.2s !important;
+  font-weight: 500;
+}
+
+button:hover {
+  background-color: #2e7ab3 !important;
+  transform: translateY(-1px);
+}
+
+/* Специальные кнопки */
+button[style*="background: none"] {
+  background: transparent !important;
+  color: #a8d4ff !important;
+  padding: 5px 10px !important;
+}
+
+button[style*="color: red"] {
+  color: #ff8a8a !important;
+}
+
+button[style*="background-color: #4CAF50"] {
+  background-color: #4CAF50 !important;
+}
+
+button[style*="background-color: #f44336"] {
+  background-color: #e53935 !important;
+}
+
+button[style*="background-color: #FF9800"] {
+  background-color: #FF9800 !important;
+}
+
+/* Формы и инпуты */
+input {
+  background-color: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  color: white !important;
+  border-radius: 6px;
+  padding: 8px 12px;
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* Ссылки */
+a {
+  color: #a8d4ff;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+a:hover {
+  color: #fff;
+}
+
+/* Списки */
+div[style*="gridTemplateColumns"] {
+  gap: 15px;
+  margin: 15px 0;
+}
+
+/* Варианты голосования */
+div[style*="marginBottom: '15px'"] > div {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 6px !important;
+  transition: all 0.2s;
+}
+
+div[style*="marginBottom: '15px'"] > div:hover {
+  background-color: rgba(60, 145, 207, 0.3) !important;
+}
+
+div[style*="backgroundColor: '#f0f0f0'"] {
+  background-color: rgba(60, 145, 207, 0.4) !important;
+}
+
+/* Изображения в постах */
+img[alt="Изображение поста"] {
+  max-height: 300px;
+  object-fit: cover;
+  border-radius: 8px !important;
+}
+
+/* Текст */
+p {
+  margin: 10px 0;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+p[style*="color: #666"] {
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+
+/* Мелкий текст */
+small {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.8rem;
+}
+
+/* Адаптивность */
+@media (max-width: 600px) {
+  div[style*="max-width: '800px'"] {
+    padding: 15px;
+  }
+  
+  div[style*="gridTemplateColumns"] {
+    grid-template-columns: 1fr !important;
+  }
+}
+    `;
+    
+    // Добавляем в head документа
+    document.head.appendChild(styleElement);
+    return () => {
+        document.head.removeChild(styleElement);
+      };
     }, []);
 
 
@@ -343,7 +533,7 @@ const MainProfile = () => {
                 padding: '20px', 
                 marginBottom: '20px',
                 borderRadius: '8px',
-                backgroundColor: '#fff',
+                backgroundColor: '#5aabe5',
                 textAlign: 'center'
             }}>
                 <div style={{ position: 'relative', display: 'inline-block' }}>
@@ -710,7 +900,7 @@ const MainProfile = () => {
                                 padding: '20px',
                                 marginBottom: '20px',
                                 borderRadius: '8px',
-                                backgroundColor: '#fff',
+                                backgroundColor: '#5aabe5',
                                 boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
                             }}
                         >

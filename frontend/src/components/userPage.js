@@ -62,6 +62,147 @@ const UserChannel = () => {
         };
 
         fetchData();
+
+        const styleElement = document.createElement('style');
+    styleElement.innerHTML = `
+      /* Основные стили */
+body {
+  background-color: #396687;
+  color: #e0e0e0;
+  font-family: Arial, sans-serif;
+  padding: 20px;
+}
+
+/* Контейнер */
+div[style*="max-width: '800px'"] {
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+/* Карточка профиля */
+div[style*="border: '1px solid #ccc'"] {
+  background-color: #2d4d66;
+  border: 1px solid #3c91cf !important;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+  color: #fff;
+  text-align: center;
+}
+
+/* Аватар */
+img[alt^="Аватар"] {
+  border: 2px solid #3c91cf;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Заголовки */
+h1, h2 {
+  color: #fff;
+  margin: 15px 0 10px;
+}
+
+/* Текст */
+p {
+  margin: 8px 0;
+  color: #e0e0e0;
+}
+
+/* Кнопки */
+button {
+  background-color: #3c91cf;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin: 5px;
+  font-size: 14px;
+}
+
+button:hover {
+  background-color: #2e7ab3;
+}
+
+/* Специальные кнопки */
+button[style*="background: none"] {
+  background: transparent !important;
+  color: #a8d4ff !important;
+  padding: 0 !important;
+}
+
+button[style*="color: red"] {
+  color: #ff6b6b !important;
+}
+
+button[style*="background-color: '#f44336'"] {
+  background-color: #e53935 !important;
+}
+
+button[style*="background-color: '#4CAF50'"] {
+  background-color: #4caf50 !important;
+}
+
+button[style*="background-color: '#ff9800'"] {
+  background-color: #ff9800 !important;
+}
+
+/* Карточки постов */
+div[style*="border: '1px solid #e0e0e0'"] {
+  background-color: #2d4d66;
+  border: 1px solid #3c91cf !important;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 15px;
+  color: #fff;
+}
+
+/* Изображения в постах */
+img[alt="Изображение поста"] {
+  max-width: 100%;
+  border-radius: 6px;
+  border: 1px solid #3c91cf;
+}
+
+/* Варианты голосования */
+div[style*="marginBottom: '15px'"] > div {
+  background-color: rgba(60, 145, 207, 0.2) !important;
+  border: 1px solid #3c91cf !important;
+  color: #fff !important;
+  border-radius: 4px !important;
+}
+
+div[style*="backgroundColor: '#f0f0f0'"] {
+  background-color: rgba(60, 145, 207, 0.4) !important;
+}
+
+/* Ссылки */
+a {
+  color: #a8d4ff;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* Мелкий текст */
+small {
+  color: #aaa;
+}
+
+/* Сообщения об ошибках */
+p[style*="color: red"] {
+  color: #ff6b6b !important;
+  text-align: center;
+}
+    `;
+    
+    // Добавляем в head документа
+    document.head.appendChild(styleElement);
+    return () => {
+        document.head.removeChild(styleElement);
+      };
     }, [authorId, navigate]);
 
     const handleAddFriend = async () => {
@@ -74,7 +215,7 @@ const UserChannel = () => {
             );
             setFriendRequestSent(true); // Только отмечаем что запрос отправлен
         } catch (err) {
-            alert('Ошибка на стороне сервера, попробуйте ещё раз!')
+            alert(err.response.data.detail || 'Ошибка на стороне сервера, попробуйте ещё раз!')
         } finally {
             setFriendshipLoading(false);
         }
@@ -172,7 +313,7 @@ const UserChannel = () => {
                 padding: '20px', 
                 marginBottom: '20px',
                 borderRadius: '8px',
-                backgroundColor: '#fff',
+                backgroundColor: '#1b99b5',
                 textAlign: 'center'
             }}>
                 <img
@@ -230,7 +371,7 @@ const UserChannel = () => {
                                 padding: '20px',
                                 marginBottom: '20px',
                                 borderRadius: '8px',
-                                backgroundColor: '#fff',
+                                backgroundColor: '#1b99b5',
                                 boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
                             }}
                         >

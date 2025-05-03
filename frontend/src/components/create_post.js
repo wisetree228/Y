@@ -11,6 +11,80 @@ const CreatePost = () => {
 
     useEffect(() => {
         CheckAuthorization();
+        const styleElement = document.createElement('style');
+    styleElement.innerHTML = `
+      body {
+  background-color: #396687;
+  color: white;
+  font-family: Arial, sans-serif;
+  padding: 20px;
+  text-align: center;
+}
+
+div {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+h1 {
+  color: white;
+  margin-bottom: 30px;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: bold;
+}
+
+textarea, input[type="text"] {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #3c91cf;
+  border-radius: 4px;
+  background-color: rgba(255,255,255,0.1);
+  color: white;
+}
+
+textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+button {
+  background-color: #3c91cf;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin: 5px;
+}
+
+button[type="button"] {
+  background-color: #e53935;
+}
+
+a {
+  display: inline-block;
+  margin-top: 20px;
+  color: #a8d4ff;
+  text-decoration: none;
+}
+    `;
+    
+    // Добавляем в head документа
+    document.head.appendChild(styleElement);
+    return () => {
+        document.head.removeChild(styleElement);
+      };
         
     }, []);
 
