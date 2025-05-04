@@ -42,7 +42,6 @@ async def register_view(data: RegisterFormData, db: AsyncSession) -> dict:
 
     Args:
         data (RegisterFormData): Данные для регистрации.
-        response (Response): Объект ответа FastAPI.
         db (AsyncSession): Сессия базы данных.
 
     Returns:
@@ -77,7 +76,7 @@ async def register_view(data: RegisterFormData, db: AsyncSession) -> dict:
 
 async def login_view(data: LoginFormData, response: Response, db: AsyncSession) -> dict:
     """
-    Аутентифицирует пользователя.
+    Авторизует пользователя.
 
     Args:
         data (LoginFormData): Данные для входа.
@@ -393,6 +392,8 @@ async def get_posts_view(user_id: int, db: AsyncSession, skip: int, limit: int):
     Args:
         user_id (str): ID пользователя.
         db (AsyncSession): Сессия базы данных.
+        skip (int): сколько постов пропустить (пагинация)
+        limit (int): сколько постов вернуть
     Returns:
         dict: Данные в виде json
     """
@@ -495,6 +496,7 @@ async def edit_post_view(data: EditPostData, post_id: int, user_id: int, db: Asy
     """
     Редактирует пост
     Args:
+        data (EditPostData): данные для редактирования
         post_id (int): id поста
         user_id (int): ID пользователя.
         db (AsyncSession): сессия бд
@@ -589,7 +591,7 @@ async def delete_message_view(message_id: int, user_id: int, db: AsyncSession):
     """
     Удаляет сообщение
     Args:
-        message_id (int): id варианта голосования
+        message_id (int): id сообщения
         user_id (int): ID пользователя.
         db (AsyncSession): сессия бд
     Returns:
@@ -734,7 +736,7 @@ async def get_is_friend_view(friend_id: int, user_id: int, db: AsyncSession):
     """
     Возвращает пользователю, является ли этот человек другом или нет
     Args:
-        friend_id_id (int): id пользователя, информацию о котором мы получаем
+        friend_id (int): id пользователя, информацию о котором мы получаем
         user_id (int): id пользователя
         db (AsyncSession): сессия бд
     Returns:
@@ -748,7 +750,7 @@ async def get_is_friend_view(friend_id: int, user_id: int, db: AsyncSession):
 
 async def get_friends_view(user_id: int, db: AsyncSession):
     """
-    Возвращает массив id пользователя
+    Возвращает массив друзей пользователя (только id и юзернейм)
     Args:
         user_id (int): id пользователя
         db (AsyncSession): сессия бд
