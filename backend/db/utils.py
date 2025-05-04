@@ -183,7 +183,6 @@ async def get_all_from_table(
 ) -> list:
     """
     Получает все обьекты из таблицы бд
-    (Если используете эту функцию с limit, то также укажите skip)
     Args:
         object_type: Модель, связанная с таблицей
         db (AsyncSession): сессия бд

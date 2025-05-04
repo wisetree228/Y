@@ -55,7 +55,7 @@ async def example() -> dict:
 
 @router.post('/register')
 async def submit_form(
-    data: RegisterFormData, response: Response, db: SessionDep
+    data: RegisterFormData, db: SessionDep
 ) -> dict:
     """
     Регистрирует нового пользователя.
