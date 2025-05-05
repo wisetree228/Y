@@ -1,9 +1,12 @@
-Welcome to My FastAPI Project's documentation!
-============================================
+y documentation
+===============
+
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
-   modules
-   api
+   code
+
+
+

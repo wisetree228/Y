@@ -337,6 +337,7 @@ async def vote_view(variant_id: int, user_id: int, db: AsyncSession) -> dict:
 async def add_media_to_post_view(uploaded_file: UploadFile, post_id: int, user_id: int, db: AsyncSession):
     """
     Добавляет в бд картинку, связанную с постом
+
     Args:
         uploaded_file (UploadFile): картинка от пользователя
         post_id (int): id поста
@@ -364,6 +365,7 @@ async def add_media_to_post_view(uploaded_file: UploadFile, post_id: int, user_i
 async def add_media_to_message_view(uploaded_file: UploadFile, message_id: int, user_id: int, db: AsyncSession):
     """
     Добавляет в бд картинку, связанную с сообщением
+
     Args:
         uploaded_file (UploadFile): картинка от пользователя
         message_id (int): id сообщения
@@ -409,6 +411,7 @@ async def get_posts_view(user_id: int, db: AsyncSession):
 async def get_post_img_view(image_id: int, db: AsyncSession):
     """
     Отдаёт файл картинки, прикреплённой к посту
+
     Args:
         image_id (int): id картинки в бд
         db (AsyncSession): Сессия базы данных.
@@ -424,6 +427,7 @@ async def get_post_img_view(image_id: int, db: AsyncSession):
 async def get_post_view(post_id: int, user_id: int, db: AsyncSession):
     """
     Возвращает данные в json для просмотра отдельного поста
+
     Args:
         post_id (int): id поста
         user_id (str): ID пользователя.
@@ -481,6 +485,7 @@ async def get_post_view(post_id: int, user_id: int, db: AsyncSession):
 async def get_message_img_view(image_id: int, db: AsyncSession):
     """
     Отдаёт файл картинки, прикреплённой к посту
+
     Args:
         image_id (int): id картинки в бд
         db (AsyncSession): Сессия базы данных.
@@ -496,6 +501,7 @@ async def get_message_img_view(image_id: int, db: AsyncSession):
 async def edit_post_view(data: EditPostData, post_id: int, user_id: int, db: AsyncSession):
     """
     Редактирует пост
+
     Args:
         post_id (int): id поста
         user_id (int): ID пользователя.
@@ -526,6 +532,7 @@ async def edit_post_view(data: EditPostData, post_id: int, user_id: int, db: Asy
 async def delete_post_view(post_id: int, user_id: int, db: AsyncSession):
     """
     Удаляет пост
+
     Args:
         post_id (int): id поста
         user_id (int): ID пользователя.
@@ -546,6 +553,7 @@ async def delete_post_view(post_id: int, user_id: int, db: AsyncSession):
 async def delete_comment_view(comment_id: int, user_id: int, db: AsyncSession):
     """
     Удаляет комментарий
+
     Args:
         comment_id (int): id комментария
         user_id (int): ID пользователя.
@@ -566,6 +574,7 @@ async def delete_comment_view(comment_id: int, user_id: int, db: AsyncSession):
 async def delete_vote_view(post_id: int, user_id: int, db: AsyncSession):
     """
     Удаляет голос пользователя на варианте голосования в посте
+
     Args:
         post_id (int): id поста
         user_id (int): ID пользователя.
@@ -590,6 +599,7 @@ async def delete_vote_view(post_id: int, user_id: int, db: AsyncSession):
 async def delete_message_view(message_id: int, user_id: int, db: AsyncSession):
     """
     Удаляет сообщение
+
     Args:
         message_id (int): id варианта голосования
         user_id (int): ID пользователя.
@@ -609,6 +619,7 @@ async def delete_message_view(message_id: int, user_id: int, db: AsyncSession):
 async def change_avatar_view(uploaded_file: UploadFile, user_id: int, db: AsyncSession):
     """
     Меняет аватарку пользователя
+
     Args:
         uploaded_file (UploadFile): загруженное изображение
         user_id (int): id пользователя
@@ -626,6 +637,7 @@ async def change_avatar_view(uploaded_file: UploadFile, user_id: int, db: AsyncS
 async def get_avatar_view(another_user_id: int, user_id: int, db: AsyncSession):
     """
     Возвращает аватарку пользователя
+
     Args:
         another_user_id (int): id пользователя, аватарку которого мы получаем
         user_id (int): id пользователя
@@ -644,6 +656,7 @@ async def get_avatar_view(another_user_id: int, user_id: int, db: AsyncSession):
 async def get_chat_view(recipient_id: int, user_id: int, db: AsyncSession):
     """
     Возвращает данные для страницы чата (массив сообщений)
+
     Args:
         recipient_id (int): id собеседника
         user_id (int): id пользователя
@@ -693,6 +706,7 @@ async def get_users_posts_view(user_id: int, db: AsyncSession):
 async def get_my_page_view(user_id: int, db: AsyncSession):
     """
     Возвращает пользователю информацию о нём
+
     Args:
         user_id (int): id пользователя
         db (AsyncSession): сессия бд
@@ -713,6 +727,7 @@ async def get_my_page_view(user_id: int, db: AsyncSession):
 async def get_other_page_view(other_user_id: int, user_id: int, db: AsyncSession):
     """
     Возвращает пользователю информацию о нём
+
     Args:
         user_id (int): id пользователя
         db (AsyncSession): сессия бд
@@ -735,6 +750,7 @@ async def get_other_page_view(other_user_id: int, user_id: int, db: AsyncSession
 async def get_is_friend_view(friend_id: int, user_id: int, db: AsyncSession):
     """
     Возвращает пользователю, является ли этот человек другом или нет
+
     Args:
         friend_id_id (int): id пользователя, информацию о котором мы получаем
         user_id (int): id пользователя
@@ -751,6 +767,7 @@ async def get_is_friend_view(friend_id: int, user_id: int, db: AsyncSession):
 async def get_friends_view(user_id: int, db: AsyncSession):
     """
     Возвращает массив id пользователя
+
     Args:
         user_id (int): id пользователя
         db (AsyncSession): сессия бд
@@ -772,6 +789,7 @@ async def get_friends_view(user_id: int, db: AsyncSession):
 async def delete_friend_view(friend_id: int, user_id: int, db: AsyncSession):
     """
     Удаляет друга
+
     Args:
         friend_id (int): id друга
         user_id (int): id пользователя
@@ -788,6 +806,7 @@ async def delete_friend_view(friend_id: int, user_id: int, db: AsyncSession):
 async def get_friendship_requests_view(user_id: int, db: AsyncSession):
     """
     Возвращает запросы дружбы, отправленные пользователю
+
     Args:
         user_id (str): id пользователя
         db (AsyncSession): сессия бд
@@ -808,6 +827,7 @@ async def get_friendship_requests_view(user_id: int, db: AsyncSession):
 async def delete_friendship_request_view(request_id: int, user_id: int, db: AsyncSession):
     """
     Отклоняет входящий запрос дружбы
+
     Args:
         request_id (int): id запроса
         user_id (int): id пользователя
@@ -827,6 +847,7 @@ async def delete_friendship_request_view(request_id: int, user_id: int, db: Asyn
 async def delete_post_image_view(image_id: int, user_id: int, db: AsyncSession):
     """
     Удаляет изображение прикреплённое к посту
+
     Args:
         image_id (int): id картинки
         user_id (int): id пользователя
@@ -849,6 +870,7 @@ async def delete_post_image_view(image_id: int, user_id: int, db: AsyncSession):
 async def get_voted_users_view(voting_variant_id: int, user_id: int, db: AsyncSession) -> dict:
     """
     Возвращает список голосовавших за вариант голосования в посте
+
     Args:
         voting_variant_id (int): id варианта голосования
         user_id (int): id пользователя (не используется в текущей реализации)

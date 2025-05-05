@@ -21,6 +21,7 @@ async def add_and_refresh_object(
     """
     Добавляет обьект в бд и перезагружает его (получает автоматически созданные
     параметры обьекта, такие как id и created_at)
+
     Args:
         object (Union[User, Post, Friendship, FriendshipRequest, VotingVariant, Like, Message, Vote, MediaInPost]): обьект
         db (AsyncSession): Сессия базы данных.
@@ -35,6 +36,7 @@ async def add_and_refresh_object(
 async def get_user_by_email(email: str, db: AsyncSession) -> User:
     """
     Получает пользователя по email из бд
+
     Args:
         email (str): email
         db (AsyncSession): Сессия базы данных.
@@ -67,6 +69,7 @@ async def delete_object(
 ) -> None:
     """
     Удаляет обьект из бд
+
     Args:
         object (Union[User, Post, Friendship, FriendshipRequest, VotingVariant, Like, Message, Vote, MediaInPost]): обьект
         db (AsyncSession): Сессия базы данных.
@@ -80,6 +83,7 @@ async def delete_object(
 async def get_like_on_post_from_user(post_id: int, user_id: int, db: AsyncSession) -> Like:
     """
     Возвращает лайк пользователя на посте
+
     Args:
         post_id (int): id поста
         post_id (int): id юзера
@@ -96,6 +100,7 @@ async def get_like_on_post_from_user(post_id: int, user_id: int, db: AsyncSessio
 async def get_likes_count(post_id: int, db: AsyncSession) -> int:
     """
     Возвращает количество лайков на посте
+
     Args:
         post_id (int): id поста
     Returns:
@@ -113,6 +118,7 @@ async def get_likes_count(post_id: int, db: AsyncSession) -> int:
 async def get_user_vote(var_id: int, user_id: int, db: AsyncSession) -> Vote:
     """
     Возвращает голос юзера на варианте голосования
+
     Args:
         var_id (int): id варианта
         user_id (int): id юзера
@@ -183,6 +189,7 @@ async def get_all_from_table(
 ) -> list:
     """
     Получает все обьекты из таблицы бд
+
     Args:
         object_type: Модель, связанная с таблицей
         db (AsyncSession): сессия бд
@@ -200,6 +207,7 @@ async def get_all_from_table(
 async def get_post_voting_variants(post_id: int, db: AsyncSession) -> list:
     """
     Получает варианты голосования поста
+
     Args:
         post_id (int): id поста
         db (AsyncSession): сессия бд
@@ -218,6 +226,7 @@ async def get_object_by_id(
 ):
     """
     Получает обьект из бд по id
+
     Args:
         object_type: модель обьекта
         id (int): id обьекта
@@ -232,6 +241,7 @@ async def get_object_by_id(
 async def get_messages_between_two_users(first_user_id: int, second_user_id: int, db: AsyncSession) -> list:
     """
     Возвращает список сообщений между двумя пользователями
+
     Args:
         first_user_id (int): id первого пользователя
         second_user_id (int): id второго пользователя
@@ -257,6 +267,7 @@ async def get_messages_between_two_users(first_user_id: int, second_user_id: int
 async def get_images_id_for_message(message_id: int, db: AsyncSession) -> List[int]:
     """
     Получает список id картинок в бд, прикреплённых к сообщению
+
     Args:
         message_id (int): id поста
         db (AsyncSession): сессия бд
@@ -273,6 +284,7 @@ async def get_images_id_for_message(message_id: int, db: AsyncSession) -> List[i
 async def get_votes_on_voting_variant(variant_id: int, db: AsyncSession) -> List[Vote]:
     """
     Возвращает голоса на варианте голосования с жадной загрузкой пользователей
+
     Args:
         variant_id (int): id варианта голосования
         db (AsyncSession): сессия бд
@@ -289,6 +301,7 @@ async def get_votes_on_voting_variant(variant_id: int, db: AsyncSession) -> List
 async def get_user_posts(user_id: int, db: AsyncSession) -> list:
     """
     Возвращает посты пользователя
+
     Args:
         user_id (int): id пользователя
         db (AsyncSession): сессия бд
@@ -302,6 +315,7 @@ async def get_user_posts(user_id: int, db: AsyncSession) -> list:
 async def get_user_friends(user_id: int, db: AsyncSession):
     """
     Возвращает список друзей пользователя
+
     Args:
         user_id (int): id пользователя
         db (AsyncSession): сессия бд
@@ -330,6 +344,7 @@ async def get_friendship_requests_for_user(user_id: int, db: AsyncSession):
     """
     Возвращает запросы дружбы отправленные пользователю, с
     информацией об отправителе
+
     Args:
         user_id (int): id пользователя
         db (AsyncSession): сессия бд
