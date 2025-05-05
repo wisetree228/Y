@@ -330,8 +330,10 @@ span[style*="color: '#666'"] {
                         {new Date(post.created_at).toLocaleString()}
                     </span>
                 </div>
-
-                <p style={{ fontSize: '16px', marginBottom: '15px' }}>{post.text}</p>
+                <div style={{ width: '100%', overflowWrap: 'break-word', wordBreak: 'break-all' }}>
+                  <p style={{ fontSize: '16px', marginBottom: '15px', whiteSpace: 'pre-wrap' }}>{post.text}</p>
+                </div>
+                
 
                 {images.length > 0 && (
                     <div style={{ marginBottom: '15px' }}>
@@ -392,7 +394,7 @@ span[style*="color: '#666'"] {
                                 >
                                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                                         <span>{variant.text}</span>
-                                        <span>{variant.percent}% ({variant.votes?.length || 0})</span>
+                                        <span>{`${variant.percent} % (${variant.votes_count} голосов)`}</span>
                                     </div>
                                     <div
                                         style={{

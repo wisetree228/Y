@@ -321,8 +321,11 @@ small {
                 </p>
               </div>
             </div>
+
+                <div style={{ width: '100%', overflowWrap: 'break-word', wordBreak: 'break-all' }}>
+                  <p style={{ marginBottom: '15px', lineHeight: '1.5', whiteSpace: 'pre-wrap' }}>{post.text}</p>
+                </div>
             
-            <p style={{ marginBottom: '15px', lineHeight: '1.5' }}>{post.text}</p>
             
             {post.images_id && post.images_id.length > 0 && (
               <div style={{ 
@@ -361,7 +364,7 @@ small {
                       backgroundColor: variant.selected ? '#f0f0f0' : 'transparent'
                     }}
                   >
-                    {variant.text} {variant.percent && `(${variant.percent}%)`}
+                    {variant.text} {`${variant.percent} % (${variant.votes_count} голосов)`}
                   </div>
                 ))}
               </div>

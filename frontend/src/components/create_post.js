@@ -78,6 +78,9 @@ a {
   color: #a8d4ff;
   text-decoration: none;
 }
+  .inputtext{
+     width: 100%
+  }
     `;
     
     // Добавляем в head документа
@@ -126,7 +129,7 @@ a {
         <div>
             <h1>Создать пост</h1>
             <form onSubmit={handleSubmit}>
-                <div>
+                <div className='inputtext'>
                     <label>Текст поста:</label>
                     <textarea
                         value={postText}
@@ -150,7 +153,7 @@ a {
                             <button type="button" onClick={() => removeOption(index)}>Удалить</button>
                         </div>
                     ))}
-                    <button type="button" onClick={addOption}>Добавить вариант</button>
+                    <button type="button" style={{ backgroundColor: '#4db5ff' }} onClick={addOption}>Добавить вариант</button>
                 </div>
                 <button type="submit">Опубликовать пост</button>
             </form>
