@@ -67,7 +67,11 @@ ESLINT_NO_DEV_ERRORS=true
 DISABLE_ESLINT_PLUGIN=true
 ```
 (это нужно для отключения ошибок eslint)
+
 5) Поднять докер (на виндовс просто запустите docker desktop, на линуксе выполните команду ```sudo systemctl start docker```)
+
 6) Выполните команду ```sudo docker compose up --build```
+
 7) Когда докер поднимется, откройте второй терминал и выполните ```sudo docker compose run --rm app alembic revision --autogenerate -m "New migration"``` а потом ```sudo docker compose run --rm app alembic upgrade head``` (создание таблиц в бд)
+
 8) Готово! Проект доступен на локальном сервере по адресу http://localhost:3000 (пользовательский фронтенд), к API бэкенда обращаться по http://localhost:8000

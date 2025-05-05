@@ -171,17 +171,7 @@ footer {
                 password,
             }, { withCredentials: true });
     
-            if (response.status === 200) {
-                
-    
-                navigate('/posts'); 
-                setLoading(false); 
-            } else {
-                
-                setError("При входе произошла ошибка! Проверьте корректность email и пароля.");
-                 setLoading(false); 
-                console.error('Ошибка:', response.status, response.data); 
-            }
+            navigate('/posts')
         } catch (err) {
             alert('Ошибка! Проверьте корректность введённых данных и попробуйте ещё раз!')
             setLoading(false); 

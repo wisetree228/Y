@@ -307,6 +307,18 @@ p[style*="color: red"] {
 
     return (
         <div style={{ maxWidth: '800px', margin: '0 auto', padding: '20px' }}>
+            <button
+                onClick={() => navigate(-1)}
+                style={{
+                    padding: '10px 20px',
+                    backgroundColor: '#007bff',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: '5px',
+                    cursor: 'pointer',
+                    marginBottom: '20px',
+                }}
+            >Вернуться назад</button>
             {/* Шапка профиля */}
             <div style={{ 
                 border: '1px solid #ccc', 
@@ -397,8 +409,10 @@ p[style*="color: red"] {
                                 
                                 
                             </div>
-                            
-                            <p style={{ marginBottom: '15px', lineHeight: '1.5' }}>{post.text}</p>
+                      
+                            <div style={{ width: '100%', overflowWrap: 'break-word', wordBreak: 'break-all' }}>
+                  <p style={{ marginBottom: '15px', lineHeight: '1.5', whiteSpace: 'pre-wrap' }}>{post.text}</p>
+                </div>
                             
                             {post.images_id && post.images_id.length > 0 && (
                                 <div style={{ 
@@ -437,7 +451,7 @@ p[style*="color: red"] {
                                                 backgroundColor: variant.user_voted ? '#f0f0f0' : 'transparent'
                                             }}
                                         >
-                                            {variant.text} {variant.percent && `(${variant.percent}%)`}
+                                            {variant.text} {`${variant.percent} % (${variant.votes_count} голосов)`}
                                         </div>
                                     ))}
                                 </div>
