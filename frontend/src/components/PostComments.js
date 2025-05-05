@@ -19,7 +19,7 @@ const PostComments = () => {
         const fetchPost = async () => {
             try {
                 await CheckAuthorization();
-                const response = await axios.get(`${API_BASE_URL}/posts/${postId}?t=${Date.now()}`, {
+                const response = await axios.get(`${API_BASE_URL}/posts/${postId}`, {
                     withCredentials: true
                 });
                 const postData = response.data.post;
@@ -34,14 +34,168 @@ const PostComments = () => {
 
                 setLoading(false);
             } catch (error) {
-                console.error('Ошибка при загрузке поста:', error);
-                setError('Ошибка при загрузке поста');
-                setLoading(false);
+                alert('Ошибка на стороне сервера, попробуйте ещё раз!')
+            }
+        };
+
+        const fetchId = async () => {
+            try {
+                await CheckAuthorization();
+                const response = await axios.get(`${API_BASE_URL}/my_id`, {
+                    withCredentials: true
+                });
+                const Id = response.data.id;
+                setCurrentUserId(Id);
+
+                
+                }
+
+                
+             catch (error) {
+                alert('Ошибка на стороне сервера, попробуйте ещё раз!')
             }
         };
 
         fetchPost();
+        fetchId();
+        const styleElement = document.createElement('style');
+    styleElement.innerHTML = `
+      /* Основные стили */
+body {
+  background-color: #396687;
+  color: #e0e0e0;
+  font-family: Arial, sans-serif;
+  padding: 20px;
+  line-height: 1.5;
+}
 
+/* Контейнер */
+div[style*="max-width: '800px'"] {
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+/* Карточка поста */
+div[style*="border: '1px solid #ccc'"] {
+  background-color: #2d4d66;
+  border: 1px solid #3c91cf !important;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+  color: #fff;
+}
+
+/* Заголовки */
+h1, h2, h3 {
+  color: #fff;
+  margin: 15px 0 10px;
+}
+
+/* Текст */
+p {
+  margin: 10px 0;
+  color: #e0e0e0;
+}
+
+/* Кнопки */
+button {
+  background-color: #3c91cf;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin: 5px 0;
+  font-size: 14px;
+}
+
+button:hover {
+  background-color: #2e7ab3;
+}
+
+/* Специальные кнопки */
+button[style*="background: none"] {
+  background: transparent !important;
+  padding: 0 !important;
+  color: #ff6b6b !important;
+}
+
+button[style*="background-color: '#f44336'"] {
+  background-color: #e53935 !important;
+}
+
+/* Форма комментария */
+textarea {
+  width: 100%;
+  padding: 10px;
+  border-radius: 4px;
+  border: 1px solid #3c91cf;
+  background-color: #2d4d66;
+  color: white;
+  min-height: 100px;
+  margin-bottom: 10px;
+}
+
+textarea::placeholder {
+  color: #aaa;
+}
+
+/* Комментарии */
+div[style*="border: '1px solid #eee'"] {
+  background-color: #2d4d66;
+  border: 1px solid #3c91cf !important;
+  border-radius: 6px;
+  padding: 15px;
+  margin-bottom: 15px;
+  color: #fff;
+}
+
+/* Изображения */
+img {
+  max-width: 100%;
+  border-radius: 6px;
+  border: 1px solid #3c91cf;
+}
+
+/* Ссылки */
+a {
+  color: #a8d4ff;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* Варианты голосования */
+button[style*="width: '100%'"] {
+  background-color: #2d4d66 !important;
+  color: white !important;
+  border: 1px solid #3c91cf !important;
+  margin-bottom: 8px;
+}
+
+/* Полоса прогресса голосования */
+div[style*="height: '10px'"] {
+  background-color: #3c91cf !important;
+}
+
+/* Мелкий текст */
+small {
+  color: #aaa;
+}
+
+/* Предупреждения */
+span[style*="color: '#666'"] {
+  color: #aaa !important;
+}
+    `;
+    
+    // Добавляем в head документа
+    document.head.appendChild(styleElement);
+    return () => {
+        document.head.removeChild(styleElement);
+      };
 
     }, [postId]);
 
@@ -56,8 +210,7 @@ const PostComments = () => {
                 likes_count: response.data.likes_count
             }));
         } catch (error) {
-            console.error('Ошибка при обработке лайка:', error);
-            alert(error.response?.data?.detail || 'Ошибка при обработке лайка');
+            alert('Ошибка на стороне сервера, попробуйте ещё раз!')
         }
     };
 
@@ -72,8 +225,7 @@ const PostComments = () => {
             });
             setPost(response.data.post);
         } catch (error) {
-            console.error('Ошибка при голосовании:', error);
-            alert(error.response?.data?.detail || 'Ошибка при голосовании');
+            alert('Ошибка на стороне сервера, попробуйте ещё раз!')
         }
     };
 
@@ -82,33 +234,32 @@ const PostComments = () => {
         if (!newComment.trim()) return;
 
         try {
-            await axios.post(`${API_BASE_URL}/post/${postId}/comment?t=${Date.now()}`, {
+            await axios.post(`${API_BASE_URL}/post/${postId}/comment`, {
                 text: newComment
             }, {
                 withCredentials: true
             });
 
-            const response = await axios.get(`${API_BASE_URL}/posts/${postId}?t=${Date.now()}`, {
+            const response = await axios.get(`${API_BASE_URL}/posts/${postId}`, {
                 withCredentials: true
             });
             setPost(response.data.post);
             setNewComment('');
         } catch (error) {
-            console.error('Ошибка при добавлении комментария:', error);
-            alert(error.response?.data?.detail || 'Ошибка при добавлении комментария');
+            alert('Ошибка на стороне сервера, попробуйте ещё раз!')
         }
     };
 
     const handleDeleteVote = async (postId) => {
         try {
             await axios.delete(
-                `${API_BASE_URL}/vote/${postId}?t=${Date.now()}`,
+                `${API_BASE_URL}/vote/${postId}`,
                 { withCredentials: true }
             );
         } catch (err) {
-            console.error('Ошибка при удалении голоса:', err);
+            alert('Ошибка на стороне сервера, попробуйте ещё раз!')
         }
-        const response = await axios.get(`${API_BASE_URL}/posts/${postId}?t=${Date.now()}`, {
+        const response = await axios.get(`${API_BASE_URL}/posts/${postId}`, {
             withCredentials: true
         });
         const postData = response.data.post;
@@ -123,13 +274,12 @@ const PostComments = () => {
             });
 
             // Обновляем данные поста
-            const response = await axios.get(`${API_BASE_URL}/posts/${postId}?t=${Date.now()}`, {
+            const response = await axios.get(`${API_BASE_URL}/posts/${postId}`, {
                 withCredentials: true
             });
             setPost(response.data.post);
         } catch (error) {
-            console.error('Ошибка при удалении комментария:', error);
-            alert(error.response?.data?.detail || 'Ошибка при удалении комментария');
+            alert('Ошибка на стороне сервера, попробуйте ещё раз!')
         }
     };
 
@@ -168,7 +318,7 @@ const PostComments = () => {
                 padding: '20px',
                 marginBottom: '20px',
                 borderRadius: '8px',
-                backgroundColor: '#fff'
+                backgroundColor: '#1b99b5'
             }}>
                 <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
                     <h2 style={{ margin: 0 }}>{post.author_username}</h2>
@@ -180,8 +330,10 @@ const PostComments = () => {
                         {new Date(post.created_at).toLocaleString()}
                     </span>
                 </div>
-
-                <p style={{ fontSize: '16px', marginBottom: '15px' }}>{post.text}</p>
+                <div style={{ width: '100%', overflowWrap: 'break-word', wordBreak: 'break-all' }}>
+                  <p style={{ fontSize: '16px', marginBottom: '15px', whiteSpace: 'pre-wrap' }}>{post.text}</p>
+                </div>
+                
 
                 {images.length > 0 && (
                     <div style={{ marginBottom: '15px' }}>
@@ -235,14 +387,14 @@ const PostComments = () => {
                                         textAlign: 'left',
                                         border: `1px solid ${variant.user_voted ? '#4CAF50' : '#ddd'}`,
                                         borderRadius: '4px',
-                                        backgroundColor: variant.user_voted ? '#e8f5e9' : '#fff',
+                                        backgroundColor: variant.user_voted ? '#e8f5e9' : '#166e82',
                                         cursor: variant.user_voted ? 'default' : 'pointer',
                                         opacity: variant.user_voted ? 0.8 : 1
                                     }}
                                 >
                                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                                         <span>{variant.text}</span>
-                                        <span>{variant.percent}% ({variant.votes?.length || 0})</span>
+                                        <span>{`${variant.percent} % (${variant.votes_count} голосов)`}</span>
                                     </div>
                                     <div
                                         style={{
@@ -332,7 +484,7 @@ const PostComments = () => {
                                 padding: '15px',
                                 marginBottom: '15px',
                                 borderRadius: '8px',
-                                backgroundColor: '#f9f9f9'
+                                backgroundColor: '#1b99b5'
                             }}
                         >
                             <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>

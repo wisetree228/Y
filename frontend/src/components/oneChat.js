@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from '../config';
 import CheckAuthorization from '../utils';
 import './css/Chat.css';
@@ -16,6 +16,7 @@ const Chat = () => {
     const [isConnected, setIsConnected] = useState(false);
     const socketRef = useRef(null);
     const messagesEndRef = useRef(null);
+    const navigate = useNavigate();
 
     // Функция для прокрутки к последнему сообщению при обновлении
     const scrollToBottom = () => {
@@ -157,12 +158,22 @@ const Chat = () => {
     if (error) return <div className="chat-error">Ошибка: {error}</div>;
 
     return (
+        
         <div className="chat-container">
+            <button
+                onClick={() => navigate(-1)}
+                style={{
+                    padding: '10px 20px',
+                    backgroundColor: '#007bff',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: '5px',
+                    cursor: 'pointer',
+                    marginBottom: '20px',
+                }}
+            >Вернуться назад</button>
             <div className="chat-header">
                 <h2>Чат с {recipient?.username}</h2>
-                <div className={`connection-status ${isConnected ? 'connected' : 'disconnected'}`}>
-                    {isConnected ? 'Онлайн' : 'Оффлайн'}
-                </div>
             </div>
             
             <div className="messages-list">

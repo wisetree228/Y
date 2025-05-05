@@ -185,7 +185,7 @@ async def get_all_from_table(
         object_type: Union[Type[User], Type[Post], Type[Friendship], Type[FriendshipRequest],
         Type[VotingVariant], Type[Like], Type[Message], Type[Vote], Type[MediaInPost],
         Type[MediaInMessage], Type[Comment]],
-        db: AsyncSession, limit=None
+        db: AsyncSession, limit=None, skip=0
 ) -> list:
     """
     Получает все обьекты из таблицы бд
@@ -194,13 +194,23 @@ async def get_all_from_table(
         object_type: Модель, связанная с таблицей
         db (AsyncSession): сессия бд
         limit: ограничение на количество получаемых обьектов, по умолчанию None
+        skip: сколько обьектов пропустить
     Returns:
         список обьектов
     """
     if limit:
-        result = await db.execute(select(object_type).order_by(desc(object_type.id)).limit(5))
+        result = await db.execute(
+            select(object_type)
+            .order_by(object_type.id.desc())  # Сортировка по ID в порядке убывания
+            .offset(skip)
+            .limit(limit)
+        )
         return result.scalars().all()
-    result = await db.execute(select(object_type))
+
+    result = await db.execute(
+        select(object_type)
+        .order_by(object_type.id.desc())  # Сортировка по ID в порядке убывания
+    )
     return result.scalars().all()
 
 

@@ -53,13 +53,119 @@ const EditPost = () => {
             
             setLoading(false);
         } catch (err) {
-            setError(err.response?.data?.detail || 'Ошибка загрузки поста');
-            setLoading(false);
+            alert('Ошибка на стороне сервера, попробуйте ещё раз!')
         }
     };
 
     useEffect(() => {
         fetchPost();
+        const styleElement = document.createElement('style');
+    styleElement.innerHTML = `
+      /* Основные стили */
+body {
+  background-color: #396687;
+  color: white;
+  font-family: Arial, sans-serif;
+  padding: 20px;
+}
+
+/* Контейнер */
+div[style*="max-width: '800px'"] {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* Заголовок */
+h1 {
+  color: white;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+/* Форма */
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+/* Группы полей */
+div[style*="marginBottom: '20px'"] {
+  margin-bottom: 15px;
+}
+
+/* Текстовые поля */
+textarea, input[type="text"] {
+  width: 100%;
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #3c91cf;
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+textarea {
+  min-height: 100px;
+}
+
+/* Кнопки */
+button {
+  background-color: #3c91cf;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+/* Специальные кнопки */
+button[style*="background-color: '#dc3545'"],
+button[style*="background-color: 'rgba(220, 53, 69, 0.8)'"] {
+  background-color: #e53935 !important;
+}
+
+button[style*="background-color: '#28a745'"] {
+  background-color: #4caf50 !important;
+}
+
+/* Ссылка-кнопка */
+a[style*="backgroundColor: '#6c757d'"] {
+  background-color: #607d8b !important;
+  color: white !important;
+}
+
+/* Изображения */
+img {
+  border-radius: 4px;
+  border: 1px solid #3c91cf;
+}
+
+/* Предупреждение */
+div[style*="backgroundColor: '#fff3cd'"] {
+  background-color: rgba(255, 193, 7, 0.2) !important;
+  color: white !important;
+  border-left: 3px solid #ffc107;
+}
+
+/* Файловый инпут */
+input[type="file"] {
+  color: white;
+}
+
+/* Адаптивность */
+@media (max-width: 600px) {
+  div[style*="max-width: '800px'"] {
+    padding: 15px;
+  }
+}
+    `;
+    
+    // Добавляем в head документа
+    document.head.appendChild(styleElement);
+    return () => {
+        document.head.removeChild(styleElement);
+      };
     }, [postId]);
 
     const handlePostTextChange = (e) => {
@@ -96,8 +202,7 @@ const EditPost = () => {
             });
             setImages(images.filter(img => img.id !== imageId));
         } catch (err) {
-            console.error('Ошибка удаления изображения:', err);
-            alert('Не удалось удалить изображение');
+            alert('Ошибка на стороне сервера, попробуйте ещё раз!')
         }
     };
 
@@ -131,10 +236,9 @@ const EditPost = () => {
                 });
             }
 
-            navigate(`/posts/${postId}`);
+            navigate(`/home`);
         } catch (err) {
-            console.error('Ошибка при редактировании поста:', err);
-            alert('Не удалось сохранить изменения');
+            alert('Ошибка на стороне сервера, попробуйте ещё раз!')
         }
     };
 
@@ -162,9 +266,10 @@ const EditPost = () => {
                         marginBottom: '20px',
                         padding: '15px',
                         backgroundColor: '#fff3cd',
-                        borderRadius: '4px'
+                        borderRadius: '4px',
+                        color: '#a61907'
                     }}>
-                        <strong>Внимание!</strong> Если вы измените варианты голосования, 
+                        <strong style={{ color: '#a61907' }}>Внимание!</strong> Если вы измените варианты голосования, 
                         все текущие голоса будут сброшены.
                     </div>
                 )}
