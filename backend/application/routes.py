@@ -55,7 +55,7 @@ async def example() -> dict:
 
 @router.post('/register')
 async def submit_form(
-    data: RegisterFormData, response: Response, db: SessionDep
+    data: RegisterFormData, db: SessionDep
 ) -> dict:
     """
     Регистрирует нового пользователя.
@@ -236,6 +236,7 @@ async def websocket_endpoint(
 ) -> None:
     """
     Обрабатывает WebSocket-соединение для чата.
+
     Args:
         websocket (WebSocket): WebSocket-соединение.
         user_id (str): ID пользователя.
@@ -251,6 +252,7 @@ async def add_media_to_post(
 ):
     """
     Добавляет в бд картинку, связанную с постом
+
     Args:
         uploaded_file (UploadFile): картинка от пользователя
         post_id (int): id поста
@@ -271,6 +273,7 @@ async def add_media_to_message(
 ):
     """
     Добавляет в бд картинку, связанную с сообщением
+
     Args:
         uploaded_file (UploadFile): картинка от пользователя
         message_id (int): id сообщения
@@ -306,6 +309,7 @@ async def get_post_img(
 ):
     """
     Отдаёт файл картинки, прикреплённой к посту
+
     Args:
         image_id (int): id картинки в бд
         db (AsyncSession): Сессия базы данных.
@@ -339,6 +343,7 @@ async def get_message_img(
 ):
     """
     Отдаёт файл картинки, прикреплённой к сообщению
+
     Args:
         image_id (int): id картинки в бд
         db (AsyncSession): Сессия базы данных.
@@ -354,6 +359,7 @@ async def edit_post(
 ) -> dict:
     """
     Редактирует пост
+
     Args:
         post_id (int): id поста
         user_id (str): ID пользователя.
@@ -370,6 +376,7 @@ async def delete_post(
 ) -> dict:
     """
     Удаляет пост
+
     Args:
         post_id (int): id поста
         user_id (str): ID пользователя.
@@ -386,6 +393,7 @@ async def delete_comment(
 ) -> dict:
     """
     Удаляет комментарий
+
     Args:
         comment_id (int): id комментария
         user_id (str): ID пользователя.
@@ -402,6 +410,7 @@ async def delete_vote(
 ) -> dict:
     """
     Удаляет голос пользователя на варианте голосования в посте
+
     Args:
         post_id (int): id поста
         user_id (str): ID пользователя.
@@ -418,6 +427,7 @@ async def delete_message(
 ) -> dict:
     """
     Удаляет сообщение
+
     Args:
         message_id (int): id варианта голосования
         user_id (str): ID пользователя.
@@ -434,6 +444,7 @@ async def change_avatar(
 ) -> dict:
     """
     Меняет аватарку пользователя
+
     Args:
         uploaded_file (UploadFile): загруженное изображение
         user_id (str): id пользователя
@@ -451,6 +462,7 @@ async def get_avatar(
 ) -> dict:
     """
     Возвращает аватарку пользователя
+
     Args:
         another_user_id (int): id пользователя, аватарку которого мы получаем
         user_id (str): id пользователя
@@ -467,6 +479,7 @@ async def get_avatar(
 ) -> dict:
     """
     Возвращает аватарку пользователя
+
     Args:
         user_id (str): id пользователя
         db (AsyncSession): сессия бд
@@ -482,6 +495,7 @@ async def get_chat(
 ) -> dict:
     """
     Возвращает данные для страницы чата (массив сообщений)
+
     Args:
         recipient_id (int): id собеседника
         user_id (str): id пользователя
@@ -498,6 +512,7 @@ async def get_users_posts(
 ) -> dict:
     """
     Возвращает список постов пользователя
+
     Args:
         user_id (str): id пользователя
         db (AsyncSession): сессия бд
@@ -513,6 +528,7 @@ async def get_user_posts(
 ) -> dict:
     """
     Возвращает список постов пользователя
+
     Args:
         user_id (str): id пользователя
         db (AsyncSession): сессия бд
@@ -528,6 +544,7 @@ async def get_my_page(
 ) -> dict:
     """
     Возвращает пользователю информацию о нём
+
     Args:
         user_id (str): id пользователя
         db (AsyncSession): сессия бд
@@ -543,6 +560,7 @@ async def get_other_page(
 ) -> dict:
     """
     Возвращает пользователю информацию о пользователе по id
+
     Args:
         other_user_id (int): id пользователя, информацию о котором мы получаем
         user_id (str): id пользователя
@@ -559,6 +577,7 @@ async def get_is_friend(
 ) -> dict:
     """
     Возвращает пользователю, является ли этот человек другом или нет
+
     Args:
         friend_id_id (int): id пользователя, информацию о котором мы получаем
         user_id (str): id пользователя
@@ -575,6 +594,7 @@ async def get_friends(
 ) -> dict:
     """
     Возвращает массив id пользователя
+
     Args:
         user_id (str): id пользователя
         db (AsyncSession): сессия бд
@@ -590,6 +610,7 @@ async def delete_friend(
 ) -> dict:
     """
     Удаляет друга
+
     Args:
         friend_id (int): id друга
         user_id (str): id пользователя
@@ -606,6 +627,7 @@ async def get_friendship_requests(
 ) -> dict:
     """
     Возвращает запросы дружбы, отправленные пользователю
+
     Args:
         user_id (str): id пользователя
         db (AsyncSession): сессия бд
@@ -621,6 +643,7 @@ async def delete_friendship_request(
 ) -> dict:
     """
     Отклоняет входящий запрос дружбы
+
     Args:
         request_id (int): id запроса
         user_id (str): id пользователя
@@ -637,6 +660,7 @@ async def delete_post_image(
 ) -> dict:
     """
     Удаляет изображение прикреплённое к посту
+
     Args:
         image_id (int): id картинки
         user_id (str): id пользователя
@@ -682,6 +706,7 @@ async def get_voted_users(voting_variant_id: int, db: SessionDep, user_id = Depe
     """
     Возвращает информацию о проголосовавших за конкретный
     вариант голосования пользователей
+
     Args:
         voting_variant_id (int): id варианта голосования
         db (AsyncSession): сессия бд

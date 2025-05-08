@@ -15,6 +15,7 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 def hash_password(password: str) -> str:
     """
     Хэширует пароль
+
     Args:
         password (str): пароль
     Returns:
@@ -25,6 +26,7 @@ def hash_password(password: str) -> str:
 def verify_password(stored_hashed_password: str, provided_password: str) -> bool:
     """
     Сверяет пароль и хэш из бд
+
     Args:
         stored_hashed_password (str): хэш
         provided_password (str): пароль
@@ -36,6 +38,7 @@ def verify_password(stored_hashed_password: str, provided_password: str) -> bool
 async def get_current_user_id(request: Request) -> str:
     """
     Достаёт из файлов куки токен авторизации и дешифрует оттуда id пользователя
+
     Args:
         request (Request): http request
     Returns:
@@ -70,6 +73,7 @@ async def get_current_user_id(request: Request) -> str:
 async def process_voting_variants(variants) -> list:
     """
     Обрабатывает данные голосования для возврата пользователю (высчитывает процент)
+    
     Args:
         variants (list): варианты
     Returns:
@@ -83,7 +87,8 @@ async def process_voting_variants(variants) -> list:
         {
             'id': variant.id,
             'text': variant.text,
-            'percent': round((len(variant.votes) / total_votes * 100) if total_votes else 0)
+            'percent': round((len(variant.votes) / total_votes * 100) if total_votes else 0),
+            'votes_count':len(variant.votes)
         }
         for variant in variants
     ]
