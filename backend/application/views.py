@@ -3,8 +3,8 @@
 """
 import json
 from io import BytesIO
-from fastapi import (HTTPException, Response, WebSocket, WebSocketDisconnect,
-    UploadFile
+from fastapi import (
+    HTTPException, Response, WebSocket, WebSocketDisconnect, UploadFile
 )
 from fastapi.responses import StreamingResponse, FileResponse
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -22,8 +22,6 @@ from backend.db.utils import (
     get_all_from_table, get_post_voting_variants, get_object_by_id,
     get_messages_between_two_users, get_images_id_for_message, get_votes_on_voting_variant,
     get_user_posts, get_user_friends, get_friendship_requests_for_user,
-
-
 )
 from backend.application.utils import (
     hash_password, verify_password, WebSocketConnectionManager, process_voting_variants
