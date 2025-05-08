@@ -75,3 +75,9 @@ DISABLE_ESLINT_PLUGIN=true
 7) Когда докер поднимется, откройте второй терминал и выполните ```sudo docker compose run --rm app alembic revision --autogenerate -m "New migration"``` а потом ```sudo docker compose run --rm app alembic upgrade head``` (создание таблиц в бд)
 
 8) Готово! Проект доступен на локальном сервере по адресу http://localhost:3000 (пользовательский фронтенд), к API бэкенда обращаться по http://localhost:8000
+
+## Генерация документации
+
+1) Перейдите в папку docs (```cd docs```)
+2) выполните команду ```make html``` (если не сработало, то ```.\make html```)
+3) Теперь, когда документация сгенерирована, откройте в браузере файл который располагается по адресу ```docs/build/html/index.html```
