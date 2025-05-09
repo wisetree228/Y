@@ -71,6 +71,12 @@ async def test_something_with_db(client, db):
 
 @pytest.mark.asyncio
 async def test_register(client):
+    """
+    Тест регистрации пользователя при валидных данных
+    Ожидается:
+        статус код: 200
+        json: {'status': 'ok'}
+    """
     response = await client.post(
         '/register',
         json={
@@ -87,6 +93,11 @@ async def test_register(client):
 
 @pytest.mark.asyncio
 async def test_login(client):
+    """
+    Тест входа существующего пользователя 
+    Ожидается:
+        статус код: 200
+    """
     response = await client.post(
         '/login',
         json={
@@ -98,6 +109,12 @@ async def test_login(client):
 
 @pytest.mark.asyncio
 async def test_logout(client):
+    """
+    Тест выхода авторизированного пользователя
+    Ожидается:
+        статус код: 200
+        json: {'status': 'ok'}
+    """
     response = await client.post(
         '/logout'
     )
@@ -107,7 +124,14 @@ async def test_logout(client):
 @pytest.mark.asyncio
 async def test_create_post(client):
     token = security.create_access_token(uid="1") 
-    client.cookies.set(config.JWT_ACCESS_COOKIE_NAME, token) 
+    client.cookies.set(config.JWT_ACCESS_COOKIE_NAME, token)
+    """
+    Тест успешного создания поста 
+        - пользователь авторизован
+    Ожидается:
+        статус код: 200
+        json: {'status': 'ok'}
+    """ 
     response = await client.post(
         '/post',
         json={
@@ -123,6 +147,14 @@ async def test_create_post(client):
 
 @pytest.mark.asyncio
 async def test_create_comment(client):
+    """
+    Тест успешного создания комментария
+        - пользователь авторизован
+        - пост существует
+    Ожидается:
+        статус код: 200
+        json: {'status': 'ok'}
+    """
     token = security.create_access_token(uid="1") 
     client.cookies.set(config.JWT_ACCESS_COOKIE_NAME, token) 
     response = await client.post(
@@ -137,6 +169,14 @@ async def test_create_comment(client):
 
 @pytest.mark.asyncio
 async def test_create_like(client):
+    """
+    Тест добавления лайка к посту
+        - пользователь авторизован
+        - пост существует
+    Ожидается:
+        статус код: 200
+        json: {'status': 'liked', 'likes_count': 1}
+    """
     token = security.create_access_token(uid="1") 
     client.cookies.set(config.JWT_ACCESS_COOKIE_NAME, token) 
     response = await client.post(
@@ -147,6 +187,14 @@ async def test_create_like(client):
 
 @pytest.mark.asyncio
 async def test_delete_like(client):
+    """
+    Тест удаления лайка у поста
+        - пользователь авторизован
+        - пост существует
+    Ожидается:
+        статус код: 200
+        json: {'status': 'unliked', 'likes_count': 0}
+    """
     token = security.create_access_token(uid="1") 
     client.cookies.set(config.JWT_ACCESS_COOKIE_NAME, token) 
     response = await client.post(
@@ -158,6 +206,12 @@ async def test_delete_like(client):
 
 @pytest.mark.asyncio
 async def test_get_posts(client):
+    """
+    Тест получения списка постов
+        - пользователь авторизован
+    Ожидается:
+        статус код: 200
+    """
     token = security.create_access_token(uid="1") 
     client.cookies.set(config.JWT_ACCESS_COOKIE_NAME, token) 
 
