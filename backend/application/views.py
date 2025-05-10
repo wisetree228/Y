@@ -4,7 +4,8 @@
 import json
 from io import BytesIO
 from fastapi import (
-    HTTPException, Response, WebSocket, WebSocketDisconnect, UploadFile
+    HTTPException, Response, WebSocket, WebSocketDisconnect,
+    UploadFile
 )
 from fastapi.responses import StreamingResponse, FileResponse
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -12,8 +13,8 @@ from sqlalchemy.orm import joinedload
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
 from backend.db.models import (
-    User, Post, Comment, Vote, VotingVariant, Message, Friendship, FriendshipRequest, Like,
-    MediaInPost, MediaInMessage, ComplaintAboutPost, ComplaintAboutComment
+    User, Post, Comment, Vote, VotingVariant, Message, Friendship, FriendshipRequest,
+    Like, MediaInPost, MediaInMessage, ComplaintAboutPost, ComplaintAboutComment
 )
 from backend.db.utils import (
     delete_object, add_and_refresh_object, get_user_by_email,
@@ -905,7 +906,7 @@ async def complaint_post_view(post_id: int, user_id: int, db: AsyncSession):
     if not post:
         raise HTTPException(status_code=404, detail="Пост не найден")
 
-    new_complaint = ComplaintAboutPost(post_id=post_id, author_id=post.author_id)
+    new_complaint = ComplaintAboutPost(post_id=post_id, author_id=user_id)
 
     await add_and_refresh_object(object=new_complaint, db=db)
     return {'status': 'ok'}
@@ -915,7 +916,7 @@ async def complaint_comment_view(comment_id: int, user_id: int, db: AsyncSession
     """
     Создание жалобы на комментарий
     Args:
-        post_id (int): id поста
+        comment_id (int): id комментария
         user_id (str): ID пользователя.
         db (AsyncSession): Сессия базы данных.
     Returns:
@@ -926,7 +927,7 @@ async def complaint_comment_view(comment_id: int, user_id: int, db: AsyncSession
     if not comment:
         raise HTTPException(status_code=404, detail="Комментарий не найден")
 
-    new_complaint = ComplaintAboutComment(comment_id=comment_id, author_id=comment.author_id)
+    new_complaint = ComplaintAboutComment(comment_id=comment_id, author_id=user_id)
 
     await add_and_refresh_object(object=new_complaint, db=db)
     return {'status': 'ok'}

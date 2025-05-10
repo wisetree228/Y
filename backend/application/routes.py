@@ -673,7 +673,7 @@ async def delete_post_image(
 
 
 
-@router.get('/complaint_post/{post_id}', dependencies=[Depends(security.access_token_required)])
+@router.post('/complaint_post/{post_id}', dependencies=[Depends(security.access_token_required)])
 async def complaint_post(db: SessionDep, post_id: int, user_id: str = Depends(get_current_user_id)):
     """
     Создаёт жалобу на пост
@@ -687,12 +687,12 @@ async def complaint_post(db: SessionDep, post_id: int, user_id: str = Depends(ge
     return await complaint_post_view(post_id = post_id, user_id = int(user_id), db=db)
 
 
-@router.get('/complaint_comment/{comment_id}', dependencies=[Depends(security.access_token_required)])
+@router.post('/complaint_comment/{comment_id}', dependencies=[Depends(security.access_token_required)])
 async def complaint_comment(db: SessionDep, comment_id: int, user_id: str = Depends(get_current_user_id)):
     """
     Создаёт жалобу на коментарий
     Args:
-        comment_id (int): id поста 
+        comment_id (int): id комментария
         user_id (str): id пользователя
         db (Session): сессия бд
     Returns:
