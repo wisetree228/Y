@@ -3,8 +3,8 @@
 """
 import json
 from io import BytesIO
-from fastapi import (HTTPException, Response, WebSocket, WebSocketDisconnect,
-    UploadFile
+from fastapi import (
+    HTTPException, Response, WebSocket, WebSocketDisconnect, UploadFile
 )
 from fastapi.responses import StreamingResponse, FileResponse
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -13,7 +13,7 @@ from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
 from backend.db.models import (
     User, Post, Comment, Vote, VotingVariant, Message, Friendship, FriendshipRequest, Like,
-    MediaInPost, MediaInMessage
+    MediaInPost, MediaInMessage, ComplaintAboutPost, ComplaintAboutComment
 )
 from backend.db.utils import (
     delete_object, add_and_refresh_object, get_user_by_email,
@@ -22,8 +22,6 @@ from backend.db.utils import (
     get_all_from_table, get_post_voting_variants, get_object_by_id,
     get_messages_between_two_users, get_images_id_for_message, get_votes_on_voting_variant,
     get_user_posts, get_user_friends, get_friendship_requests_for_user,
-
-
 )
 from backend.application.utils import (
     hash_password, verify_password, WebSocketConnectionManager, process_voting_variants
@@ -891,3 +889,44 @@ async def get_voted_users_view(voting_variant_id: int, user_id: int, db: AsyncSe
             for vote in votes
         ]
     }
+
+async def complaint_post_view(post_id: int, user_id: int, db: AsyncSession):
+    """
+    Создание жалобы на пост
+    Args:
+        post_id (int): id поста
+        user_id (str): ID пользователя.
+        db (AsyncSession): Сессия базы данных.
+    Returns:
+        dict: Статус операции
+    """
+    post = await get_object_by_id(object_type=Post, id=post_id, db=db)
+    
+    if not post:
+        raise HTTPException(status_code=404, detail="Пост не найден")
+
+    new_complaint = ComplaintAboutPost(post_id=post_id, author_id=post.author_id)
+
+    await add_and_refresh_object(object=new_complaint, db=db)
+    return {'status': 'ok'}
+
+
+async def complaint_comment_view(comment_id: int, user_id: int, db: AsyncSession):
+    """
+    Создание жалобы на комментарий
+    Args:
+        post_id (int): id поста
+        user_id (str): ID пользователя.
+        db (AsyncSession): Сессия базы данных.
+    Returns:
+        dict: Статус операции
+    """
+    comment = await get_object_by_id(object_type=Comment, id=comment_id, db=db)
+    
+    if not comment:
+        raise HTTPException(status_code=404, detail="Комментарий не найден")
+
+    new_complaint = ComplaintAboutComment(comment_id=comment_id, author_id=comment.author_id)
+
+    await add_and_refresh_object(object=new_complaint, db=db)
+    return {'status': 'ok'}

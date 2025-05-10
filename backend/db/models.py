@@ -34,8 +34,8 @@ class User(Base):
 
     comments = relationship("Comment", back_populates="author", cascade="all, delete-orphan")
     posts = relationship("Post", back_populates="author", cascade="all, delete-orphan")
-    # complaints_about_comments = relationship("ComplaintAboutComment", back_populates="author", cascade="all, delete-orphan")
-    # complaints_about_posts = relationship("ComplaintAboutPost", back_populates="author", cascade="all, delete-orphan")
+    complaints_about_comments = relationship("ComplaintAboutComment", back_populates="author", cascade="all, delete-orphan")
+    complaints_about_posts = relationship("ComplaintAboutPost", back_populates="author", cascade="all, delete-orphan")
     votes = relationship("Vote", back_populates="user", cascade="all, delete-orphan")
     friendship_requests_sent = relationship("FriendshipRequest", foreign_keys="FriendshipRequest.author_id", back_populates="author", cascade="all, delete-orphan")
     friendship_requests_received = relationship("FriendshipRequest", foreign_keys="FriendshipRequest.getter_id", back_populates="getter", cascade="all, delete-orphan")
@@ -59,28 +59,28 @@ class Comment(Base):
 
     author = relationship("User", back_populates="comments")
     post = relationship("Post", back_populates="comments")
-    # complaints = relationship("ComplaintAboutComment", back_populates="comment", cascade="all, delete-orphan")
+    complaints = relationship("ComplaintAboutComment", back_populates="comment", cascade="all, delete-orphan")
 
 
-# class ComplaintAboutComment(Base):
-#     __tablename__ = 'complaints_about_comment'
-#     id = Column(Integer, primary_key=True)
-#     author_id = Column(Integer, ForeignKey('users.id'), nullable=False)
-#     comment_id = Column(Integer, ForeignKey('comments.id'), nullable=False)
-#     created_at = Column(DateTime, default=datetime.now)
-#
-#     author = relationship("User", back_populates="complaints_about_comments")
-#     comment = relationship("Comment", back_populates="complaints")
-#
-# class ComplaintAboutPost(Base):
-#     __tablename__ = 'complaints_about_post'
-#     id = Column(Integer, primary_key=True)
-#     author_id = Column(Integer, ForeignKey('users.id'), nullable=False)
-#     post_id = Column(Integer, ForeignKey('posts.id'), nullable=False)
-#     created_at = Column(DateTime, default=datetime.now)
-#
-#     author = relationship("User", back_populates="complaints_about_posts")
-#     post = relationship("Post", back_populates="complaints")
+class ComplaintAboutComment(Base):
+    __tablename__ = 'complaints_about_comment'
+    id = Column(Integer, primary_key=True)
+    author_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    comment_id = Column(Integer, ForeignKey('comments.id'), nullable=False)
+    created_at = Column(DateTime, default=datetime.now)
+
+    author = relationship("User", back_populates="complaints_about_comments")
+    comment = relationship("Comment", back_populates="complaints")
+
+class ComplaintAboutPost(Base):
+    __tablename__ = 'complaints_about_post'
+    id = Column(Integer, primary_key=True)
+    author_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    post_id = Column(Integer, ForeignKey('posts.id'), nullable=False)
+    created_at = Column(DateTime, default=datetime.now)
+
+    author = relationship("User", back_populates="complaints_about_posts")
+    post = relationship("Post", back_populates="complaints")
 
 
 class Post(Base):
@@ -95,7 +95,7 @@ class Post(Base):
 
     author = relationship("User", back_populates="posts")
     comments = relationship("Comment", back_populates="post", cascade="all, delete-orphan")
-    # complaints = relationship("ComplaintAboutPost", back_populates="post", cascade="all, delete-orphan")
+    complaints = relationship("ComplaintAboutPost", back_populates="post", cascade="all, delete-orphan")
     voting_variants = relationship("VotingVariant", back_populates="post", cascade="all, delete-orphan")
     media = relationship("MediaInPost", back_populates="post", cascade="all, delete-orphan")
     likes = relationship("Like", back_populates="post", cascade="all, delete-orphan")

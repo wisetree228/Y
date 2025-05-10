@@ -446,7 +446,7 @@ sketch
 # Local History for Visual Studio Code
 .history/
 
-# Built Visual Studio Code Extensions
+# Built Visual Studio Code Extensions 
 *.vsix
 
 ### VisualStudioCode Patch ###
@@ -457,3 +457,5 @@ sketch
 .pycache
 
 # End of https://www.toptal.com/developers/gitignore/api/python,pycharm,visualstudiocode,react,node
+
+test.db

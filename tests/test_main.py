@@ -6,21 +6,34 @@ project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, project_root)
 
 import pytest
+import pytest_asyncio
+from fastapi import FastAPI
 from fastapi.testclient import TestClient
+from httpx import AsyncClient
+from httpx import ASGITransport
+from fastapi import Response
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 from backend.main import app
 from backend.db.models import Base  # Импортируем Base из моделей приложения
-
+from backend.application.config import (security, config)
+from backend.db.utils import (get_likes_count)
+from backend.application.routes import (get_db)
 
 # Важно: Используйте переменную окружения для тестирования.
 TEST_DATABASE_URL = os.environ.get("TEST_DATABASE_URL", "sqlite+aiosqlite:///./test.db")
 async_engine = create_async_engine(TEST_DATABASE_URL, echo=True)
 
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=async_engine, class_=AsyncSession)
+SessionLocal = sessionmaker(
+    autocommit=False, 
+    autoflush=False, 
+    bind=async_engine, 
+    class_=AsyncSession,
+    expire_on_commit=False
+)
 
 
-@pytest.fixture(scope="module")
+@pytest_asyncio.fixture(scope="module")
 async def db():
     async with async_engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
@@ -28,29 +41,181 @@ async def db():
         yield SessionLocal()
     finally:
         # Закрываем сессию
+        await clear_data()
         await SessionLocal().close()
 
 
-@pytest.fixture(scope="module")
-def client(db):
-    def get_test_client():
-        return TestClient(app)
+@pytest_asyncio.fixture(scope="module")
+async def client():
+    app.dependency_overrides[get_db] = override_get_db
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as ac:
+        yield ac
 
-    client = get_test_client()
-    return client
+async def clear_data():
+    async with async_engine.begin() as conn:
+        for table in reversed(Base.metadata.sorted_tables):
+            await conn.execute(table.delete())
 
-
-def override_get_db():
-    try:
-        db = SessionLocal()
-        yield db
-    finally:
-        db.close()
+async def override_get_db():
+    async with SessionLocal() as session:
+        yield session
 
 
 @pytest.mark.asyncio
-async def test_something_with_db(client):
+async def test_something_with_db(client, db):
     """Пример теста, взаимодействующего с базой данных."""
     # Ваш код для работы с базой данных и отправки запросов к API здесь.
-    response = client.get('/')  # Замена на ваш эндпоинт
+    response = await client.get('/')  # Замена на ваш эндпоинт
+    assert response.status_code == 200
+
+@pytest.mark.asyncio
+async def test_register(client):
+    """
+    Тест регистрации пользователя при валидных данных
+    Ожидается:
+        статус код: 200
+        json: {'status': 'ok'}
+    """
+    response = await client.post(
+        '/register',
+        json={
+            "email": "user@example.com",
+            "username": "test",
+            "name": "user",
+            "surname": "testuser",
+            "password": "123"
+        }
+    )
+    assert response.status_code == 200
+    assert response.json() == {'status': 'ok'}
+
+
+@pytest.mark.asyncio
+async def test_login(client):
+    """
+    Тест входа существующего пользователя 
+    Ожидается:
+        статус код: 200
+    """
+    response = await client.post(
+        '/login',
+        json={
+            "email": "user@example.com",
+            "password": "123"
+        }
+    )
+    assert response.status_code == 200
+
+@pytest.mark.asyncio
+async def test_logout(client):
+    """
+    Тест выхода авторизированного пользователя
+    Ожидается:
+        статус код: 200
+        json: {'status': 'ok'}
+    """
+    response = await client.post(
+        '/logout'
+    )
+    assert response.status_code == 200
+    assert response.json() == {'status': 'ok'}
+
+@pytest.mark.asyncio
+async def test_create_post(client):
+    token = security.create_access_token(uid="1") 
+    client.cookies.set(config.JWT_ACCESS_COOKIE_NAME, token)
+    """
+    Тест успешного создания поста 
+        - пользователь авторизован
+    Ожидается:
+        статус код: 200
+        json: {'status': 'ok'}
+    """ 
+    response = await client.post(
+        '/post',
+        json={
+            "text": "string",
+            "options": [
+                "string"
+            ]
+        }
+    )
+    assert response.status_code == 200
+    assert response.json() == {'status': 'ok'}
+
+
+@pytest.mark.asyncio
+async def test_create_comment(client):
+    """
+    Тест успешного создания комментария
+        - пользователь авторизован
+        - пост существует
+    Ожидается:
+        статус код: 200
+        json: {'status': 'ok'}
+    """
+    token = security.create_access_token(uid="1") 
+    client.cookies.set(config.JWT_ACCESS_COOKIE_NAME, token) 
+    response = await client.post(
+        f'/post/{1}/comment',
+        json={
+            "text": "string"
+        }
+    )
+    assert response.status_code == 200
+    assert response.json() == {'status': 'ok'}
+
+
+@pytest.mark.asyncio
+async def test_create_like(client):
+    """
+    Тест добавления лайка к посту
+        - пользователь авторизован
+        - пост существует
+    Ожидается:
+        статус код: 200
+        json: {'status': 'liked', 'likes_count': 1}
+    """
+    token = security.create_access_token(uid="1") 
+    client.cookies.set(config.JWT_ACCESS_COOKIE_NAME, token) 
+    response = await client.post(
+        f'/post/{1}/like'
+    )
+    assert response.status_code == 200
+    assert response.json() == {'status': 'liked', 'likes_count': 1}
+
+@pytest.mark.asyncio
+async def test_delete_like(client):
+    """
+    Тест удаления лайка у поста
+        - пользователь авторизован
+        - пост существует
+    Ожидается:
+        статус код: 200
+        json: {'status': 'unliked', 'likes_count': 0}
+    """
+    token = security.create_access_token(uid="1") 
+    client.cookies.set(config.JWT_ACCESS_COOKIE_NAME, token) 
+    response = await client.post(
+        f'/post/{1}/like'
+    )
+    assert response.status_code == 200
+    assert response.json() == {'status': 'unliked', 'likes_count': 0}
+
+
+@pytest.mark.asyncio
+async def test_get_posts(client):
+    """
+    Тест получения списка постов
+        - пользователь авторизован
+    Ожидается:
+        статус код: 200
+    """
+    token = security.create_access_token(uid="1") 
+    client.cookies.set(config.JWT_ACCESS_COOKIE_NAME, token) 
+
+    response = await client.get(
+        '/posts'
+    )
     assert response.status_code == 200
