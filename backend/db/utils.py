@@ -8,14 +8,13 @@ from sqlalchemy.orm import joinedload
 from sqlalchemy import or_, and_, func, desc
 from .models import ( User, Post, Friendship, FriendshipRequest,
     VotingVariant, Like, Message, Vote, MediaInPost, Comment,
-    MediaInMessage
+    MediaInMessage, ComplaintAboutPost, ComplaintAboutComment,
+    Base
 )
 
 
 async def add_and_refresh_object(
-        object: Union[User, Post, Friendship, FriendshipRequest,
-        VotingVariant, Like, Message, Vote, MediaInPost, Comment,
-        MediaInMessage],
+        object: Base,
         db: AsyncSession
 ) -> None:
     """
@@ -62,9 +61,7 @@ async def get_user_by_username(username: str, db: AsyncSession) -> User:
 
 
 async def delete_object(
-    object: Union[User, Post, Friendship, FriendshipRequest,
-    VotingVariant, Like, Message, Vote, Comment, MediaInPost,
-    MediaInMessage],
+    object: Base,
     db: AsyncSession
 ) -> None:
     """
@@ -182,9 +179,7 @@ async def get_existing_friendship(
 
 
 async def get_all_from_table(
-        object_type: Union[Type[User], Type[Post], Type[Friendship], Type[FriendshipRequest],
-        Type[VotingVariant], Type[Like], Type[Message], Type[Vote], Type[MediaInPost],
-        Type[MediaInMessage], Type[Comment]],
+        object_type: Type[Base],
         db: AsyncSession, limit=None, skip=0
 ) -> list:
     """
@@ -229,9 +224,7 @@ async def get_post_voting_variants(post_id: int, db: AsyncSession) -> list:
 
 
 async def get_object_by_id(
-        object_type: Union[Type[User], Type[Post], Type[Friendship], Type[FriendshipRequest],
-        Type[VotingVariant], Type[Like], Type[Message], Type[Vote], Type[MediaInPost],
-        Type[MediaInMessage], Type[Comment]],
+        object_type: Type[Base],
         id: int, db: AsyncSession
 ):
     """
