@@ -10,9 +10,9 @@ const Login = () => {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
 
-useEffect(() => {
+    useEffect(() => {
         const styleElement = document.createElement('style');
-    styleElement.innerHTML = `
+        styleElement.innerHTML = `
       .container {
     min-height: 100vh;
     display: flex;
@@ -152,12 +152,12 @@ footer {
     z-index: 1;
 }
     `;
-    
-    // Добавляем в head документа
-    document.head.appendChild(styleElement);
-    return () => {
-        document.head.removeChild(styleElement);
-      };
+
+        // Добавляем в head документа
+        document.head.appendChild(styleElement);
+        return () => {
+            document.head.removeChild(styleElement);
+        };
     }, []);
 
 
@@ -165,17 +165,17 @@ footer {
         e.preventDefault();
         console.log('Отправка данных:', { email, password });
         try {
-            setLoading(true); 
+            setLoading(true);
             const response = await axios.post(API_BASE_URL + '/login', {
                 email,
                 password,
             }, { withCredentials: true });
-    
+
             navigate('/posts')
         } catch (err) {
             alert('Ошибка! Проверьте корректность введённых данных и попробуйте ещё раз!')
-            setLoading(false); 
-            console.error('Ошибка:', err); 
+            setLoading(false);
+            console.error('Ошибка:', err);
         }
     };
 
@@ -186,7 +186,7 @@ footer {
                 <div className="shape shape-2"></div>
                 <div className="shape shape-3"></div>
             </div>
-    
+
             <main>
                 <div className="auth-container">
                     <h1 className="logo">Y</h1>
@@ -214,7 +214,7 @@ footer {
                     </div>
                 </div>
             </main>
-    
+
             <footer>
                 <div className="footer-content">
                     <p>© 2025 Y. Все права защищены</p>

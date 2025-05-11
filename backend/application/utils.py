@@ -1,12 +1,15 @@
-from passlib.context import CryptContext
-import bcrypt
-from .config import config, security
-from fastapi import Request, HTTPException, status
-from jose import JWTError, jwt
-from fastapi import WebSocket
+"""
+Вспомогательные функции, которые используются во view функциях
+"""
 from typing import Dict
 from datetime import datetime
 import json
+from jose import JWTError, jwt
+from passlib.context import CryptContext
+import bcrypt
+from fastapi import Request, HTTPException, status, WebSocket
+from .config import config
+
 
 # Настройка контекста для хэширования
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -102,13 +105,35 @@ class WebSocketConnectionManager:
     def __init__(self):
         self.active_connections: Dict[str, WebSocket] = {}
 
+
     async def connect(self, user_id: str, websocket: WebSocket):
+        """
+        Устанавливает соединение через websocket с
+        пользователем
+
+        Args:
+            user_id (str): id подключаемого пользователя
+            websocket: вебсокет
+
+        Returns:
+            None
+        """
         await websocket.accept()
         self.active_connections[user_id] = websocket
 
+
     def disconnect(self, user_id: str):
+        """
+        Отключает соединение с через вебсокетом
+
+        Args:
+            user_id (str): id отключаемого пользователя
+        Returns:
+            None
+        """
         if user_id in self.active_connections:
             del self.active_connections[user_id]
+
 
     async def send_personal_message(self, message_id: int, author_id: str, text: str, user_id: str):
         """

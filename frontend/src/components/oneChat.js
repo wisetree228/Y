@@ -158,7 +158,7 @@ const Chat = () => {
     if (error) return <div className="chat-error">Ошибка: {error}</div>;
 
     return (
-        
+
         <div className="chat-container">
             <button
                 onClick={() => navigate(-1)}
@@ -175,14 +175,14 @@ const Chat = () => {
             <div className="chat-header">
                 <h2>Чат с {recipient?.username}</h2>
             </div>
-            
+
             <div className="messages-list">
                 {messages.length === 0 ? (
                     <div className="no-messages">Нет сообщений</div>
                 ) : (
                     messages.map((message) => (
-                        <div 
-                            key={message.id} 
+                        <div
+                            key={message.id}
                             className={`message ${message.author_id === currentUserId ? 'sent' : 'received'}`}
                         >
                             <div className="message-content">
@@ -196,7 +196,7 @@ const Chat = () => {
                 )}
                 <div ref={messagesEndRef} />
             </div>
-            
+
             <form onSubmit={handleSendMessage} className="message-form">
                 <input
                     type="text"
@@ -206,8 +206,8 @@ const Chat = () => {
                     className="message-input"
                     disabled={!isConnected}
                 />
-                <button 
-                    type="submit" 
+                <button
+                    type="submit"
                     className="send-button"
                 >
                     Отправить

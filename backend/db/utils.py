@@ -1,15 +1,14 @@
 """
-Импорты всякой необходимой шняги
+Вспомогательные функции для обращения к бд
 """
-from typing import Union, Type, List
+from typing import Type, List
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import joinedload
-from sqlalchemy import or_, and_, func, desc
+from sqlalchemy import or_, and_, func
 from .models import ( User, Post, Friendship, FriendshipRequest,
-    VotingVariant, Like, Message, Vote, MediaInPost, Comment,
-    MediaInMessage, ComplaintAboutPost, ComplaintAboutComment,
-    Base
+    VotingVariant, Like, Message, Vote,
+    MediaInMessage, Base
 )
 
 
@@ -22,7 +21,7 @@ async def add_and_refresh_object(
     параметры обьекта, такие как id и created_at)
 
     Args:
-        object (Union[User, Post, Friendship, FriendshipRequest, VotingVariant, Like, Message, Vote, MediaInPost]): обьект
+        object (Base): обьект
         db (AsyncSession): Сессия базы данных.
     Returns:
         None
@@ -68,7 +67,7 @@ async def delete_object(
     Удаляет обьект из бд
 
     Args:
-        object (Union[User, Post, Friendship, FriendshipRequest, VotingVariant, Like, Message, Vote, MediaInPost]): обьект
+        object (Base): обьект
         db (AsyncSession): Сессия базы данных.
     Returns:
         None
@@ -241,7 +240,9 @@ async def get_object_by_id(
     return result.scalars().first()
 
 
-async def get_messages_between_two_users(first_user_id: int, second_user_id: int, db: AsyncSession) -> list:
+async def get_messages_between_two_users(
+        first_user_id: int, second_user_id: int, db: AsyncSession
+) -> list:
     """
     Возвращает список сообщений между двумя пользователями
 
@@ -278,7 +279,9 @@ async def get_images_id_for_message(message_id: int, db: AsyncSession) -> List[i
         list[int]
     """
     id_list=[]
-    result_db = await db.execute(select(MediaInMessage).filter(MediaInMessage.message_id==message_id))
+    result_db = await db.execute(
+        select(MediaInMessage).filter(MediaInMessage.message_id==message_id)
+    )
     for img in result_db.scalars().all():
         id_list.append(img.id)
     return id_list
@@ -360,5 +363,3 @@ async def get_friendship_requests_for_user(user_id: int, db: AsyncSession):
         joinedload(FriendshipRequest.author)
     ))
     return result_db
-
-

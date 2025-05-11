@@ -1,5 +1,8 @@
-from pydantic import BaseModel, EmailStr, constr, Field
+"""
+Схемы для валидации данных
+"""
 from typing import List, Optional
+from pydantic import BaseModel, EmailStr, constr, Field
 
 
 class RegisterFormData(BaseModel):
@@ -53,5 +56,3 @@ class EditPostData(BaseModel):
     """
     text: Optional[constr(min_length=3, max_length=10000)] = None
     options: Optional[List[constr(min_length=3, max_length=100)]] = None
-
-

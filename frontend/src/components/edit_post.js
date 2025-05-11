@@ -25,21 +25,21 @@ const EditPost = () => {
                 withCredentials: true
             });
             const post = response.data.post;
-            if (post.author_id!==Idresponse.data.id){
+            if (post.author_id !== Idresponse.data.id) {
                 navigate('/posts')
             }
-            
+
             setPostText(post.text);
-            
+
             if (post.voting_variants && post.voting_variants.length > 0) {
                 const variantTexts = post.voting_variants.map(v => v.text);
                 setOptions([...variantTexts]);
                 setOriginalOptions([...variantTexts]);
             }
-            
+
             if (post.images_id && post.images_id.length > 0) {
                 const imagesData = await Promise.all(
-                    post.images_id.map(id => 
+                    post.images_id.map(id =>
                         axios.get(`${API_BASE_URL}/posts/image/${id}`, {
                             responseType: 'blob',
                             withCredentials: true
@@ -47,10 +47,10 @@ const EditPost = () => {
                             id,
                             url: URL.createObjectURL(res.data)
                         }))
-                ));
+                    ));
                 setImages(imagesData);
             }
-            
+
             setLoading(false);
         } catch (err) {
             alert('Ошибка на стороне сервера, попробуйте ещё раз!')
@@ -60,7 +60,7 @@ const EditPost = () => {
     useEffect(() => {
         fetchPost();
         const styleElement = document.createElement('style');
-    styleElement.innerHTML = `
+        styleElement.innerHTML = `
       /* Основные стили */
 body {
   background-color: #396687;
@@ -160,12 +160,12 @@ input[type="file"] {
   }
 }
     `;
-    
-    // Добавляем в head документа
-    document.head.appendChild(styleElement);
-    return () => {
-        document.head.removeChild(styleElement);
-      };
+
+        // Добавляем в head документа
+        document.head.appendChild(styleElement);
+        return () => {
+            document.head.removeChild(styleElement);
+        };
     }, [postId]);
 
     const handlePostTextChange = (e) => {
@@ -195,7 +195,7 @@ input[type="file"] {
 
     const handleDeleteImage = async (imageId) => {
         if (!window.confirm('Удалить это изображение?')) return;
-        
+
         try {
             await axios.delete(`${API_BASE_URL}/posts/image/${imageId}`, {
                 withCredentials: true
@@ -208,13 +208,13 @@ input[type="file"] {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
+
         try {
             // Подготовка данных для отправки
             const postData = {
                 text: postText,
-                options: JSON.stringify(options) === JSON.stringify(originalOptions) 
-                    ? null 
+                options: JSON.stringify(options) === JSON.stringify(originalOptions)
+                    ? null
                     : options.length > 0 ? options : []
             };
 
@@ -227,7 +227,7 @@ input[type="file"] {
             if (newImage) {
                 const formData = new FormData();
                 formData.append('uploaded_file', newImage);
-                
+
                 await axios.post(`${API_BASE_URL}/posts/${postId}/media`, formData, {
                     withCredentials: true,
                     headers: {
@@ -262,14 +262,14 @@ input[type="file"] {
                 </div>
 
                 {originalOptions.length > 0 && (
-                    <div style={{ 
+                    <div style={{
                         marginBottom: '20px',
                         padding: '15px',
                         backgroundColor: '#fff3cd',
                         borderRadius: '4px',
                         color: '#a61907'
                     }}>
-                        <strong style={{ color: '#a61907' }}>Внимание!</strong> Если вы измените варианты голосования, 
+                        <strong style={{ color: '#a61907' }}>Внимание!</strong> Если вы измените варианты голосования,
                         все текущие голоса будут сброшены.
                     </div>
                 )}
@@ -286,10 +286,10 @@ input[type="file"] {
                                 maxLength={100}
                                 style={{ flex: 1, padding: '8px' }}
                             />
-                            <button 
-                                type="button" 
+                            <button
+                                type="button"
                                 onClick={() => removeOption(index)}
-                                style={{ 
+                                style={{
                                     marginLeft: '8px',
                                     padding: '8px 12px',
                                     backgroundColor: '#dc3545',
@@ -303,10 +303,10 @@ input[type="file"] {
                             </button>
                         </div>
                     ))}
-                    <button 
-                        type="button" 
+                    <button
+                        type="button"
                         onClick={addOption}
-                        style={{ 
+                        style={{
                             padding: '8px 12px',
                             backgroundColor: '#28a745',
                             color: 'white',
@@ -324,15 +324,15 @@ input[type="file"] {
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginBottom: '10px' }}>
                         {images.map(img => (
                             <div key={img.id} style={{ position: 'relative' }}>
-                                <img 
-                                    src={img.url} 
-                                    alt="Изображение поста" 
-                                    style={{ 
-                                        width: '150px', 
+                                <img
+                                    src={img.url}
+                                    alt="Изображение поста"
+                                    style={{
+                                        width: '150px',
                                         height: '150px',
                                         objectFit: 'cover',
                                         borderRadius: '4px'
-                                    }} 
+                                    }}
                                 />
                                 <button
                                     type="button"
@@ -355,16 +355,16 @@ input[type="file"] {
                             </div>
                         ))}
                     </div>
-                    <input 
-                        type="file" 
+                    <input
+                        type="file"
                         onChange={handleImageChange}
                         accept="image/*"
                     />
                 </div>
 
-                <button 
+                <button
                     type="submit"
-                    style={{ 
+                    style={{
                         padding: '10px 20px',
                         backgroundColor: '#007bff',
                         color: 'white',
@@ -376,9 +376,9 @@ input[type="file"] {
                 >
                     Сохранить изменения
                 </button>
-                <Link 
+                <Link
                     to={`/home`}
-                    style={{ 
+                    style={{
                         padding: '10px 20px',
                         backgroundColor: '#6c757d',
                         color: 'white',

@@ -457,8 +457,8 @@ async def change_avatar(
 
 @router.get('/user/{another_user_id}/avatar',
 dependencies=[Depends(security.access_token_required)])
-async def get_avatar(
-    another_user_id: int, db: SessionDep, user_id: str = Depends(get_current_user_id)
+async def get_someones_avatar(
+    another_user_id: int, db: SessionDep
 ) -> dict:
     """
     Возвращает аватарку пользователя
@@ -470,11 +470,11 @@ async def get_avatar(
     Returns:
         StreamingResponse - файл аватарки
     """
-    return await get_avatar_view(another_user_id=another_user_id, user_id=int(user_id), db=db)
+    return await get_avatar_view(another_user_id=another_user_id, db=db)
 
 
 @router.get('/mypage/avatar', dependencies=[Depends(security.access_token_required)])
-async def get_avatar(
+async def get_my_avatar(
     db: SessionDep, user_id: str = Depends(get_current_user_id)
 ) -> dict:
     """
@@ -486,7 +486,7 @@ async def get_avatar(
     Returns:
         StreamingResponse - файл аватарки
     """
-    return await get_avatar_view(another_user_id=int(user_id), user_id=int(user_id), db=db)
+    return await get_avatar_view(another_user_id=int(user_id), db=db)
 
 
 @router.get('/chat/{recipient_id}', dependencies=[Depends(security.access_token_required)])
@@ -637,7 +637,8 @@ async def get_friendship_requests(
     return await get_friendship_requests_view(user_id=int(user_id), db=db)
 
 
-@router.delete('/friendship_request/{request_id}', dependencies=[Depends(security.access_token_required)])
+@router.delete('/friendship_request/{request_id}',
+dependencies=[Depends(security.access_token_required)])
 async def delete_friendship_request(
     request_id: int, db: SessionDep, user_id: str = Depends(get_current_user_id)
 ) -> dict:
@@ -671,8 +672,6 @@ async def delete_post_image(
     return await delete_post_image_view(image_id=image_id, user_id=int(user_id), db=db)
 
 
-
-
 @router.post('/complaint_post/{post_id}', dependencies=[Depends(security.access_token_required)])
 async def complaint_post(db: SessionDep, post_id: int, user_id: str = Depends(get_current_user_id)):
     """
@@ -687,8 +686,11 @@ async def complaint_post(db: SessionDep, post_id: int, user_id: str = Depends(ge
     return await complaint_post_view(post_id = post_id, user_id = int(user_id), db=db)
 
 
-@router.post('/complaint_comment/{comment_id}', dependencies=[Depends(security.access_token_required)])
-async def complaint_comment(db: SessionDep, comment_id: int, user_id: str = Depends(get_current_user_id)):
+@router.post('/complaint_comment/{comment_id}',
+dependencies=[Depends(security.access_token_required)])
+async def complaint_comment(
+    db: SessionDep, comment_id: int, user_id: str = Depends(get_current_user_id)
+):
     """
     Создаёт жалобу на коментарий
     Args:
@@ -701,8 +703,11 @@ async def complaint_comment(db: SessionDep, comment_id: int, user_id: str = Depe
     return await complaint_comment_view(comment_id = comment_id, user_id = int(user_id), db=db)
 
 
-@router.get('/voted_users/{voting_variant_id}', dependencies=[Depends(security.access_token_required)])
-async def get_voted_users(voting_variant_id: int, db: SessionDep, user_id = Depends(get_current_user_id)) -> dict:
+@router.get('/voted_users/{voting_variant_id}',
+dependencies=[Depends(security.access_token_required)])
+async def get_voted_users(
+    voting_variant_id: int, db: SessionDep, user_id = Depends(get_current_user_id)
+) -> dict:
     """
     Возвращает информацию о проголосовавших за конкретный
     вариант голосования пользователей
@@ -714,4 +719,6 @@ async def get_voted_users(voting_variant_id: int, db: SessionDep, user_id = Depe
     Returns:
         json - данные
     """
-    return await get_voted_users_view(voting_variant_id=voting_variant_id, user_id=int(user_id), db=db)
+    return await get_voted_users_view(
+        voting_variant_id=voting_variant_id, user_id=int(user_id), db=db
+    )

@@ -17,7 +17,7 @@ const Register = () => {
 
     useEffect(() => {
         const styleElement = document.createElement('style');
-    styleElement.innerHTML = `
+        styleElement.innerHTML = `
       div {
     min-height: 100vh;
     display: flex;
@@ -99,12 +99,12 @@ a:hover {
     text-decoration: underline;
 }
     `;
-    
-    // Добавляем в head документа
-    document.head.appendChild(styleElement);
-    return () => {
-        document.head.removeChild(styleElement);
-      };
+
+        // Добавляем в head документа
+        document.head.appendChild(styleElement);
+        return () => {
+            document.head.removeChild(styleElement);
+        };
     }, []);
 
 
