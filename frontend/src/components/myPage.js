@@ -53,13 +53,13 @@ const MainProfile = () => {
                     'Content-Type': 'multipart/form-data'
                 }
             });
-            
+
             // Обновляем аватар, добавляя timestamp для избежания кеширования
             setUser(prev => ({
                 ...prev,
                 avatar: `${API_BASE_URL}/mypage/avatar?t=${Date.now()}`
             }));
-            
+
             alert('Аватар успешно обновлен!');
         } catch (error) {
             console.error('Ошибка при обновлении аватара:', error);
@@ -137,20 +137,20 @@ const MainProfile = () => {
     const handleDeletePost = async (postId) => {
         // Подтверждение удаления
         const isConfirmed = window.confirm('Вы уверены, что хотите удалить этот пост?');
-        
+
         if (!isConfirmed) return;
-    
+
         try {
             await axios.delete(`${API_BASE_URL}/post/${postId}`, {
                 withCredentials: true
             });
-            
+
             // Обновляем список постов после удаления
             const response = await axios.get(`${API_BASE_URL}/mypage`, {
                 withCredentials: true
             });
             setPosts(response.data.posts || []);
-            
+
             alert('Пост успешно удален');
         } catch (error) {
             console.error('Ошибка при удалении поста:', error);
@@ -168,7 +168,7 @@ const MainProfile = () => {
                     withCredentials: true
                 });
                 setUser(userResponse.data);
-                
+
                 // Загрузка постов пользователя
                 if (userResponse.data.posts) {
                     setPosts(userResponse.data.posts);
@@ -176,7 +176,7 @@ const MainProfile = () => {
 
 
                 fetchFriendRequests();
-                
+
 
                 setLoading(false);
             } catch (error) {
@@ -190,7 +190,7 @@ const MainProfile = () => {
         fetchData();
 
         const styleElement = document.createElement('style');
-    styleElement.innerHTML = `
+        styleElement.innerHTML = `
       /* Основные стили */
 body {
   background-color: #396687;
@@ -372,12 +372,12 @@ small {
   }
 }
     `;
-    
-    // Добавляем в head документа
-    document.head.appendChild(styleElement);
-    return () => {
-        document.head.removeChild(styleElement);
-      };
+
+        // Добавляем в head документа
+        document.head.appendChild(styleElement);
+        return () => {
+            document.head.removeChild(styleElement);
+        };
     }, []);
 
 
@@ -389,7 +389,7 @@ small {
                 {},
                 { withCredentials: true }
             );
-            
+
             setPosts(posts.map(post => {
                 if (post.id === postId) {
                     return {
@@ -440,58 +440,58 @@ small {
 
 
     const handleEditToggle = () => {
-      setIsEditing(!isEditing);
-  };
+        setIsEditing(!isEditing);
+    };
 
-  const handleEditChange = (e) => {
-      const { name, value } = e.target;
-      setEditData(prev => ({
-          ...prev,
-          [name]: value
-      }));
-  };
+    const handleEditChange = (e) => {
+        const { name, value } = e.target;
+        setEditData(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
 
-  const handleDeleteVote = async (postId) => {
-    try {
-      await axios.delete(
-        `${API_BASE_URL}/vote/${postId}`,
-        { withCredentials: true }
-      );
-      const updatedPosts = await axios.get(`${API_BASE_URL}/mypage`, {
-        withCredentials: true
-    });
-    setPosts(updatedPosts.data.posts || []);
-    } catch (err) {
-      console.error('Ошибка при удалении голоса:', err);
-    }
-  };
+    const handleDeleteVote = async (postId) => {
+        try {
+            await axios.delete(
+                `${API_BASE_URL}/vote/${postId}`,
+                { withCredentials: true }
+            );
+            const updatedPosts = await axios.get(`${API_BASE_URL}/mypage`, {
+                withCredentials: true
+            });
+            setPosts(updatedPosts.data.posts || []);
+        } catch (err) {
+            console.error('Ошибка при удалении голоса:', err);
+        }
+    };
 
-  const handleSaveProfile = async () => {
-      try {
-          // Подготавливаем данные для отправки (удаляем пустые поля)
-          const dataToSend = Object.fromEntries(
-              Object.entries(editData).filter(([_, v]) => v !== '')
-          );
+    const handleSaveProfile = async () => {
+        try {
+            // Подготавливаем данные для отправки (удаляем пустые поля)
+            const dataToSend = Object.fromEntries(
+                Object.entries(editData).filter(([_, v]) => v !== '')
+            );
 
-          const response = await axios.put(
-              `${API_BASE_URL}/profile`,
-              dataToSend,
-              { withCredentials: true }
-          );
+            const response = await axios.put(
+                `${API_BASE_URL}/profile`,
+                dataToSend,
+                { withCredentials: true }
+            );
 
-          // Обновляем данные пользователя
-          setUser(prev => ({
-              ...prev,
-              ...dataToSend
-          }));
-          
-          setIsEditing(false);
-          alert('Профиль успешно обновлен');
-      } catch (error) {
-          console.error('Ошибка при обновлении профиля:', error);
-          setError(error.response?.data?.detail || 'Ошибка при обновлении профиля');
-      }
-  };
+            // Обновляем данные пользователя
+            setUser(prev => ({
+                ...prev,
+                ...dataToSend
+            }));
+
+            setIsEditing(false);
+            alert('Профиль успешно обновлен');
+        } catch (error) {
+            console.error('Ошибка при обновлении профиля:', error);
+            setError(error.response?.data?.detail || 'Ошибка при обновлении профиля');
+        }
+    };
 
     if (loading) {
         return <p>Загрузка...</p>;
@@ -520,14 +520,14 @@ small {
                 }}
             >Вернуться назад</button>
             {/* Добавляем кнопку выхода в верхний правый угол */}
-            <div style={{ 
-                display: 'flex', 
+            <div style={{
+                display: 'flex',
                 justifyContent: 'flex-end',
                 marginBottom: '20px'
             }}>
-                <button 
+                <button
                     onClick={handleLogout}
-                    style={{ 
+                    style={{
                         padding: '8px 16px',
                         backgroundColor: '#f44336',
                         color: 'white',
@@ -540,9 +540,9 @@ small {
                 </button>
             </div>
             {/* Шапка профиля */}
-            <div style={{ 
-                border: '1px solid #ccc', 
-                padding: '20px', 
+            <div style={{
+                border: '1px solid #ccc',
+                padding: '20px',
                 marginBottom: '20px',
                 borderRadius: '8px',
                 backgroundColor: '#5aabe5',
@@ -552,9 +552,9 @@ small {
                     <img
                         src={`${API_BASE_URL}/mypage/avatar?t=${Date.now()}`}
                         alt={`Аватар ${user.username}`}
-                        style={{ 
-                            width: '100px', 
-                            height: '100px', 
+                        style={{
+                            width: '100px',
+                            height: '100px',
                             borderRadius: '50%',
                             objectFit: 'cover',
                             cursor: 'pointer'
@@ -565,7 +565,7 @@ small {
                             console.error('Ошибка загрузки аватарки');
                         }}
                     />
-                    <button 
+                    <button
                         onClick={triggerFileInput}
                         style={{
                             position: 'absolute',
@@ -586,7 +586,7 @@ small {
                         ✏️
                     </button>
                 </div>
-                
+
                 <input
                     type="file"
                     ref={fileInputRef}
@@ -597,10 +597,10 @@ small {
 
                 {/* Кнопка для показа/скрытия списка друзей */}
                 <div style={{ marginTop: '15px' }}>
-                    <button 
+                    <button
                         onClick={fetchFriends}
                         disabled={friendsLoading}
-                        style={{ 
+                        style={{
                             padding: '8px 16px',
                             backgroundColor: '#2196F3',
                             color: 'white',
@@ -612,123 +612,123 @@ small {
                     >
                         {friendsLoading ? 'Загрузка...' : (showFriends ? 'Скрыть друзей' : 'Показать друзей')}
                     </button>
-                
-                {isEditing ? (
-                    <div style={{ marginTop: '20px' }}>
-                        <div style={{ marginBottom: '15px' }}>
-                            <label style={{ display: 'block', marginBottom: '5px' }}>Email:</label>
-                            <input
-                                type="email"
-                                name="email"
-                                value={editData.email}
-                                onChange={handleEditChange}
-                                style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }}
-                            />
+
+                    {isEditing ? (
+                        <div style={{ marginTop: '20px' }}>
+                            <div style={{ marginBottom: '15px' }}>
+                                <label style={{ display: 'block', marginBottom: '5px' }}>Email:</label>
+                                <input
+                                    type="email"
+                                    name="email"
+                                    value={editData.email}
+                                    onChange={handleEditChange}
+                                    style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }}
+                                />
+                            </div>
+
+                            <div style={{ marginBottom: '15px' }}>
+                                <label style={{ display: 'block', marginBottom: '5px' }}>Username:</label>
+                                <input
+                                    type="text"
+                                    name="username"
+                                    value={editData.username}
+                                    onChange={handleEditChange}
+                                    style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }}
+                                />
+                            </div>
+
+                            <div style={{ marginBottom: '15px' }}>
+                                <label style={{ display: 'block', marginBottom: '5px' }}>Имя:</label>
+                                <input
+                                    type="text"
+                                    name="name"
+                                    value={editData.name}
+                                    onChange={handleEditChange}
+                                    style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }}
+                                />
+                            </div>
+
+                            <div style={{ marginBottom: '15px' }}>
+                                <label style={{ display: 'block', marginBottom: '5px' }}>Фамилия:</label>
+                                <input
+                                    type="text"
+                                    name="surname"
+                                    value={editData.surname}
+                                    onChange={handleEditChange}
+                                    style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }}
+                                />
+                            </div>
+
+                            <div style={{ marginBottom: '15px' }}>
+                                <label style={{ display: 'block', marginBottom: '5px' }}>Новый пароль (оставьте пустым, чтобы не менять):</label>
+                                <input
+                                    type="password"
+                                    name="password"
+                                    value={editData.password}
+                                    onChange={handleEditChange}
+                                    style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }}
+                                />
+                            </div>
+
+                            <div style={{ display: 'flex', justifyContent: 'center', gap: '10px' }}>
+                                <button
+                                    onClick={handleSaveProfile}
+                                    style={{
+                                        padding: '8px 16px',
+                                        backgroundColor: '#4CAF50',
+                                        color: 'white',
+                                        border: 'none',
+                                        borderRadius: '4px',
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    Сохранить
+                                </button>
+                                <button
+                                    onClick={handleEditToggle}
+                                    style={{
+                                        padding: '8px 16px',
+                                        backgroundColor: '#f44336',
+                                        color: 'white',
+                                        border: 'none',
+                                        borderRadius: '4px',
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    Отмена
+                                </button>
+                            </div>
                         </div>
-                        
-                        <div style={{ marginBottom: '15px' }}>
-                            <label style={{ display: 'block', marginBottom: '5px' }}>Username:</label>
-                            <input
-                                type="text"
-                                name="username"
-                                value={editData.username}
-                                onChange={handleEditChange}
-                                style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }}
-                            />
-                        </div>
-                        
-                        <div style={{ marginBottom: '15px' }}>
-                            <label style={{ display: 'block', marginBottom: '5px' }}>Имя:</label>
-                            <input
-                                type="text"
-                                name="name"
-                                value={editData.name}
-                                onChange={handleEditChange}
-                                style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }}
-                            />
-                        </div>
-                        
-                        <div style={{ marginBottom: '15px' }}>
-                            <label style={{ display: 'block', marginBottom: '5px' }}>Фамилия:</label>
-                            <input
-                                type="text"
-                                name="surname"
-                                value={editData.surname}
-                                onChange={handleEditChange}
-                                style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }}
-                            />
-                        </div>
-                        
-                        <div style={{ marginBottom: '15px' }}>
-                            <label style={{ display: 'block', marginBottom: '5px' }}>Новый пароль (оставьте пустым, чтобы не менять):</label>
-                            <input
-                                type="password"
-                                name="password"
-                                value={editData.password}
-                                onChange={handleEditChange}
-                                style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }}
-                            />
-                        </div>
-                        
-                        <div style={{ display: 'flex', justifyContent: 'center', gap: '10px' }}>
-                            <button 
-                                onClick={handleSaveProfile}
-                                style={{ 
-                                    padding: '8px 16px',
-                                    backgroundColor: '#4CAF50',
-                                    color: 'white',
-                                    border: 'none',
-                                    borderRadius: '4px',
-                                    cursor: 'pointer'
-                                }}
-                            >
-                                Сохранить
-                            </button>
-                            <button 
+                    ) : (
+                        <>
+                            <h1>{user.username}</h1>
+                            <p>{user.name} {user.surname}</p>
+                            <p>{user.email}</p>
+
+                            <button
                                 onClick={handleEditToggle}
-                                style={{ 
+                                style={{
+                                    marginTop: '15px',
                                     padding: '8px 16px',
-                                    backgroundColor: '#f44336',
+                                    backgroundColor: '#2196F3',
                                     color: 'white',
                                     border: 'none',
                                     borderRadius: '4px',
                                     cursor: 'pointer'
                                 }}
                             >
-                                Отмена
+                                Редактировать профиль
                             </button>
-                        </div>
-                    </div>
-                ) : (
-                    <>
-                        <h1>{user.username}</h1>
-                        <p>{user.name} {user.surname}</p>
-                        <p>{user.email}</p>
-                        
-                        <button 
-                            onClick={handleEditToggle}
-                            style={{ 
-                                marginTop: '15px',
-                                padding: '8px 16px',
-                                backgroundColor: '#2196F3',
-                                color: 'white',
-                                border: 'none',
-                                borderRadius: '4px',
-                                cursor: 'pointer'
-                            }}
-                        >
-                            Редактировать профиль
-                        </button>
-                    </>
-                )}
-            </div>
+                        </>
+                    )}
+                </div>
 
 
-            {/* Кнопка для запросов дружбы */}
-            <button 
+                {/* Кнопка для запросов дружбы */}
+                <button
                     onClick={fetchFriendRequests}
                     disabled={requestsLoading}
-                    style={{ 
+                    style={{
                         padding: '8px 16px',
                         backgroundColor: '#FF9800',
                         color: 'white',
@@ -744,7 +744,7 @@ small {
 
                 {/* Список запросов дружбы */}
                 {showRequests && (
-                    <div style={{ 
+                    <div style={{
                         marginTop: '20px',
                         borderTop: '1px solid #eee',
                         paddingTop: '15px'
@@ -753,16 +753,16 @@ small {
                         {friendRequests.length === 0 ? (
                             <p>Нет входящих запросов</p>
                         ) : (
-                            <div style={{ 
+                            <div style={{
                                 display: 'grid',
                                 gridTemplateColumns: '1fr',
                                 gap: '10px',
                                 marginTop: '10px'
                             }}>
                                 {friendRequests.map(request => (
-                                    <div 
+                                    <div
                                         key={request.id}
-                                        style={{ 
+                                        style={{
                                             display: 'flex',
                                             alignItems: 'center',
                                             justifyContent: 'space-between',
@@ -771,9 +771,9 @@ small {
                                             borderRadius: '5px'
                                         }}
                                     >
-                                        <Link 
+                                        <Link
                                             to={`/users/${request.author_id}`}
-                                            style={{ 
+                                            style={{
                                                 display: 'flex',
                                                 alignItems: 'center',
                                                 textDecoration: 'none',
@@ -784,9 +784,9 @@ small {
                                             <img
                                                 src={`${API_BASE_URL}/user/${request.author_id}/avatar?t=${Date.now()}`}
                                                 alt={`Аватар ${request.author_username}`}
-                                                style={{ 
-                                                    width: '40px', 
-                                                    height: '40px', 
+                                                style={{
+                                                    width: '40px',
+                                                    height: '40px',
                                                     borderRadius: '50%',
                                                     objectFit: 'cover',
                                                     marginRight: '10px'
@@ -798,9 +798,9 @@ small {
                                             <span>{request.author_username}</span>
                                         </Link>
                                         <div>
-                                            <button 
+                                            <button
                                                 onClick={() => handleAcceptRequest(request.author_id)}
-                                                style={{ 
+                                                style={{
                                                     padding: '5px 10px',
                                                     backgroundColor: '#4CAF50',
                                                     color: 'white',
@@ -812,9 +812,9 @@ small {
                                             >
                                                 Принять
                                             </button>
-                                            <button 
+                                            <button
                                                 onClick={() => handleRejectRequest(request.id)}
-                                                style={{ 
+                                                style={{
                                                     padding: '5px 10px',
                                                     backgroundColor: '#f44336',
                                                     color: 'white',
@@ -834,9 +834,9 @@ small {
                 )}
 
 
-            {/* Список друзей */}
-            {showFriends && (
-                    <div style={{ 
+                {/* Список друзей */}
+                {showFriends && (
+                    <div style={{
                         marginTop: '20px',
                         borderTop: '1px solid #eee',
                         paddingTop: '15px'
@@ -845,17 +845,17 @@ small {
                         {friends.length === 0 ? (
                             <p>У вас пока нет друзей</p>
                         ) : (
-                            <div style={{ 
+                            <div style={{
                                 display: 'grid',
                                 gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))',
                                 gap: '10px',
                                 marginTop: '10px'
                             }}>
                                 {friends.map(friend => (
-                                    <Link 
-                                        to={`/users/${friend.id}`} 
+                                    <Link
+                                        to={`/users/${friend.id}`}
                                         key={friend.id}
-                                        style={{ 
+                                        style={{
                                             textDecoration: 'none',
                                             color: 'inherit',
                                             display: 'flex',
@@ -870,9 +870,9 @@ small {
                                         <img
                                             src={`${API_BASE_URL}/user/${friend.id}/avatar?t=${Date.now()}`}
                                             alt={`Аватар ${friend.username}`}
-                                            style={{ 
-                                                width: '50px', 
-                                                height: '50px', 
+                                            style={{
+                                                width: '50px',
+                                                height: '50px',
                                                 borderRadius: '50%',
                                                 objectFit: 'cover',
                                                 marginBottom: '5px'
@@ -881,7 +881,7 @@ small {
                                                 e.target.src = '/default-avatar.png';
                                             }}
                                         />
-                                        <span style={{ 
+                                        <span style={{
                                             fontSize: '0.9rem',
                                             textAlign: 'center',
                                             wordBreak: 'break-word'
@@ -896,7 +896,7 @@ small {
                 )}
             </div>
 
-            
+
 
             {/* Посты пользователя */}
             <div>
@@ -905,9 +905,9 @@ small {
                     <p>У вас пока нет постов</p>
                 ) : (
                     posts.map(post => (
-                        <div 
-                            key={post.id} 
-                            style={{ 
+                        <div
+                            key={post.id}
+                            style={{
                                 border: '1px solid #e0e0e0',
                                 padding: '20px',
                                 marginBottom: '20px',
@@ -918,19 +918,19 @@ small {
                         >
                             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                                 <div style={{ display: 'flex', alignItems: 'center', marginBottom: '15px' }}>
-                                <img
-                                    src={`${API_BASE_URL}/user/${post.author_id}/avatar?t=${Date.now()}`}
-                                    alt={`Аватар ${post.author_username}`}
-                                    style={{ 
-                                        width: '40px', 
-                                        height: '40px', 
-                                        borderRadius: '50%',
-                                        marginRight: '10px'
-                                    }}
-                                    onError={(e) => {
-                                        e.target.src = '/default-avatar.png';
-                                    }}
-                                />
+                                    <img
+                                        src={`${API_BASE_URL}/user/${post.author_id}/avatar?t=${Date.now()}`}
+                                        alt={`Аватар ${post.author_username}`}
+                                        style={{
+                                            width: '40px',
+                                            height: '40px',
+                                            borderRadius: '50%',
+                                            marginRight: '10px'
+                                        }}
+                                        onError={(e) => {
+                                            e.target.src = '/default-avatar.png';
+                                        }}
+                                    />
                                     <div>
                                         <p style={{ fontWeight: 'bold', margin: 0 }}>{user.username}</p>
                                         <p style={{ color: '#666', fontSize: '0.8rem', margin: 0 }}>
@@ -938,12 +938,12 @@ small {
                                         </p>
                                     </div>
                                 </div>
-                                
+
                                 {/* Кнопки управления постом */}
                                 <div>
-                                    <button 
+                                    <button
                                         onClick={() => handleEditPost(post.id)}
-                                        style={{ 
+                                        style={{
                                             marginRight: '10px',
                                             padding: '5px 10px',
                                             backgroundColor: '#f0f0f0',
@@ -954,9 +954,9 @@ small {
                                     >
                                         Редактировать
                                     </button>
-                                    <button 
+                                    <button
                                         onClick={() => handleDeletePost(post.id)}
-                                        style={{ 
+                                        style={{
                                             padding: '5px 10px',
                                             backgroundColor: '#ffebee',
                                             border: '1px solid #ffcdd2',
@@ -968,14 +968,14 @@ small {
                                     </button>
                                 </div>
                             </div>
-                            
-                            
+
+
                             <div style={{ width: '100%', overflowWrap: 'break-word', wordBreak: 'break-all' }}>
-                  <p style={{ marginBottom: '15px', lineHeight: '1.5', whiteSpace: 'pre-wrap' }}>{post.text}</p>
-                </div>
-                            
+                                <p style={{ marginBottom: '15px', lineHeight: '1.5', whiteSpace: 'pre-wrap' }}>{post.text}</p>
+                            </div>
+
                             {post.images_id && post.images_id.length > 0 && (
-                                <div style={{ 
+                                <div style={{
                                     display: 'grid',
                                     gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
                                     gap: '10px',
@@ -995,11 +995,11 @@ small {
                                     ))}
                                 </div>
                             )}
-                            
+
                             {post.voting_variants && post.voting_variants.length > 0 && (
                                 <div style={{ marginBottom: '15px' }}>
                                     {post.voting_variants.map(variant => (
-                                        <div 
+                                        <div
                                             key={variant.id}
                                             onClick={() => handleVote(variant.id, post.id)}
                                             style={{
@@ -1016,16 +1016,16 @@ small {
                                     ))}
                                 </div>
                             )}
-                            
-                            <div style={{ 
-                                display: 'flex', 
+
+                            <div style={{
+                                display: 'flex',
                                 justifyContent: 'space-between',
                                 color: '#666',
                                 fontSize: '0.9rem'
                             }}>
-                                <button 
+                                <button
                                     onClick={() => handleLike(post.id)}
-                                    style={{ 
+                                    style={{
                                         background: 'none',
                                         border: 'none',
                                         cursor: 'pointer',
@@ -1034,9 +1034,9 @@ small {
                                 >
                                     ❤️ {post.likes_count} лайков
                                 </button>
-                                
+
                                 <Link to={`/posts/${post.id}`}>
-                                    <button style={{ 
+                                    <button style={{
                                         background: 'none',
                                         border: 'none',
                                         cursor: 'pointer',
@@ -1047,21 +1047,21 @@ small {
                                 </Link>
 
                                 {post.voting_variants.length > 0 && (
-              <button 
-              onClick={() => handleDeleteVote(post.id)}
-              style={{
-                backgroundColor: '#f44336',
-                color: 'white',
-                border: 'none',
-                padding: '5px 10px',
-                borderRadius: '4px',
-                margintop: '10px',
-                cursor: 'pointer'
-              }}
-            >
-              Удалить мой голос
-            </button>
-            )}
+                                    <button
+                                        onClick={() => handleDeleteVote(post.id)}
+                                        style={{
+                                            backgroundColor: '#f44336',
+                                            color: 'white',
+                                            border: 'none',
+                                            padding: '5px 10px',
+                                            borderRadius: '4px',
+                                            margintop: '10px',
+                                            cursor: 'pointer'
+                                        }}
+                                    >
+                                        Удалить мой голос
+                                    </button>
+                                )}
                             </div>
                         </div>
                     ))

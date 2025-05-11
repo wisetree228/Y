@@ -5,13 +5,13 @@ import { API_BASE_URL } from '../config';
 import CheckAuthorization from '../utils';
 
 const CreatePost = () => {
-    const [postText, setPostText] = useState('');
-    const [options, setOptions] = useState(['']); // Начальное состояние с одним пустым полем
-    const navigate = useNavigate();
+  const [postText, setPostText] = useState('');
+  const [options, setOptions] = useState(['']); // Начальное состояние с одним пустым полем
+  const navigate = useNavigate();
 
-    useEffect(() => {
-        CheckAuthorization();
-        const styleElement = document.createElement('style');
+  useEffect(() => {
+    CheckAuthorization();
+    const styleElement = document.createElement('style');
     styleElement.innerHTML = `
       body {
   background-color: #396687;
@@ -82,84 +82,84 @@ a {
      width: 100%
   }
     `;
-    
+
     // Добавляем в head документа
     document.head.appendChild(styleElement);
     return () => {
-        document.head.removeChild(styleElement);
-      };
-        
-    }, []);
-
-    const handlePostTextChange = (e) => {
-        setPostText(e.target.value);
+      document.head.removeChild(styleElement);
     };
 
-    const handleOptionChange = (index, e) => {
-        const newOptions = [...options];
-        newOptions[index] = e.target.value;
-        setOptions(newOptions);
+  }, []);
+
+  const handlePostTextChange = (e) => {
+    setPostText(e.target.value);
+  };
+
+  const handleOptionChange = (index, e) => {
+    const newOptions = [...options];
+    newOptions[index] = e.target.value;
+    setOptions(newOptions);
+  };
+
+  const addOption = () => {
+    setOptions([...options, '']);
+  };
+
+  const removeOption = (index) => {
+    const newOptions = options.filter((_, i) => i !== index);
+    setOptions(newOptions);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const postData = {
+      text: postText,
+      options: options.length > 0 ? options : undefined
     };
 
-    const addOption = () => {
-        setOptions([...options, '']);
-    };
+    try {
+      await axios.post(`${API_BASE_URL}/post`, postData, { withCredentials: true });
+      navigate('/'); // Перенаправление на главную страницу после успешной публикации
+    } catch (error) {
+      alert('Ошибка на стороне сервера, попробуйте ещё раз! Возможные причины ошибки: некорректный формат данных')
+    }
+  };
 
-    const removeOption = (index) => {
-        const newOptions = options.filter((_, i) => i !== index);
-        setOptions(newOptions);
-    };
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        const postData = {
-            text: postText,
-            options: options.length > 0 ? options : undefined
-        };
-
-        try {
-            await axios.post(`${API_BASE_URL}/post`, postData, { withCredentials: true });
-            navigate('/'); // Перенаправление на главную страницу после успешной публикации
-        } catch (error) {
-            alert('Ошибка на стороне сервера, попробуйте ещё раз! Возможные причины ошибки: некорректный формат данных')
-        }
-    };
-
-    return (
-        <div>
-            <h1>Создать пост</h1>
-            <form onSubmit={handleSubmit}>
-                <div className='inputtext'>
-                    <label>Текст поста:</label>
-                    <textarea
-                        value={postText}
-                        onChange={handlePostTextChange}
-                        required
-                        minLength={3}
-                        maxLength={10000}
-                    />
-                </div>
-                <div>
-                    <label>Варианты голосования:</label>
-                    {options.map((option, index) => (
-                        <div key={index}>
-                            <input
-                                type="text"
-                                value={option}
-                                onChange={(e) => handleOptionChange(index, e)}
-                                minLength={3}
-                                maxLength={100}
-                            />
-                            <button type="button" onClick={() => removeOption(index)}>Удалить</button>
-                        </div>
-                    ))}
-                    <button type="button" style={{ backgroundColor: '#4db5ff' }} onClick={addOption}>Добавить вариант</button>
-                </div>
-                <button type="submit">Опубликовать пост</button>
-            </form>
-            <Link to="/">Вернуться на главную</Link>
+  return (
+    <div>
+      <h1>Создать пост</h1>
+      <form onSubmit={handleSubmit}>
+        <div className='inputtext'>
+          <label>Текст поста:</label>
+          <textarea
+            value={postText}
+            onChange={handlePostTextChange}
+            required
+            minLength={3}
+            maxLength={10000}
+          />
         </div>
-    );
+        <div>
+          <label>Варианты голосования:</label>
+          {options.map((option, index) => (
+            <div key={index}>
+              <input
+                type="text"
+                value={option}
+                onChange={(e) => handleOptionChange(index, e)}
+                minLength={3}
+                maxLength={100}
+              />
+              <button type="button" onClick={() => removeOption(index)}>Удалить</button>
+            </div>
+          ))}
+          <button type="button" style={{ backgroundColor: '#4db5ff' }} onClick={addOption}>Добавить вариант</button>
+        </div>
+        <button type="submit">Опубликовать пост</button>
+      </form>
+      <Link to="/">Вернуться на главную</Link>
+    </div>
+  );
 };
 
 export default CreatePost;

@@ -47,11 +47,11 @@ const PostComments = () => {
                 const Id = response.data.id;
                 setCurrentUserId(Id);
 
-                
-                }
 
-                
-             catch (error) {
+            }
+
+
+            catch (error) {
                 alert('Ошибка на стороне сервера, попробуйте ещё раз!')
             }
         };
@@ -59,7 +59,7 @@ const PostComments = () => {
         fetchPost();
         fetchId();
         const styleElement = document.createElement('style');
-    styleElement.innerHTML = `
+        styleElement.innerHTML = `
       /* Основные стили */
 body {
   background-color: #396687;
@@ -190,12 +190,12 @@ span[style*="color: '#666'"] {
   color: #aaa !important;
 }
     `;
-    
-    // Добавляем в head документа
-    document.head.appendChild(styleElement);
-    return () => {
-        document.head.removeChild(styleElement);
-      };
+
+        // Добавляем в head документа
+        document.head.appendChild(styleElement);
+        return () => {
+            document.head.removeChild(styleElement);
+        };
 
     }, [postId]);
 
@@ -331,9 +331,9 @@ span[style*="color: '#666'"] {
                     </span>
                 </div>
                 <div style={{ width: '100%', overflowWrap: 'break-word', wordBreak: 'break-all' }}>
-                  <p style={{ fontSize: '16px', marginBottom: '15px', whiteSpace: 'pre-wrap' }}>{post.text}</p>
+                    <p style={{ fontSize: '16px', marginBottom: '15px', whiteSpace: 'pre-wrap' }}>{post.text}</p>
                 </div>
-                
+
 
                 {images.length > 0 && (
                     <div style={{ marginBottom: '15px' }}>
@@ -408,16 +408,16 @@ span[style*="color: '#666'"] {
                                     />
                                 </button>
                                 <Link
-                                            to={`/voted_users/${variant.id}`}
-                                            style={{
-                                                textDecoration: 'none',
-                                                color: 'blue',
-                                                marginLeft: '10px',
-                                                cursor: 'pointer'
-                                            }}
-                                        >
-                                            Кто голосовал?
-                                        </Link>
+                                    to={`/voted_users/${variant.id}`}
+                                    style={{
+                                        textDecoration: 'none',
+                                        color: 'blue',
+                                        marginLeft: '10px',
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    Кто голосовал?
+                                </Link>
                             </div>
                         ))}
                     </div>

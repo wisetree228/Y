@@ -1,5 +1,5 @@
 """
-Импортирую необходимые для разработки утилиты и т. д.
+View-функции для обработки всех запросов
 """
 import json
 from io import BytesIO
@@ -27,12 +27,12 @@ from backend.db.utils import (
 from backend.application.utils import (
     hash_password, verify_password, WebSocketConnectionManager, process_voting_variants
 )
+from backend.log.log_config import logger
 from .schemas import (
     RegisterFormData, LoginFormData, CreatePostData, CreateCommentData, EditProfileFormData,
     EditPostData
 )
 from .config import config, security
-from backend.log.log_config import logger
 
 
 async def register_view(data: RegisterFormData, db: AsyncSession) -> dict:
@@ -265,7 +265,9 @@ async def create_or_delete_like_view(post_id: int, user_id: int, db: AsyncSessio
 
 
 async def handle_websocket(
-        websocket: WebSocket, user_id: str, manager: WebSocketConnectionManager, db: AsyncSession) -> None:
+    websocket: WebSocket, user_id: str, manager: WebSocketConnectionManager,
+    db: AsyncSession
+) -> None:
     """
     Обрабатывает WebSocket-соединение.
 
@@ -290,12 +292,15 @@ async def handle_websocket(
                     getter_id=int(recipient_id)
                 )
                 await add_and_refresh_object(new_message, db)
-                await manager.send_personal_message(message_id=new_message.id, author_id=user_id, text=message, user_id=recipient_id)
+                await manager.send_personal_message(
+                    message_id=new_message.id,
+                    author_id=user_id,
+                    text=message, user_id=recipient_id
+                )
             else:
                 await websocket.send_text("Invalid message format")
     except WebSocketDisconnect:
         manager.disconnect(user_id)
-        #await manager.send_personal_message(f"User {user_id} left the chat", recipient_id)
 
 
 async def vote_view(variant_id: int, user_id: int, db: AsyncSession) -> dict:
@@ -330,7 +335,10 @@ async def vote_view(variant_id: int, user_id: int, db: AsyncSession) -> dict:
     return {'status': 'ok'}
 
 
-async def add_media_to_post_view(uploaded_file: UploadFile, post_id: int, user_id: int, db: AsyncSession):
+async def add_media_to_post_view(
+    uploaded_file: UploadFile, post_id: int,
+    user_id: int, db: AsyncSession
+):
     """
     Добавляет в бд картинку, связанную с постом
 
@@ -343,13 +351,13 @@ async def add_media_to_post_view(uploaded_file: UploadFile, post_id: int, user_i
         dict: Статус операции
     """
     post = await get_object_by_id(object_type=Post, id=post_id, db=db)
-    
+
     if not post:
         raise HTTPException(status_code=404, detail="Пост не найден")
 
     if post.author_id != user_id:
         raise HTTPException(status_code=403, detail="Вы не являетесь автором поста")
-    
+
     file_bytes = await uploaded_file.read()
 
     new_media = MediaInPost(post_id=post_id, image=file_bytes)
@@ -358,7 +366,10 @@ async def add_media_to_post_view(uploaded_file: UploadFile, post_id: int, user_i
     return {'status': 'file successfully added'}
 
 
-async def add_media_to_message_view(uploaded_file: UploadFile, message_id: int, user_id: int, db: AsyncSession):
+async def add_media_to_message_view(
+    uploaded_file: UploadFile, message_id: int,
+    user_id: int, db: AsyncSession
+):
     """
     Добавляет в бд картинку, связанную с сообщением
 
@@ -371,13 +382,13 @@ async def add_media_to_message_view(uploaded_file: UploadFile, message_id: int, 
         dict: Статус операции
     """
     message = await get_object_by_id(object_type=Message, id=message_id, db=db)
-    
+
     if not message:
         raise HTTPException(status_code=404, detail="Сообщение не найдено")
 
     if message.author_id != user_id:
         raise HTTPException(status_code=403, detail="Вы не являетесь автором сообщения")
-    
+
     file_bytes = await uploaded_file.read()
 
     new_media = MediaInMessage(message_id=message_id, image=file_bytes)
@@ -516,7 +527,7 @@ async def edit_post_view(data: EditPostData, post_id: int, user_id: int, db: Asy
     if data.text:
         post.text = data.text
         await db.commit()
-    if data.options!=None:
+    if data.options is not None:
         old_options = await get_post_voting_variants(post_id = post_id, db = db)
         for option in old_options:
             await delete_object(object = option, db = db)
@@ -633,7 +644,7 @@ async def change_avatar_view(uploaded_file: UploadFile, user_id: int, db: AsyncS
     return {'status':'ok'}
 
 
-async def get_avatar_view(another_user_id: int, user_id: int, db: AsyncSession):
+async def get_avatar_view(another_user_id: int, db: AsyncSession):
     """
     Возвращает аватарку пользователя
 
@@ -666,7 +677,9 @@ async def get_chat_view(recipient_id: int, user_id: int, db: AsyncSession):
     recipient = await get_object_by_id(object_type=User, id=recipient_id, db=db)
     if not recipient:
         raise HTTPException(status_code=400, detail="Такого пользователя не существует")
-    messages_db = await get_messages_between_two_users(first_user_id=user_id, second_user_id=recipient_id, db=db)
+    messages_db = await get_messages_between_two_users(
+        first_user_id=user_id, second_user_id=recipient_id, db=db
+    )
     messages = []
     for message in messages_db:
         messages.append({
@@ -757,7 +770,9 @@ async def get_is_friend_view(friend_id: int, user_id: int, db: AsyncSession):
     Returns:
         json - данные
     """
-    friendship = await get_existing_friendship(first_friend_id=friend_id, second_friend_id=user_id, db=db)
+    friendship = await get_existing_friendship(
+        first_friend_id=friend_id, second_friend_id=user_id, db=db
+    )
     if friendship:
         return {'isFriend':True}
     return {'isFriend':False}
@@ -795,7 +810,9 @@ async def delete_friend_view(friend_id: int, user_id: int, db: AsyncSession):
     Returns:
         json - статус операции
     """
-    friendship = await get_existing_friendship(first_friend_id=friend_id, second_friend_id=user_id, db=db)
+    friendship = await get_existing_friendship(
+        first_friend_id=friend_id, second_friend_id=user_id, db=db
+    )
     if friendship:
         await delete_object(object=friendship, db=db)
     return {'status':'ok'}
@@ -902,7 +919,7 @@ async def complaint_post_view(post_id: int, user_id: int, db: AsyncSession):
         dict: Статус операции
     """
     post = await get_object_by_id(object_type=Post, id=post_id, db=db)
-    
+
     if not post:
         raise HTTPException(status_code=404, detail="Пост не найден")
 
@@ -923,7 +940,7 @@ async def complaint_comment_view(comment_id: int, user_id: int, db: AsyncSession
         dict: Статус операции
     """
     comment = await get_object_by_id(object_type=Comment, id=comment_id, db=db)
-    
+
     if not comment:
         raise HTTPException(status_code=404, detail="Комментарий не найден")
 

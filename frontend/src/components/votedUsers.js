@@ -105,12 +105,12 @@ p[style*="color: 'red'"] {
   margin: 20px auto;
 }
     `;
-    
+
     // Добавляем в head документа
     document.head.appendChild(styleElement);
     return () => {
-        document.head.removeChild(styleElement);
-      };
+      document.head.removeChild(styleElement);
+    };
   }, [votingVariantId]);
 
 
@@ -137,12 +137,12 @@ p[style*="color: 'red'"] {
 
 
   if (loading) {
-    return <div style={{textAlign: 'center', paddingTop: '100px'}}>
-    <div style={{display: 'flex', justifyContent: 'center'}}>
-    <div style={{backgroundColor: 'lightgray', padding: '20px', borderRadius: '8px'}}>
-    <p style={{color: 'gray'}}>Загрузка...</p>
-    </div>
-    </div>
+    return <div style={{ textAlign: 'center', paddingTop: '100px' }}>
+      <div style={{ display: 'flex', justifyContent: 'center' }}>
+        <div style={{ backgroundColor: 'lightgray', padding: '20px', borderRadius: '8px' }}>
+          <p style={{ color: 'gray' }}>Загрузка...</p>
+        </div>
+      </div>
     </div>;
   }
 
@@ -179,9 +179,9 @@ p[style*="color: 'red'"] {
                   "&:hover": { backgroundColor: "#e0e0e0" }
                 }}
               >
-                  <div>
+                <div>
                   {user.username}
-                  </div>
+                </div>
               </Link>
             </li>
           ))}

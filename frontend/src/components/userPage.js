@@ -6,7 +6,7 @@ import CheckAuthorization from '../utils';
 
 const UserChannel = () => {
     const [user, setUser] = useState(null);
-    const { authorId } = useParams(); 
+    const { authorId } = useParams();
     const [posts, setPosts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -23,10 +23,10 @@ const UserChannel = () => {
                 const idResponse = await axios.get(`${API_BASE_URL}/my_id`, {
                     withCredentials: true
                 });
-                if (idResponse.data.id===Number(authorId)){
+                if (idResponse.data.id === Number(authorId)) {
                     navigate('/home')
                 }
-                
+
             } catch (error) {
                 console.error('Ошибка при загрузке данных:', error);
                 setError('Ошибка при загрузке данных');
@@ -39,7 +39,7 @@ const UserChannel = () => {
                     withCredentials: true
                 });
                 setUser(userResponse.data);
-                
+
                 // Загрузка постов пользователя
                 if (userResponse.data.posts) {
                     setPosts(userResponse.data.posts);
@@ -64,7 +64,7 @@ const UserChannel = () => {
         fetchData();
 
         const styleElement = document.createElement('style');
-    styleElement.innerHTML = `
+        styleElement.innerHTML = `
       /* Основные стили */
 body {
   background-color: #396687;
@@ -197,12 +197,12 @@ p[style*="color: red"] {
   text-align: center;
 }
     `;
-    
-    // Добавляем в head документа
-    document.head.appendChild(styleElement);
-    return () => {
-        document.head.removeChild(styleElement);
-      };
+
+        // Добавляем в head документа
+        document.head.appendChild(styleElement);
+        return () => {
+            document.head.removeChild(styleElement);
+        };
     }, [authorId, navigate]);
 
     const handleAddFriend = async () => {
@@ -243,7 +243,7 @@ p[style*="color: red"] {
                 {},
                 { withCredentials: true }
             );
-            
+
             setPosts(posts.map(post => {
                 if (post.id === postId) {
                     return {
@@ -278,20 +278,20 @@ p[style*="color: red"] {
 
     const handleDeleteVote = async (postId) => {
         try {
-          await axios.delete(
-            `${API_BASE_URL}/vote/${postId}`,
-            { withCredentials: true }
-          );
-          const updatedPosts = await axios.get(`${API_BASE_URL}/users/${authorId}/posts`, {
-            withCredentials: true
-        });
-        setPosts(updatedPosts.data.posts || []);
+            await axios.delete(
+                `${API_BASE_URL}/vote/${postId}`,
+                { withCredentials: true }
+            );
+            const updatedPosts = await axios.get(`${API_BASE_URL}/users/${authorId}/posts`, {
+                withCredentials: true
+            });
+            setPosts(updatedPosts.data.posts || []);
         } catch (err) {
             alert('Ошибка на стороне сервера, попробуйте ещё раз!')
         }
-      };
+    };
 
-    
+
 
     if (loading) {
         return <p>Загрузка...</p>;
@@ -320,9 +320,9 @@ p[style*="color: red"] {
                 }}
             >Вернуться назад</button>
             {/* Шапка профиля */}
-            <div style={{ 
-                border: '1px solid #ccc', 
-                padding: '20px', 
+            <div style={{
+                border: '1px solid #ccc',
+                padding: '20px',
                 marginBottom: '20px',
                 borderRadius: '8px',
                 backgroundColor: '#1b99b5',
@@ -331,9 +331,9 @@ p[style*="color: red"] {
                 <img
                     src={`${API_BASE_URL}/user/${authorId}/avatar?t=${Date.now()}`}
                     alt={`Аватар ${user.username}`}
-                    style={{ 
-                        width: '100px', 
-                        height: '100px', 
+                    style={{
+                        width: '100px',
+                        height: '100px',
                         borderRadius: '50%',
                         objectFit: 'cover'
                     }}
@@ -344,31 +344,31 @@ p[style*="color: red"] {
             </div>
 
             <div style={{ marginTop: '15px' }}>
-            {isFriend ? (
-        <>
-            <button onClick={handleRemoveFriend}>
-                Удалить из друзей
-            </button>
-            {/* Кнопка для чата */}
-            <Link to={`/chat/${authorId}`} style={{ marginLeft: '10px' }}>
-                <button>
-                    Чат
-                </button>
-            </Link>
-        </>
-    ) : (
-        <button 
-            onClick={handleAddFriend}
-            disabled={friendRequestSent || friendshipLoading}
-            style={{
-                backgroundColor: friendRequestSent ? '#ff9800' : '#4CAF50'
-            }}
-        >
-            {friendRequestSent ? 'Запрос отправлен' : 'Добавить в друзья'}
-        </button>
-    )}
+                {isFriend ? (
+                    <>
+                        <button onClick={handleRemoveFriend}>
+                            Удалить из друзей
+                        </button>
+                        {/* Кнопка для чата */}
+                        <Link to={`/chat/${authorId}`} style={{ marginLeft: '10px' }}>
+                            <button>
+                                Чат
+                            </button>
+                        </Link>
+                    </>
+                ) : (
+                    <button
+                        onClick={handleAddFriend}
+                        disabled={friendRequestSent || friendshipLoading}
+                        style={{
+                            backgroundColor: friendRequestSent ? '#ff9800' : '#4CAF50'
+                        }}
+                    >
+                        {friendRequestSent ? 'Запрос отправлен' : 'Добавить в друзья'}
+                    </button>
+                )}
             </div>
-       
+
             {/* Посты пользователя */}
             <div>
                 <h2>Посты пользователя</h2>
@@ -376,9 +376,9 @@ p[style*="color: red"] {
                     <p>У вас пока нет постов</p>
                 ) : (
                     posts.map(post => (
-                        <div 
-                            key={post.id} 
-                            style={{ 
+                        <div
+                            key={post.id}
+                            style={{
                                 border: '1px solid #e0e0e0',
                                 padding: '20px',
                                 marginBottom: '20px',
@@ -392,9 +392,9 @@ p[style*="color: red"] {
                                     <img
                                         src={`${API_BASE_URL}/user/${post.author_id}/avatar?t=${Date.now()}`}
                                         alt={`Аватар ${user.username}`}
-                                        style={{ 
-                                            width: '40px', 
-                                            height: '40px', 
+                                        style={{
+                                            width: '40px',
+                                            height: '40px',
                                             borderRadius: '50%',
                                             marginRight: '10px'
                                         }}
@@ -406,16 +406,16 @@ p[style*="color: red"] {
                                         </p>
                                     </div>
                                 </div>
-                                
-                                
+
+
                             </div>
-                      
+
                             <div style={{ width: '100%', overflowWrap: 'break-word', wordBreak: 'break-all' }}>
-                  <p style={{ marginBottom: '15px', lineHeight: '1.5', whiteSpace: 'pre-wrap' }}>{post.text}</p>
-                </div>
-                            
+                                <p style={{ marginBottom: '15px', lineHeight: '1.5', whiteSpace: 'pre-wrap' }}>{post.text}</p>
+                            </div>
+
                             {post.images_id && post.images_id.length > 0 && (
-                                <div style={{ 
+                                <div style={{
                                     display: 'grid',
                                     gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
                                     gap: '10px',
@@ -435,11 +435,11 @@ p[style*="color: red"] {
                                     ))}
                                 </div>
                             )}
-                            
+
                             {post.voting_variants && post.voting_variants.length > 0 && (
                                 <div style={{ marginBottom: '15px' }}>
                                     {post.voting_variants.map(variant => (
-                                        <div 
+                                        <div
                                             key={variant.id}
                                             onClick={() => handleVote(variant.id, post.id)}
                                             style={{
@@ -456,16 +456,16 @@ p[style*="color: red"] {
                                     ))}
                                 </div>
                             )}
-                            
-                            <div style={{ 
-                                display: 'flex', 
+
+                            <div style={{
+                                display: 'flex',
                                 justifyContent: 'space-between',
                                 color: '#666',
                                 fontSize: '0.9rem'
                             }}>
-                                <button 
+                                <button
                                     onClick={() => handleLike(post.id)}
-                                    style={{ 
+                                    style={{
                                         background: 'none',
                                         border: 'none',
                                         cursor: 'pointer',
@@ -474,9 +474,9 @@ p[style*="color: red"] {
                                 >
                                     ❤️ {post.likes_count} лайков
                                 </button>
-                                
+
                                 <Link to={`/posts/${post.id}`}>
-                                    <button style={{ 
+                                    <button style={{
                                         background: 'none',
                                         border: 'none',
                                         cursor: 'pointer',
@@ -487,21 +487,21 @@ p[style*="color: red"] {
                                 </Link>
 
                                 {post.voting_variants.length > 0 && (
-              <button 
-              onClick={() => handleDeleteVote(post.id)}
-              style={{
-                backgroundColor: '#f44336',
-                color: 'white',
-                border: 'none',
-                padding: '5px 10px',
-                borderRadius: '4px',
-                margintop: '10px',
-                cursor: 'pointer'
-              }}
-            >
-              Удалить мой голос
-            </button>
-            )}
+                                    <button
+                                        onClick={() => handleDeleteVote(post.id)}
+                                        style={{
+                                            backgroundColor: '#f44336',
+                                            color: 'white',
+                                            border: 'none',
+                                            padding: '5px 10px',
+                                            borderRadius: '4px',
+                                            margintop: '10px',
+                                            cursor: 'pointer'
+                                        }}
+                                    >
+                                        Удалить мой голос
+                                    </button>
+                                )}
                             </div>
                         </div>
                     ))

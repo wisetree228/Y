@@ -5,7 +5,6 @@ from authx import AuthX, AuthXConfig
 import os
 
 
-
 config = AuthXConfig()
 config.JWT_ALGORITHM = "HS256"
 config.JWT_SECRET_KEY = os.getenv('SECRET_KEY')
