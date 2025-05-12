@@ -134,6 +134,23 @@ async def test_login_fail_password(client):
 
 
 @pytest.mark.asyncio
+async def test_login(client):
+    """
+    Тест входа существующего пользователя 
+    Ожидается:
+        статус код: 200
+    """
+    response = await client.post(
+        '/login',
+        json={
+            "email": "user@example.com",
+            "password": "123"
+        }
+    )
+    assert response.status_code == 200
+
+
+@pytest.mark.asyncio
 async def test_logout(client):
     """
     Тест выхода авторизированного пользователя
