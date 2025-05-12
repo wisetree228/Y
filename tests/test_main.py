@@ -5,6 +5,8 @@ import sys
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, project_root)
 
+import io
+from starlette.datastructures import UploadFile as StarletteUploadFile
 import pytest
 import pytest_asyncio
 from fastapi import FastAPI
@@ -92,20 +94,44 @@ async def test_register(client):
 
 
 @pytest.mark.asyncio
-async def test_login(client):
+async def test_login_fail_email(client):
     """
-    Тест входа существующего пользователя 
+    Тест входа с неверной почтой
+    Ожидается:
+        статус код: 400
+        json: {'detail': 'Пользователя с таким email не существует! Зарегистрируйтесь, пожалуйста.'}
+    """
+    response = await client.post(
+        '/login',
+        json={
+            "email": "test@example.com",
+            "password": "123"
+        }
+    )
+    assert response.status_code == 400
+    assert response.json() == {
+        'detail': 'Пользователя с таким email не существует! Зарегистрируйтесь, пожалуйста.'
+    }
+
+
+@pytest.mark.asyncio
+async def test_login_fail_password(client):
+    """
+    Тест входа с неверным паролем
     Ожидается:
         статус код: 200
+        json: {'detail': 'Неверный пароль!'}
     """
     response = await client.post(
         '/login',
         json={
             "email": "user@example.com",
-            "password": "123"
+            "password": "123456"
         }
     )
-    assert response.status_code == 200
+    assert response.status_code == 400
+    assert response.json() == {'detail': 'Неверный пароль!'}
+
 
 @pytest.mark.asyncio
 async def test_logout(client):
@@ -143,6 +169,25 @@ async def test_create_post(client):
     )
     assert response.status_code == 200
     assert response.json() == {'status': 'ok'}
+
+
+
+@pytest.mark.asyncio
+async def test_get_post(client):
+    """
+    Тест получения поста
+        - пост существует
+        - пользователь авторизован
+    Ожидается:
+        статус код: 200
+    """
+    token = security.create_access_token(uid="1")
+    client.cookies.set(config.JWT_ACCESS_COOKIE_NAME, token)
+
+    response = await client.get(
+        f'/posts/{1}'
+    )
+    assert response.status_code == 200
 
 
 @pytest.mark.asyncio
@@ -453,6 +498,36 @@ async def test_get_voted_users(client):
 
 
 @pytest.mark.asyncio
+async def test_upload_image_to_post(client):
+    """
+    Тест добавления изображения к посту:
+        - пользователь авторизован
+        - пост существует
+        - пользователь является автором поста
+    Ожидается:
+        статус код: 200
+        json: {'status': 'file successfully added'}
+    """
+    token = security.create_access_token(uid="1")
+    client.cookies.set(config.JWT_ACCESS_COOKIE_NAME, token)
+
+    image_content = b"test image"
+    image_file = io.BytesIO(image_content)
+    
+    files = {
+        "uploaded_file": ("test.jpg", image_file, "image/jpeg")
+    }
+
+    response = await client.post(
+        f"/posts/1/media", 
+        files=files
+    )
+
+    assert response.status_code == 200
+    assert response.json() == {"status": "file successfully added"}
+
+
+@pytest.mark.asyncio
 async def test_delete_post(client):
     token = security.create_access_token(uid="1")
     client.cookies.set(config.JWT_ACCESS_COOKIE_NAME, token)
@@ -468,6 +543,24 @@ async def test_delete_post(client):
     )
     assert response.status_code == 200
     assert response.json() == {'status': 'ok'}
+
+
+@pytest.mark.asyncio
+async def test_create_like_fail(client):
+    """
+    Тест добавления лайка к несуществующему посту
+        - пользователь авторизован
+    Ожидается:
+        статус код: 400
+        json: {'detail': 'Такого поста не существует!'}
+    """
+    token = security.create_access_token(uid="1") 
+    client.cookies.set(config.JWT_ACCESS_COOKIE_NAME, token) 
+    response = await client.post(
+        f'/post/{1}/like'
+    )
+    assert response.status_code == 400
+    assert response.json() == {'detail': 'Такого поста не существует!'}
 
 
 @pytest.mark.asyncio
@@ -685,3 +778,25 @@ async def test_delete_friend(client):
         f'/friend/{1}'
     )
     assert response.status_code == 200
+
+
+@pytest.mark.asyncio
+async def test_register_fail(client):
+    """
+    Тест регистрации с данными уже существующего пользователя
+    Ожидается:
+        статус код: 400
+        json: {'detail': 'Пользователь с таким email уже существует.'}
+    """
+    response = await client.post(
+        '/register',
+        json={
+            "email": "user@example.com",
+            "username": "test",
+            "name": "user",
+            "surname": "testuser",
+            "password": "123"
+        }
+    )
+    assert response.status_code == 400
+    assert response.json() == {'detail': 'Пользователь с таким email уже существует.'}
