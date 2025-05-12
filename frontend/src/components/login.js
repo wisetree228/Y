@@ -173,9 +173,14 @@ footer {
 
             navigate('/posts')
         } catch (err) {
-            alert('Ошибка! Проверьте корректность введённых данных и попробуйте ещё раз!')
-            setLoading(false);
-            console.error('Ошибка:', err);
+            setLoading(true);
+            try {
+                const response = await axios.get(API_BASE_URL + '/my_id', { withCredentials: true });
+                navigate('/posts')
+            } catch (err) {
+                alert('Ошибка! Проверьте корректность введённых данных и попробуйте ещё раз!')
+            }
+
         }
     };
 
