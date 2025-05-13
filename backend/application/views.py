@@ -14,14 +14,14 @@ from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
 from backend.db.models import (
     User, Post, Comment, Vote, VotingVariant, Message, Friendship, FriendshipRequest,
-    Like, MediaInPost, MediaInMessage, ComplaintAboutPost, ComplaintAboutComment
+    Like, MediaInPost, ComplaintAboutPost, ComplaintAboutComment
 )
 from backend.db.utils import (
     delete_object, add_and_refresh_object, get_user_by_email,
     get_like_on_post_from_user, get_likes_count, get_user_vote,
     get_user_by_username, get_existing_friendship, get_existing_friendship_request,
     get_all_from_table, get_post_voting_variants, get_object_by_id,
-    get_messages_between_two_users, get_images_id_for_message, get_votes_on_voting_variant,
+    get_messages_between_two_users, get_votes_on_voting_variant,
     get_user_posts, get_user_friends, get_friendship_requests_for_user,
 )
 from backend.application.utils import (
@@ -366,37 +366,6 @@ async def add_media_to_post_view(
     return {'status': 'file successfully added'}
 
 
-async def add_media_to_message_view(
-    uploaded_file: UploadFile, message_id: int,
-    user_id: int, db: AsyncSession
-):
-    """
-    Добавляет в бд картинку, связанную с сообщением
-
-    Args:
-        uploaded_file (UploadFile): картинка от пользователя
-        message_id (int): id сообщения
-        user_id (str): ID пользователя.
-        db (AsyncSession): Сессия базы данных.
-    Returns:
-        dict: Статус операции
-    """
-    message = await get_object_by_id(object_type=Message, id=message_id, db=db)
-
-    if not message:
-        raise HTTPException(status_code=404, detail="Сообщение не найдено")
-
-    if message.author_id != user_id:
-        raise HTTPException(status_code=403, detail="Вы не являетесь автором сообщения")
-
-    file_bytes = await uploaded_file.read()
-
-    new_media = MediaInMessage(message_id=message_id, image=file_bytes)
-
-    await add_and_refresh_object(object=new_media, db=db)
-    return {'status': 'file successfully added'}
-
-
 async def get_posts_view(user_id: int, db: AsyncSession, skip: int, limit: int):
     """
     Отдаёт данные для отрисовки ленты постов.
@@ -489,22 +458,6 @@ async def get_post_view(post_id: int, user_id: int, db: AsyncSession):
     }
 
     return {'post': post}
-
-
-async def get_message_img_view(image_id: int, db: AsyncSession):
-    """
-    Отдаёт файл картинки, прикреплённой к посту
-
-    Args:
-        image_id (int): id картинки в бд
-        db (AsyncSession): Сессия базы данных.
-    Returns:
-        StreamingResponse: файл картинки
-    """
-    img_db = await get_object_by_id(object_type=MediaInMessage, id=image_id, db=db)
-    if not img_db:
-        raise HTTPException(status_code=400, detail="Такой картинки не существует!")
-    return StreamingResponse(BytesIO(img_db.image), media_type='image/png')
 
 
 async def edit_post_view(data: EditPostData, post_id: int, user_id: int, db: AsyncSession):
@@ -686,8 +639,7 @@ async def get_chat_view(recipient_id: int, user_id: int, db: AsyncSession):
             'id':message.id,
             'author_id':message.author_id,
             'text':message.text,
-            'created_at':message.created_at,
-            'images_id':await get_images_id_for_message(message_id=message.id, db=db)
+            'created_at':message.created_at
         })
 
     return {
@@ -736,7 +688,7 @@ async def get_my_page_view(user_id: int, db: AsyncSession):
     }
 
 
-async def get_other_page_view(other_user_id: int, user_id: int, db: AsyncSession):
+async def get_other_page_view(other_user_id: int, db: AsyncSession):
     """
     Возвращает пользователю информацию о нём
 
