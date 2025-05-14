@@ -60,7 +60,7 @@ async def get_current_user_id(request: Request) -> str:
             algorithms=[config.JWT_ALGORITHM]  # Алгоритм, используемый для подписи токена
         )
         user_id: str = payload.get("sub")
-        if user_id is None:
+        if not user_id.isdigit():
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Неверный токен",
@@ -152,20 +152,3 @@ class WebSocketConnectionManager:
                 'created_at': datetime.now().isoformat()
             }
             await self.active_connections[user_id].send_text(json.dumps(message_data))
-
-    async def broadcast(self, author_id: str, text: str):
-        """
-        Рассылает сообщение всем подключенным клиентам в формате JSON
-
-        Args:
-            author_id: ID отправителя
-            text: Текст сообщения
-        """
-        message_data = {
-            'author_id': author_id,
-            'text': text,
-            'created_at': datetime.now().isoformat()
-        }
-        json_message = json.dumps(message_data)
-        for connection in self.active_connections.values():
-            await connection.send_text(json_message)
