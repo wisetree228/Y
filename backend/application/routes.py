@@ -61,7 +61,6 @@ async def submit_form(
 
     Args:
         data (RegisterFormData): Данные для регистрации.
-        response (Response): Объект ответа FastAPI.
         db (AsyncSession): Сессия базы данных.
 
     Returns:

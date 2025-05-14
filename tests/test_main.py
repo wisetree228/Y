@@ -10,6 +10,8 @@ import pytest
 import pytest_asyncio
 from httpx import AsyncClient
 from httpx import ASGITransport
+from fastapi import Request, status
+from fastapi.exceptions import HTTPException
 from fastapi.testclient import TestClient
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
@@ -874,3 +876,55 @@ async def test_register_fail(client):
     )
     assert response.status_code == 400
     assert response.json() == {'detail': 'Пользователь с таким email уже существует.'}
+
+
+@pytest.mark.asyncio
+async def test_fail_decode_token(client):
+    """
+    Тест получения данных для авторизованных лиц при неправильном токене
+    Ожидается:
+        статус код: 401
+    """
+    from backend.application.utils import get_current_user_id
+    request = Request(scope={"type": "http"})
+    request._cookies = {config.JWT_ACCESS_COOKIE_NAME: "invalid_token"}
+
+    with pytest.raises(HTTPException) as exc_info:
+        await get_current_user_id(request)
+
+    assert exc_info.value.status_code == status.HTTP_401_UNAUTHORIZED
+
+
+@pytest.mark.asyncio
+async def test_fail_decode_token2(client):
+    """
+    Тест получения данных для авторизованных лиц без токена
+    Ожидается:
+        статус код: 401
+    """
+    from backend.application.utils import get_current_user_id
+    request = Request(scope={"type": "http"})
+    request._cookies = {'some_cookie': "not a token"}
+
+    with pytest.raises(HTTPException) as exc_info:
+        await get_current_user_id(request)
+
+    assert exc_info.value.status_code == status.HTTP_401_UNAUTHORIZED
+
+
+@pytest.mark.asyncio
+async def test_fail_decode_token2(client):
+    """
+    Тест получения данных для авторизованных лиц с токеном в котором зашифрован невалидный id
+    Ожидается:
+        статус код: 401
+    """
+    from backend.application.utils import get_current_user_id
+    request = Request(scope={"type": "http"})
+    token = security.create_access_token(uid="string")
+    request._cookies = {config.JWT_ACCESS_COOKIE_NAME: token}
+
+    with pytest.raises(HTTPException) as exc_info:
+        await get_current_user_id(request)
+
+    assert exc_info.value.status_code == status.HTTP_401_UNAUTHORIZED

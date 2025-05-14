@@ -404,9 +404,6 @@ small {
             <Link to={`/users/${post.author_id}`}>
               <button style={{ marginRight: '10px' }}>Перейти в канал</button>
             </Link>
-            <Link to={`/posts/${post.id}`}>
-              <button>Комментарии</button>
-            </Link>
           </div>
 
           {post.voting_variants.length > 0 && (
