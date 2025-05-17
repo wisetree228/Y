@@ -38,7 +38,7 @@ build_docs:
   stage: doc
   script:
     - echo "Генерация документации..."
-    - cd docs && .\make html
+    - cd docs && make html
   artifacts:
     paths:
       - docs/build/html/
