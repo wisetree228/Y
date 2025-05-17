@@ -10,12 +10,14 @@ import pytest
 import pytest_asyncio
 from httpx import AsyncClient
 from httpx import ASGITransport
-from fastapi import Request, status
+from fastapi import Request, status, Response
 from fastapi.exceptions import HTTPException
 from fastapi.testclient import TestClient
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 from backend.main import app
+from backend.application.schemas import (RegisterFormData, LoginFormData)
+from backend.application.views import (register_view, login_view)
 from backend.db.models import Base  # Импортируем Base из моделей приложения
 from backend.application.config import (security, config)
 from backend.application.routes import (get_db)
@@ -91,6 +93,46 @@ async def test_register(client):
 
 
 @pytest.mark.asyncio
+async def test_login_fail_email(client):
+    """
+    Тест входа с неверной почтой
+    Ожидается:
+        статус код: 400
+        json: {'detail': 'Пользователя с таким email не существует! Зарегистрируйтесь, пожалуйста.'}
+    """
+    response = await client.post(
+        '/login',
+        json={
+            "email": "test@example.com",
+            "password": "123"
+        }
+    )
+    assert response.status_code == 400
+    assert response.json() == {
+        'detail': 'Пользователя с таким email не существует! Зарегистрируйтесь, пожалуйста.'
+    }
+
+
+@pytest.mark.asyncio
+async def test_login_fail_password(client):
+    """
+    Тест входа с неверным паролем
+    Ожидается:
+        статус код: 200
+        json: {'detail': 'Неверный пароль!'}
+    """
+    response = await client.post(
+        '/login',
+        json={
+            "email": "user@example.com",
+            "password": "123456"
+        }
+    )
+    assert response.status_code == 400
+    assert response.json() == {'detail': 'Неверный пароль!'}
+
+
+@pytest.mark.asyncio
 async def test_login(client):
     """
     Тест входа существующего пользователя 
@@ -105,6 +147,7 @@ async def test_login(client):
         }
     )
     assert response.status_code == 200
+
 
 @pytest.mark.asyncio
 async def test_logout(client):
@@ -142,6 +185,25 @@ async def test_create_post(client):
     )
     assert response.status_code == 200
     assert response.json() == {'status': 'ok'}
+
+
+
+@pytest.mark.asyncio
+async def test_get_post(client):
+    """
+    Тест получения поста
+        - пост существует
+        - пользователь авторизован
+    Ожидается:
+        статус код: 200
+    """
+    token = security.create_access_token(uid="1")
+    client.cookies.set(config.JWT_ACCESS_COOKIE_NAME, token)
+
+    response = await client.get(
+        f'/posts/{1}'
+    )
+    assert response.status_code == 200
 
 
 @pytest.mark.asyncio
@@ -523,6 +585,24 @@ async def test_delete_post(client):
     )
     assert response.status_code == 200
     assert response.json() == {'status': 'ok'}
+
+
+@pytest.mark.asyncio
+async def test_create_like_fail(client):
+    """
+    Тест добавления лайка к несуществующему посту
+        - пользователь авторизован
+    Ожидается:
+        статус код: 400
+        json: {'detail': 'Такого поста не существует!'}
+    """
+    token = security.create_access_token(uid="1") 
+    client.cookies.set(config.JWT_ACCESS_COOKIE_NAME, token) 
+    response = await client.post(
+        f'/post/{1}/like'
+    )
+    assert response.status_code == 400
+    assert response.json() == {'detail': 'Такого поста не существует!'}
 
 
 @pytest.mark.asyncio
@@ -928,3 +1008,31 @@ async def test_fail_decode_token2(client):
         await get_current_user_id(request)
 
     assert exc_info.value.status_code == status.HTTP_401_UNAUTHORIZED
+
+
+
+@pytest.mark.asyncio
+async def test_unit_register(client, db):
+    data = RegisterFormData(
+        email='test@exapmle.com',
+        username='testuser',
+        name='user',
+        surname='test',
+        password='test123'
+    )
+    response = await register_view(data, db=db)
+    assert response == {'status': 'ok'}
+
+
+@pytest.mark.asyncio
+async def test_unit_login(client, db):
+    data = LoginFormData(
+        email='test@exapmle.com',
+        password='test123'
+    )
+    response = Response()
+    test_token = security.create_access_token(uid="3")
+    test_token = test_token[10]
+    response = await login_view(data, db=db, response=response)
+    token = response["auth_token"][10]
+    assert token == test_token
