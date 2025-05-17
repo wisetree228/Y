@@ -5,21 +5,21 @@ import sys
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, project_root)
 
-import io
-from starlette.datastructures import UploadFile as StarletteUploadFile
+import json
 import pytest
 import pytest_asyncio
-from fastapi import FastAPI
-from fastapi.testclient import TestClient
 from httpx import AsyncClient
 from httpx import ASGITransport
-from fastapi import Response
+from fastapi import Request, status, Response
+from fastapi.exceptions import HTTPException
+from fastapi.testclient import TestClient
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 from backend.main import app
+from backend.application.schemas import (RegisterFormData, LoginFormData)
+from backend.application.views import (register_view, login_view)
 from backend.db.models import Base  # Импортируем Base из моделей приложения
 from backend.application.config import (security, config)
-from backend.db.utils import (get_likes_count)
 from backend.application.routes import (get_db)
 
 # Важно: Используйте переменную окружения для тестирования.
@@ -65,10 +65,9 @@ async def override_get_db():
 
 
 @pytest.mark.asyncio
-async def test_something_with_db(client, db):
-    """Пример теста, взаимодействующего с базой данных."""
-    # Ваш код для работы с базой данных и отправки запросов к API здесь.
-    response = await client.get('/')  # Замена на ваш эндпоинт
+async def test_base_api(client, db):
+    """Пример теста, взаимодействующего с api."""
+    response = await client.get('/')
     assert response.status_code == 200
 
 @pytest.mark.asyncio
@@ -515,33 +514,59 @@ async def test_get_voted_users(client):
 
 
 @pytest.mark.asyncio
-async def test_upload_image_to_post(client):
+async def test_upload_post_image(client):
     """
-    Тест добавления изображения к посту:
-        - пользователь авторизован
-        - пост существует
-        - пользователь является автором поста
-    Ожидается:
-        статус код: 200
-        json: {'status': 'file successfully added'}
+    Тест прикрепления картинки к посту
     """
     token = security.create_access_token(uid="1")
     client.cookies.set(config.JWT_ACCESS_COOKIE_NAME, token)
 
-    image_content = b"test image"
-    image_file = io.BytesIO(image_content)
-    
-    files = {
-        "uploaded_file": ("test.jpg", image_file, "image/jpeg")
-    }
+    test_file = ("post_image.jpg", b"fake image data", "image/jpeg")
 
     response = await client.post(
-        f"/posts/1/media", 
-        files=files
+        f"/posts/{1}/media",
+        files={"uploaded_file": test_file}
     )
-
     assert response.status_code == 200
-    assert response.json() == {"status": "file successfully added"}
+
+
+@pytest.mark.asyncio
+async def test_get_post_image(client):
+    """
+    Тест получения картинки к посту
+    """
+    token = security.create_access_token(uid="1")
+    client.cookies.set(config.JWT_ACCESS_COOKIE_NAME, token)
+    response = await client.get(
+        f"/posts/image/{1}"
+    )
+    assert response.status_code == 200
+
+
+@pytest.mark.asyncio
+async def test_delete_post_image(client):
+    """
+    Тест удаления картинки из поста
+    """
+    token = security.create_access_token(uid="1")
+    client.cookies.set(config.JWT_ACCESS_COOKIE_NAME, token)
+    response = await client.delete(
+        f"/posts/image/{1}"
+    )
+    assert response.status_code == 200
+
+
+@pytest.mark.asyncio
+async def test_get_single_post(client):
+    """
+    Тест получения отдельного поста
+    """
+    token = security.create_access_token(uid="1")
+    client.cookies.set(config.JWT_ACCESS_COOKIE_NAME, token)
+    response = await client.get(
+        f"/posts/{1}"
+    )
+    assert response.status_code == 200
 
 
 @pytest.mark.asyncio
@@ -798,6 +823,120 @@ async def test_delete_friend(client):
 
 
 @pytest.mark.asyncio
+async def test_websocket_chat():
+    """
+    Тестирование WebSocket чата:
+    1. Подключение двух клиентов
+    2. Отправка сообщения от первого клиента второму
+    3. Проверка получения сообщения вторым клиентом
+    """
+    client = TestClient(app)
+    with client.websocket_connect("/chatsocket/1") as websocket1:
+        with client.websocket_connect("/chatsocket/2") as websocket2:
+            test_message = {
+                "recipient_id": "2",
+                "message": "Hello from user 1"
+            }
+
+            websocket1.send_text(json.dumps(test_message))
+            data = websocket2.receive_text()
+            received_message = json.loads(data)
+
+            assert received_message["author_id"] == "1"
+            assert received_message["text"] == "Hello from user 1"
+            assert "created_at" in received_message
+            assert "id" in received_message
+
+
+@pytest.mark.asyncio
+async def test_upload_avatar(client):
+    """
+    Тест смены аватарки
+    """
+    token = security.create_access_token(uid="1")
+    client.cookies.set(config.JWT_ACCESS_COOKIE_NAME, token)
+
+    test_file = ("post_image.jpg", b"fake image data", "image/jpeg")
+
+    response = await client.post(
+        "/avatar",
+        files={"uploaded_file": test_file}
+    )
+    assert response.status_code == 200
+
+
+@pytest.mark.asyncio
+async def test_logout(client):
+    """
+    Тест выхода из аккаунта
+    """
+    token = security.create_access_token(uid="1")
+    client.cookies.set(config.JWT_ACCESS_COOKIE_NAME, token)
+    response = await client.post(
+        f"/logout"
+    )
+    assert response.status_code == 200
+
+
+@pytest.mark.asyncio
+async def test_delete_message(client):
+    token = security.create_access_token(uid="1")
+    client.cookies.set(config.JWT_ACCESS_COOKIE_NAME, token)
+    """
+    Тест успешного удаления сообщения
+        - пользователь авторизован
+    Ожидается:
+        статус код: 200
+        json: {'status': 'ok'}
+    """
+    response = await client.delete(
+        f'/message/{1}'
+    )
+    assert response.status_code == 200
+    assert response.json() == {'status': 'ok'}
+
+
+@pytest.mark.asyncio
+async def test_login_fail_email(client):
+    """
+    Тест входа с неверной почтой
+    Ожидается:
+        статус код: 400
+        json: {'detail': 'Пользователя с таким email не существует! Зарегистрируйтесь, пожалуйста.'}
+    """
+    response = await client.post(
+        '/login',
+        json={
+            "email": "test@example.com",
+            "password": "123"
+        }
+    )
+    assert response.status_code == 400
+    assert response.json() == {
+        'detail': 'Пользователя с таким email не существует! Зарегистрируйтесь, пожалуйста.'
+    }
+
+
+@pytest.mark.asyncio
+async def test_login_fail_password(client):
+    """
+    Тест входа с неверным паролем
+    Ожидается:
+        статус код: 200
+        json: {'detail': 'Неверный пароль!'}
+    """
+    response = await client.post(
+        '/login',
+        json={
+            "email": "user@example.com",
+            "password": "123456"
+        }
+    )
+    assert response.status_code == 400
+    assert response.json() == {'detail': 'Неверный пароль!'}
+
+
+@pytest.mark.asyncio
 async def test_register_fail(client):
     """
     Тест регистрации с данными уже существующего пользователя
@@ -809,7 +948,7 @@ async def test_register_fail(client):
         '/register',
         json={
             "email": "user@example.com",
-            "username": "test",
+            "username": "test34",
             "name": "user",
             "surname": "testuser",
             "password": "123"
@@ -817,3 +956,83 @@ async def test_register_fail(client):
     )
     assert response.status_code == 400
     assert response.json() == {'detail': 'Пользователь с таким email уже существует.'}
+
+
+@pytest.mark.asyncio
+async def test_fail_decode_token(client):
+    """
+    Тест получения данных для авторизованных лиц при неправильном токене
+    Ожидается:
+        статус код: 401
+    """
+    from backend.application.utils import get_current_user_id
+    request = Request(scope={"type": "http"})
+    request._cookies = {config.JWT_ACCESS_COOKIE_NAME: "invalid_token"}
+
+    with pytest.raises(HTTPException) as exc_info:
+        await get_current_user_id(request)
+
+    assert exc_info.value.status_code == status.HTTP_401_UNAUTHORIZED
+
+
+@pytest.mark.asyncio
+async def test_fail_decode_token2(client):
+    """
+    Тест получения данных для авторизованных лиц без токена
+    Ожидается:
+        статус код: 401
+    """
+    from backend.application.utils import get_current_user_id
+    request = Request(scope={"type": "http"})
+    request._cookies = {'some_cookie': "not a token"}
+
+    with pytest.raises(HTTPException) as exc_info:
+        await get_current_user_id(request)
+
+    assert exc_info.value.status_code == status.HTTP_401_UNAUTHORIZED
+
+
+@pytest.mark.asyncio
+async def test_fail_decode_token2(client):
+    """
+    Тест получения данных для авторизованных лиц с токеном в котором зашифрован невалидный id
+    Ожидается:
+        статус код: 401
+    """
+    from backend.application.utils import get_current_user_id
+    request = Request(scope={"type": "http"})
+    token = security.create_access_token(uid="string")
+    request._cookies = {config.JWT_ACCESS_COOKIE_NAME: token}
+
+    with pytest.raises(HTTPException) as exc_info:
+        await get_current_user_id(request)
+
+    assert exc_info.value.status_code == status.HTTP_401_UNAUTHORIZED
+
+
+
+@pytest.mark.asyncio
+async def test_unit_register(client, db):
+    data = RegisterFormData(
+        email='test@exapmle.com',
+        username='testuser',
+        name='user',
+        surname='test',
+        password='test123'
+    )
+    response = await register_view(data, db=db)
+    assert response == {'status': 'ok'}
+
+
+@pytest.mark.asyncio
+async def test_unit_login(client, db):
+    data = LoginFormData(
+        email='test@exapmle.com',
+        password='test123'
+    )
+    response = Response()
+    test_token = security.create_access_token(uid="3")
+    test_token = test_token[10]
+    response = await login_view(data, db=db, response=response)
+    token = response["auth_token"][10]
+    assert token == test_token
