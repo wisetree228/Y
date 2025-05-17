@@ -7,8 +7,7 @@ from sqlalchemy.future import select
 from sqlalchemy.orm import joinedload
 from sqlalchemy import or_, and_, func
 from .models import ( User, Post, Friendship, FriendshipRequest,
-    VotingVariant, Like, Message, Vote,
-    MediaInMessage, Base
+    VotingVariant, Like, Message, Vote, Base
 )
 
 
@@ -266,25 +265,6 @@ async def get_messages_between_two_users(
         )
     ))
     return result_db.scalars().all()
-
-
-async def get_images_id_for_message(message_id: int, db: AsyncSession) -> List[int]:
-    """
-    Получает список id картинок в бд, прикреплённых к сообщению
-
-    Args:
-        message_id (int): id поста
-        db (AsyncSession): сессия бд
-    Returns:
-        list[int]
-    """
-    id_list=[]
-    result_db = await db.execute(
-        select(MediaInMessage).filter(MediaInMessage.message_id==message_id)
-    )
-    for img in result_db.scalars().all():
-        id_list.append(img.id)
-    return id_list
 
 
 async def get_votes_on_voting_variant(variant_id: int, db: AsyncSession) -> List[Vote]:

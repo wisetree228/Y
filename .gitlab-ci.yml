@@ -1,0 +1,44 @@
+image: python:3.11
+
+stages:
+  - lint
+  - test
+  - doc
+
+cache:
+  paths:
+    - __pycache__/
+    - .pytest_cache/
+    - venv/
+
+before_script:
+  - pip install --upgrade pip
+  - pip install -r requirements.txt
+
+lint_code:
+  stage: lint
+  script:
+    - echo "Запуск линтера..."
+    - pylint --fail-under=7 backend/main.py
+    - pylint --fail-under=7 backend/application/views.py
+    - pylint --fail-under=7 backend/application/schemas.py
+    - pylint --fail-under=7 backend/application/utils.py
+    - pylint --fail-under=7 backend/application/routes.py
+    - pylint --fail-under=7 backend/db/models.py
+    - pylint --fail-under=7 backend/db/utils.py
+
+test_code:
+  stage: test
+  script:
+    - echo "Запуск тестов..."
+    - printf "POSTGRES_USER=wisetree\nPOSTGRES_PASSWORD=123456789\nPOSTGRES_DB=mydb\nDATABASE_URL=postgresql+asyncpg://wisetree:123456789@db:5432/mydb\nSECRET_KEY=96683abd8bb109bc25fe27675433a9b6" > .env
+    - pytest
+
+build_docs:
+  stage: doc
+  script:
+    - echo "Генерация документации..."
+    - cd docs && make html
+  artifacts:
+    paths:
+      - docs/build/html/

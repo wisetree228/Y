@@ -11,8 +11,7 @@ from .views import (
     register_view, login_view, create_post_view, create_comment_view,
     create_friendship_request_view, edit_profile_view, create_or_delete_like_view,
     vote_view, handle_websocket, add_media_to_post_view, get_posts_view,
-    get_post_img_view, get_post_view, add_media_to_message_view,
-    get_message_img_view, edit_post_view, delete_post_view, delete_comment_view,
+    get_post_img_view, get_post_view, edit_post_view, delete_post_view, delete_comment_view,
     delete_vote_view, delete_message_view, change_avatar_view, get_avatar_view,
     get_chat_view, get_users_posts_view, get_my_page_view,
     get_other_page_view, get_is_friend_view, get_friends_view, delete_friend_view,
@@ -62,7 +61,6 @@ async def submit_form(
 
     Args:
         data (RegisterFormData): Данные для регистрации.
-        response (Response): Объект ответа FastAPI.
         db (AsyncSession): Сессия базы данных.
 
     Returns:
@@ -265,27 +263,6 @@ async def add_media_to_post(
     post_id=post_id, user_id=int(user_id), db=db)
 
 
-@router.post('/message/{message_id}/media',
-dependencies=[Depends(security.access_token_required)])
-async def add_media_to_message(
-    message_id: int, uploaded_file: UploadFile, db: SessionDep,
-    user_id: str = Depends(get_current_user_id)
-):
-    """
-    Добавляет в бд картинку, связанную с сообщением
-
-    Args:
-        uploaded_file (UploadFile): картинка от пользователя
-        message_id (int): id сообщения
-        user_id (str): ID пользователя.
-        db (AsyncSession): Сессия базы данных.
-    Returns:
-        json: Статус операции
-    """
-    return await add_media_to_message_view(uploaded_file=uploaded_file,
-    message_id=message_id, user_id=int(user_id), db=db)
-
-
 @router.get('/posts', dependencies=[Depends(security.access_token_required)])
 async def get_posts(
     db: SessionDep, user_id: str = Depends(get_current_user_id),
@@ -334,23 +311,6 @@ async def get_post(
         json: Данные в виде json
     """
     return await get_post_view(post_id=post_id, user_id=int(user_id), db=db)
-
-
-@router.get('/message/image/{image_id}',
-dependencies=[Depends(security.access_token_required)])
-async def get_message_img(
-    image_id: int, db: SessionDep
-):
-    """
-    Отдаёт файл картинки, прикреплённой к сообщению
-
-    Args:
-        image_id (int): id картинки в бд
-        db (AsyncSession): Сессия базы данных.
-    Returns:
-        StreamingResponse: файл картинки
-    """
-    return await get_message_img_view(image_id=image_id, db=db)
 
 
 @router.put('/post/{post_id}', dependencies=[Depends(security.access_token_required)])
@@ -568,7 +528,7 @@ async def get_other_page(
     Returns:
         json - данные
     """
-    return await get_other_page_view(other_user_id=other_user_id, user_id=int(user_id), db=db)
+    return await get_other_page_view(other_user_id=other_user_id, db=db)
 
 
 @router.get('/isfriend/{friend_id}', dependencies=[Depends(security.access_token_required)])

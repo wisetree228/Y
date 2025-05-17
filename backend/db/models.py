@@ -210,20 +210,6 @@ class Message(Base):
 
     author = relationship("User", foreign_keys=[author_id], back_populates="messages_sent")
     getter = relationship("User", foreign_keys=[getter_id], back_populates="messages_received")
-    media = relationship("MediaInMessage", back_populates="message", cascade="all, delete-orphan")
-
-
-class MediaInMessage(Base):
-     """
-     Модель картинки в сообщении
-     """
-     __tablename__ = 'media_in_message'
-     id = Column(Integer, primary_key=True)
-     message_id = Column(Integer, ForeignKey('messages.id'), nullable=False)
-     image = Column(LargeBinary)
-     created_at = Column(DateTime, default=datetime.now)
-
-     message = relationship("Message", back_populates="media")
 
 
 class Like(Base):
@@ -239,12 +225,12 @@ class Like(Base):
     post = relationship("Post", back_populates="likes")
 
 
-async def create_database():
-    """
-    Запасной вариант создания таблиц на случай если
-    alembic поломается
-    """
-    async with engine.begin() as conn:
-        # Используем run_sync для создания таблиц
-        await conn.run_sync(Base.metadata.create_all)
+# async def create_database():
+#     """
+#     Запасной вариант создания таблиц на случай если
+#     alembic поломается
+#     """
+#     async with engine.begin() as conn:
+#         # Используем run_sync для создания таблиц
+#         await conn.run_sync(Base.metadata.create_all)
 
