@@ -868,7 +868,7 @@ async def test_register_fail(client):
         '/register',
         json={
             "email": "user@example.com",
-            "username": "test",
+            "username": "test34",
             "name": "user",
             "surname": "testuser",
             "password": "123"
