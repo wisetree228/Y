@@ -1,205 +1,89 @@
-[//]: # (# Y_py_masters)
+# Проект "Y"
 
-[//]: # ()
-[//]: # ()
-[//]: # ()
-[//]: # (## Getting started)
+### Идея проекта:
+Всем известно, что соцсеть "X" (в прошлом "Твиттер") скатилась, и мы решили заменить её самописной соцсетью "Y"
 
-[//]: # ()
-[//]: # (To make it easy for you to get started with GitLab, here's a list of recommended next steps.)
+### Сам проект на сервере - http://158.160.132.221
 
-[//]: # ()
-[//]: # (Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom]&#40;#editing-this-readme&#41;!)
+### Технологический стэк:
+#### Backend:
+- Python 3.12
+- FastAPI 0.115.0
+- Postgres
+- Alembic 1.13.2
+#### Frontend:
+- ReactJS
+#### Паттерн проектирования на бэкенде - MVC
 
-[//]: # ()
-[//]: # (## Add your files)
+#### Для поднятия всего проекта используется docker compose
 
-[//]: # ()
-[//]: # (- [ ] [Create]&#40;https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file&#41; or [upload]&#40;https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file&#41; files)
+### Реализованный функционал:
+- Система регистрации и аутентификации на JWT токенах, которые хранятся в файлах cookie
+- Редактирование своего профиля, смена любых данных (инициалов, пароля, аватарки)
+- Просмотр чужого профиля, с постами пользователя
+- Система дружбы, возможность отправлять и принимать или отклонять запросы добавления в друзья, возможность удалять пользователей из друзей
+- Создание постов, редактирование постов, создание голосований и прикрепление картинок в постах, удаление постов
+- Лента постов с реализованной пагинацией, рабочими лайками и возможностью голосовать (процентные результаты высчитываются корректно)
+- Возможность просмотра отдельных постов, чтения и написания (и, соответственно, удаления) комментариев, возможность посмотреть какие пользователи голосовали за какой вариант голосования
+- Работающий в реальном времени без перезагрузки страницы чат между пользователями на вебсокетах, все сообщения сохраняются в бд
 
-[//]: # (- [ ] [Add files using the command line]&#40;https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line&#41; or push an existing Git repository with the following command:)
 
-[//]: # ()
-[//]: # (```)
-
-[//]: # (cd existing_repo)
-
-[//]: # (git remote add origin https://gitlab.informatics.ru/2024-2025/hse/s108/y_py_masters.git)
-
-[//]: # (git branch -M main)
-
-[//]: # (git push -uf origin main)
-
-[//]: # (```)
-
-[//]: # ()
-[//]: # (## Integrate with your tools)
-
-[//]: # ()
-[//]: # (- [ ] [Set up project integrations]&#40;https://gitlab.informatics.ru/2024-2025/hse/s108/y_py_masters/-/settings/integrations&#41;)
-
-[//]: # ()
-[//]: # (## Collaborate with your team)
-
-[//]: # ()
-[//]: # (- [ ] [Invite team members and collaborators]&#40;https://docs.gitlab.com/ee/user/project/members/&#41;)
-
-[//]: # (- [ ] [Create a new merge request]&#40;https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html&#41;)
-
-[//]: # (- [ ] [Automatically close issues from merge requests]&#40;https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically&#41;)
-
-[//]: # (- [ ] [Enable merge request approvals]&#40;https://docs.gitlab.com/ee/user/project/merge_requests/approvals/&#41;)
-
-[//]: # (- [ ] [Set auto-merge]&#40;https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html&#41;)
-
-[//]: # ()
-[//]: # (## Test and Deploy)
-
-[//]: # ()
-[//]: # (Use the built-in continuous integration in GitLab.)
-
-[//]: # ()
-[//]: # (- [ ] [Get started with GitLab CI/CD]&#40;https://docs.gitlab.com/ee/ci/quick_start/index.html&#41;)
-
-[//]: # (- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing &#40;SAST&#41;]&#40;https://docs.gitlab.com/ee/user/application_security/sast/&#41;)
-
-[//]: # (- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy]&#40;https://docs.gitlab.com/ee/topics/autodevops/requirements.html&#41;)
-
-[//]: # (- [ ] [Use pull-based deployments for improved Kubernetes management]&#40;https://docs.gitlab.com/ee/user/clusters/agent/&#41;)
-
-[//]: # (- [ ] [Set up protected environments]&#40;https://docs.gitlab.com/ee/ci/environments/protected_environments.html&#41;)
-
-[//]: # ()
-[//]: # (***)
-
-[//]: # ()
-[//]: # (# Editing this README)
-
-[//]: # ()
-[//]: # (When you're ready to make this README your own, just edit this file and use the handy template below &#40;or feel free to structure it however you want - this is just a starting point!&#41;. Thanks to [makeareadme.com]&#40;https://www.makeareadme.com/&#41; for this template.)
-
-[//]: # ()
-[//]: # (## Suggestions for a good README)
-
-[//]: # ()
-[//]: # (Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.)
-
-[//]: # ()
-[//]: # (## Name)
-
-[//]: # (Choose a self-explaining name for your project.)
-
-[//]: # ()
-[//]: # (## Description)
-
-[//]: # (Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.)
-
-[//]: # ()
-[//]: # (## Badges)
-
-[//]: # (On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.)
-
-[//]: # ()
-[//]: # (## Visuals)
-
-[//]: # (Depending on what you are making, it can be a good idea to include screenshots or even a video &#40;you'll frequently see GIFs rather than actual videos&#41;. Tools like ttygif can help, but check out Asciinema for a more sophisticated method.)
-
-[//]: # ()
-[//]: # (## Installation)
-
-[//]: # (Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.)
-
-[//]: # ()
-[//]: # (## Usage)
-
-[//]: # (Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.)
-
-[//]: # ()
-[//]: # (## Support)
-
-[//]: # (Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.)
-
-[//]: # ()
-[//]: # (## Roadmap)
-
-[//]: # (If you have ideas for releases in the future, it is a good idea to list them in the README.)
-
-[//]: # ()
-[//]: # (## Contributing)
-
-[//]: # (State if you are open to contributions and what your requirements are for accepting them.)
-
-[//]: # ()
-[//]: # (For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.)
-
-[//]: # ()
-[//]: # (You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.)
-
-[//]: # ()
-[//]: # (## Authors and acknowledgment)
-
-[//]: # (Show your appreciation to those who have contributed to the project.)
-
-[//]: # ()
-[//]: # (## License)
-
-[//]: # (For open source projects, say how it is licensed.)
-
-[//]: # ()
-[//]: # (## Project status)
-
-[//]: # (If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.)
-### Для запуска проекта:
-
-#### Для запуска бэкенда (данные инструкции выполнять в папке backend)
+# Инструкция по локальному запуску 
 
 1) создать виртуальное окружение:
+
+-для виндовс
 ```commandline
 py -m venv venv
 ```
--для виндовс
+
+-для линукса
 ```commandline
 python3 -m venv venv
 ```
--для линукса
 
 2) активировать:
+
+-для виндовс
 ```commandline
 venv\Scripts\activate
 ```
--для виндовс
 
+-для линукса
 ```commandline
 source venv/bin/activate
 ```
--для линукса
 
-3) Установить всю пакеты:
+3) В корневой директории проекта создать файл .env и там установить настройки подключения к бд, а также секретный ключ для шифрования JWT токенов при авторизации, пример:
 ```
-python3 -m pip install -r requirements.txt
-```
-
-4) Создать файл .env и там установить ссылку для подключения к бд по следующему паттерну:
-```
-DATABASE_URL=postgresql+asyncpg://<your_user_name>:<your_password>@localhost:<your_port>/<your_db_name>
-```
-например
-```
-DATABASE_URL=postgresql+asyncpg://postgres:123456789@localhost:5432/mydb
-```
-туда же прописать
-```
-SECRET_KEY=<your_secret_key>
-```
-это нужно для шифрования JWT токенов при авторизации.
-
-5) Для создания таблиц в бд запустить create_all.py:
-```commandline
-python3 python db/create_all.py
+POSTGRES_USER=wisetree
+POSTGRES_PASSWORD=123456789
+POSTGRES_DB=mydb
+SECRET_KEY=96683abd8bb109bc25fe27675433a9b6
+DATABASE_URL=postgresql+asyncpg://wisetree:123456789@db:5432/mydb
 ```
 
-
-Вот и готово, для запуска проекта 
-```commandline
-python3 main.py
+4) В папке frontend создать ещё один файл .env и записать туда
 ```
+ESLINT_NO_DEV_ERRORS=true
+DISABLE_ESLINT_PLUGIN=true
+```
+(это нужно для отключения ошибок eslint)
+
+5) Поднять докер (на виндовс просто запустите docker desktop, на линуксе выполните команду ```sudo systemctl start docker```)
+
+6) Выполните команду ```sudo docker compose up --build```
+
+7) Когда докер поднимется, откройте второй терминал и выполните ```sudo docker compose run --rm app alembic revision --autogenerate -m "New migration"``` а потом ```sudo docker compose run --rm app alembic upgrade head``` (создание таблиц в бд)
+
+8) Готово! Проект доступен на локальном сервере по адресу http://localhost (пользовательский фронтенд), к API бэкенда обращаться по http://localhost:8000
+
+## Тестирование
+
+Чтобы прогнать тесты с анализом процента покрытия, в корневой директории выполните команду ```pytest --cov=backend```(без созданного по инструкции .env файла в корневой директории тесты работать не будут)
+
+## Генерация документации
+
+1) Перейдите в папку docs (```cd docs```)
+2) выполните команду ```make html``` (если не сработало, то ```.\make html```)
+3) Теперь, когда документация сгенерирована, откройте в браузере файл который располагается по адресу ```docs/build/html/index.html```
