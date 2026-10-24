@@ -7,7 +7,9 @@
 ### Идея проекта:
 Всем известно, что соцсеть "X" (в прошлом "Твиттер") скатилась, и мы решили заменить её самописной соцсетью "Y"
 
-### Сам проект на сервере - http://5.35.126.208/
+### Сам проект на сервере (с использованием nginx и все как надо) - https://ysocial.ru
+(Если вы в России то выключите VPN перед открытием)
+
 
 ### Технологический стэк:
 #### Backend:
@@ -98,7 +100,8 @@ DISABLE_ESLINT_PLUGIN=true
 ### Project Idea:
 It is well-known that social network "X" (formerly "Twitter") has declined, and we decided to replace it with a custom social network "Y".
 
-### The project is hosted at - http://5.35.126.208/
+### The project is hosted at - https://ysocial.ru
+(If you're in Russia - turn off vpn, else turn it on and connect to russian server)
 
 ### Technology Stack:
 #### Backend:
