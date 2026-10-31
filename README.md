@@ -11,6 +11,9 @@
 (Если вы в России то выключите VPN перед открытием)
 
 
+<img src="demonstration_gif_for_readme/demo.gif" width="700" alt="Demo">
+
+
 ### Технологический стэк:
 #### Backend:
 - Python 3.12
